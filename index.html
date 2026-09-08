@@ -89,19 +89,22 @@
         @media (max-width: 600px) { .radio-container { padding: 12px; margin: 6px; } .header h1 { font-size: 1.8em; } .channels { grid-template-columns: repeat(3, 1fr); } .info-section { grid-template-columns: 1fr; } .control-btn { width: 35px; height: 35px; font-size: 1em; } .control-btn.play { width: 45px; height: 45px; } .track-title { font-size: 1.2em; } .anchor-avatar { width: 60px; height: 60px; font-size: 2em; } }
     </style>
 </head>
-    <body>
-    <img src="/jp-logo-blue.png" alt="JP AI Radio Logo" style="width:60px; position:absolute; top:15px; left:15px; z-index:2000;">
-    <!-- Start Screen -->
-    <div class="start-screen" id="startScreen">
-        <button class="start-button" onclick="startRadio()">📻 Tune In to JP AI Radio 📻</button>
-        <div class="start-info">
-            🎵 Real Music • 🗣️ Political Debate Channel • 🏈 Sports • 🌤️ Weather<br>
-            🎧 Continuous Feed • 🌎 World News Ticker<br>
-            📍 Boston, MA • 📧 Contact: jpierre722@yahoo.com
-        </div>
-    </div>
+<body>
 
-   <!-- Radio Container -->
+<!-- REMOVE THIS FLOATING LOGO -->
+<!-- <img src="/jp-logo-blue.png" alt="JP AI Radio Logo" style="width:60px; position:absolute; top:15px; left:15px; z-index:2000;"> -->
+
+<!-- Start Screen -->
+<div class="start-screen" id="startScreen">
+    <button class="start-button" onclick="startRadio()">📻 Tune In to JP AI Radio 📻</button>
+    <div class="start-info">
+        🎵 Real Music • 🗣️ Political Debate Channel • 🏈 Sports • 🌤️ Weather<br>
+        🎧 Continuous Feed • 🌎 World News Ticker<br>
+        📍 Boston, MA • 📧 Contact: jpierre722@yahoo.com
+    </div>
+</div>
+
+<!-- Radio Container -->
 <div class="radio-container">
 
     <div class="header" style="display:flex; align-items:center; justify-content:center; gap:15px;">
