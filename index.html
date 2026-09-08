@@ -95,6 +95,7 @@
     </div>
 
     <!-- Radio Container -->
+    <!-- Radio Container -->
 <div class="radio-container">
 
     <div class="header" 
@@ -117,13 +118,20 @@
     </h1>
 </div>
 
-    <div class="status-bar" 
-     style="display:flex; justify-content:center; gap:25px; padding:10px 0;">
-    <div class="live-indicator"><div class="live-dot"></div>LIVE 24/7</div>
-    <div class="time-display">🕐 <span id="currentTime">00:00:00</span></div>
-    <div class="listener-count">👥 <span id="listeners">1500</span></div>
-</div>
 
+        <div class="status-bar" style="display:flex; justify-content:center; gap:25px; padding:10px 0;">
+            <div class="live-indicator"><div class="live-dot"></div>LIVE 24/7</div>
+            <div class="time-display">🕐 <span id="currentTime">00:00:00</span></div>
+            <div class="listener-count">👥 <span id="listeners">1500</span></div>
+        </div>
+
+        <!-- Now Playing Section (reinserted) -->
+        <div class="now-playing" id="now-playing">
+            <div class="track-title" id="trackTitle">Click Start to Play</div>
+            <div class="track-artist" id="trackArtist">JP AI Radio Station</div>
+            <div class="track-genre" id="trackGenre">Real Music Streams</div>
+            <div class="visualizer" id="visualizer"></div>
+        </div>
 
         <!-- Anchor Container (for Debate) -->
         <div class="anchor-container" id="anchorContainer">
@@ -145,7 +153,7 @@
             </div>
         </div>
 
-        <!-- Channels: 7 buttons now -->
+        <!-- Channels: 7 buttons -->
         <div class="channels">
             <button class="channel-btn active" onclick="switchChannel('rnb')"><span class="channel-icon">🎤</span>R&B / Hip-Hop</button>
             <button class="channel-btn" onclick="switchChannel('rock')"><span class="channel-icon">🎸</span>Classic Rock</button>
@@ -232,6 +240,12 @@
     </div>
 
     <script>
+        // The entire JavaScript from the previous full file remains exactly the same
+        // ... (paste the complete script here, unchanged from the last full version)
+        // To avoid duplicate length, I am indicating that the script is identical.
+        // In the final answer, I will include the full script as before.
+        // For the purpose of this correction, I will include the script entirely.
+
         // ============================================
         // JP AI RADIO - FULL WORKING VERSION
         // ============================================
@@ -353,7 +367,7 @@
             "Champions League final set"
         ];
 
-        // Static upcoming games (will be replaced by fetched data if available)
+        // Static upcoming games
         const upcomingGamesData = [
             { home: "Lakers", away: "Warriors", date: "Tomorrow", time: "7:30 PM" },
             { home: "Patriots", away: "Jets", date: "Sunday", time: "1:00 PM" },
@@ -505,7 +519,6 @@
             } catch(e) {
                 sportNewsPool = backupSportsNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
             }
-            // Set upcoming games (static for now)
             upcomingGames = upcomingGamesData;
         }
 
@@ -518,9 +531,7 @@
             newsIndex++;
         }
 
-        function refreshWorldNews() {
-            fetchWorldNews();
-        }
+        function refreshWorldNews() { fetchWorldNews(); }
 
         // ========== DEBATE (TOPIC-AWARE, 30 MIN) ==========
         function startDebateLoop() {
@@ -540,13 +551,11 @@
             );
             const topic = politicalItems.length > 0 ? politicalItems[0] : newsPool[0];
             if (!topic) return;
-
             topic.debated = true;
             if (newsPool.every(item => item.debated)) {
                 newsPool.forEach(item => item.debated = false);
             }
-
-            runProfessionalDebate(topic, 1800000); // 30 minutes
+            runProfessionalDebate(topic, 1800000);
         }
 
         function runProfessionalDebate(topic, duration) {
@@ -562,99 +571,35 @@
             const topicText = (topic.title + ' ' + (topic.description || '')).toLowerCase();
             const argumentsMap = {
                 election: {
-                    aff: [
-                        "Free and fair elections are the cornerstone of democracy.",
-                        "Expanding access to voting strengthens our republic.",
-                        "Modernizing election infrastructure is long overdue.",
-                        "We must protect the integrity of every vote."
-                    ],
-                    neg: [
-                        "Election reforms must be carefully balanced to prevent fraud.",
-                        "We should not rush changes that could undermine voter confidence.",
-                        "Local control of elections is essential.",
-                        "Unintended consequences of new laws could disenfranchise voters."
-                    ]
+                    aff: ["Free and fair elections are the cornerstone of democracy.", "Expanding access to voting strengthens our republic.", "Modernizing election infrastructure is long overdue.", "We must protect the integrity of every vote."],
+                    neg: ["Election reforms must be carefully balanced to prevent fraud.", "We should not rush changes that could undermine voter confidence.", "Local control of elections is essential.", "Unintended consequences of new laws could disenfranchise voters."]
                 },
                 tax: {
-                    aff: [
-                        "Lowering taxes stimulates economic growth.",
-                        "The current tax code is overly complex and burdensome.",
-                        "Tax relief for middle-class families is overdue.",
-                        "We can fund essential services while cutting waste."
-                    ],
-                    neg: [
-                        "Tax cuts for the wealthy increase inequality.",
-                        "We need revenue to invest in infrastructure and education.",
-                        "The deficit cannot be ignored.",
-                        "Targeted tax credits are more effective than broad cuts."
-                    ]
+                    aff: ["Lowering taxes stimulates economic growth.", "The current tax code is overly complex and burdensome.", "Tax relief for middle-class families is overdue.", "We can fund essential services while cutting waste."],
+                    neg: ["Tax cuts for the wealthy increase inequality.", "We need revenue to invest in infrastructure and education.", "The deficit cannot be ignored.", "Targeted tax credits are more effective than broad cuts."]
                 },
                 health: {
-                    aff: [
-                        "Expanding healthcare access is a moral imperative.",
-                        "Preventive care reduces long-term costs.",
-                        "We cannot leave millions uninsured.",
-                        "A healthier population is a more productive workforce."
-                    ],
-                    neg: [
-                        "Government-run healthcare leads to inefficiency.",
-                        "We must preserve patient choice and private insurance.",
-                        "Cost controls are needed before expansion.",
-                        "One-size-fits-all approaches fail patients."
-                    ]
+                    aff: ["Expanding healthcare access is a moral imperative.", "Preventive care reduces long-term costs.", "We cannot leave millions uninsured.", "A healthier population is a more productive workforce."],
+                    neg: ["Government-run healthcare leads to inefficiency.", "We must preserve patient choice and private insurance.", "Cost controls are needed before expansion.", "One-size-fits-all approaches fail patients."]
                 },
                 immigration: {
-                    aff: [
-                        "Immigrants strengthen our economy and communities.",
-                        "A pathway to citizenship is fair and just.",
-                        "We need comprehensive immigration reform.",
-                        "Diversity is our nation's strength."
-                    ],
-                    neg: [
-                        "Border security must come first.",
-                        "We cannot reward illegal behavior.",
-                        "Immigration levels must be sustainable.",
-                        "Local communities should have a say."
-                    ]
+                    aff: ["Immigrants strengthen our economy and communities.", "A pathway to citizenship is fair and just.", "We need comprehensive immigration reform.", "Diversity is our nation's strength."],
+                    neg: ["Border security must come first.", "We cannot reward illegal behavior.", "Immigration levels must be sustainable.", "Local communities should have a say."]
                 },
                 climate: {
-                    aff: [
-                        "Climate change is an existential threat requiring urgent action.",
-                        "Investing in renewable energy creates jobs.",
-                        "We owe future generations a livable planet.",
-                        "The cost of inaction far exceeds the cost of action."
-                    ],
-                    neg: [
-                        "Climate policies must not harm our economy.",
-                        "The transition to green energy must be gradual.",
-                        "We should focus on adaptation, not just mitigation.",
-                        "International cooperation is necessary before domestic action."
-                    ]
+                    aff: ["Climate change is an existential threat requiring urgent action.", "Investing in renewable energy creates jobs.", "We owe future generations a livable planet.", "The cost of inaction far exceeds the cost of action."],
+                    neg: ["Climate policies must not harm our economy.", "The transition to green energy must be gradual.", "We should focus on adaptation, not just mitigation.", "International cooperation is necessary before domestic action."]
                 },
                 default: {
-                    aff: [
-                        "This policy is necessary for progress.",
-                        "The evidence supports our position.",
-                        "We must act now for future generations.",
-                        "Our approach is both fair and effective."
-                    ],
-                    neg: [
-                        "We must consider the unintended consequences.",
-                        "There are better alternatives available.",
-                        "The proposed solution is too costly.",
-                        "We need more time to study the issue."
-                    ]
+                    aff: ["This policy is necessary for progress.", "The evidence supports our position.", "We must act now for future generations.", "Our approach is both fair and effective."],
+                    neg: ["We must consider the unintended consequences.", "There are better alternatives available.", "The proposed solution is too costly.", "We need more time to study the issue."]
                 }
             };
 
             let category = 'default';
             for (const key of Object.keys(argumentsMap)) {
-                if (key !== 'default' && topicText.includes(key)) {
-                    category = key;
-                    break;
-                }
+                if (key !== 'default' && topicText.includes(key)) { category = key; break; }
             }
-
             const affArgs = argumentsMap[category].aff;
             const negArgs = argumentsMap[category].neg;
 
@@ -682,25 +627,13 @@
             let step = 0;
             function nextStep() {
                 if (!isDebating) return;
-                if (step >= statements.length) {
-                    endDebate();
-                    return;
-                }
+                if (step >= statements.length) { endDebate(); return; }
                 const s = statements[step];
                 document.getElementById('anchorNewsText').textContent = s.text;
-                speakSingle(s.text, {
-                    isFemale: s.isFemale,
-                    onEndCallback: () => {
-                        step++;
-                        setTimeout(nextStep, 500);
-                    }
-                });
+                speakSingle(s.text, { isFemale: s.isFemale, onEndCallback: () => { step++; setTimeout(nextStep, 500); } });
             }
             nextStep();
-
-            const safetyTimer = setTimeout(() => {
-                if (isDebating) endDebate();
-            }, duration + 5000);
+            const safetyTimer = setTimeout(() => { if (isDebating) endDebate(); }, duration + 5000);
             debateTimers.push(safetyTimer);
 
             function endDebate() {
@@ -710,31 +643,25 @@
                 document.getElementById('anchorName').textContent = 'The Political Debate';
                 document.getElementById('anchorAvatar').textContent = '🗣️';
                 document.getElementById('anchorStatus').textContent = 'Moderated by JP';
-
                 const nextTopic = pickNextTopic();
                 if (nextTopic) {
                     const reminder = `Thank you for listening. Our next debate topic will be: ${nextTopic.title}. Stay tuned.`;
                     document.getElementById('anchorNewsText').textContent = reminder;
                     if (!isMuted) speakLongText(reminder, false);
                 }
-
                 if (debateLoopActive) {
                     const now = new Date();
                     const nextHour = new Date(now);
                     nextHour.setHours(now.getHours() + 1, 0, 0, 0);
                     const msUntilNextHour = nextHour - now;
-                    debateTimeoutId = setTimeout(() => {
-                        pickAndStartDebate();
-                    }, msUntilNextHour);
+                    debateTimeoutId = setTimeout(() => { pickAndStartDebate(); }, msUntilNextHour);
                 }
             }
         }
 
         function pickNextTopic() {
             const politicalKeywords = ['election', 'president', 'government', 'senate', 'congress', 'policy', 'law', 'vote', 'minister', 'prime minister', 'political', 'parliament', 'bill', 'tax', 'health', 'immigration', 'climate', 'energy', 'defense', 'education', 'trade'];
-            const politicalItems = newsPool.filter(item => 
-                !item.debated && politicalKeywords.some(keyword => (item.title + ' ' + item.description).toLowerCase().includes(keyword))
-            );
+            const politicalItems = newsPool.filter(item => !item.debated && politicalKeywords.some(keyword => (item.title + ' ' + item.description).toLowerCase().includes(keyword)));
             return politicalItems.length > 0 ? politicalItems[0] : newsPool.find(item => !item.debated) || newsPool[0];
         }
 
@@ -748,54 +675,36 @@
             document.getElementById('now-playing').style.display = 'block';
         }
 
-        // ========== ADS (BEFORE MUSIC AND EVERY 30 MIN) ==========
+        // ========== ADS ==========
         const adScripts = [
             "This is JP AI Radio. Geico can save you 15% or more on car insurance. Visit Geico.com today.",
             "This is JP AI Radio. Liberty Mutual customizes your car insurance so you only pay for what you need. Only pay for what you need."
         ];
-
         function playAd(callback) {
-            if (!musicChannels.includes(currentChannel) || isMuted || isDebating || adInProgress) {
-                if (callback) callback();
-                return;
-            }
+            if (!musicChannels.includes(currentChannel) || isMuted || isDebating || adInProgress) { if (callback) callback(); return; }
             adInProgress = true;
             const adText = adScripts[adIndex % adScripts.length];
             adIndex++;
             const isInitialAd = !audioElement || audioElement.paused;
-            if (!isInitialAd) {
-                audioElement.volume = 0.15;
-            }
+            if (!isInitialAd) audioElement.volume = 0.15;
             document.getElementById('anchorNewsText').textContent = adText;
             speakLongText(adText, false, () => {
                 adInProgress = false;
-                if (!isInitialAd && audioElement && !isMuted) {
-                    audioElement.volume = volume;
-                }
+                if (!isInitialAd && audioElement && !isMuted) audioElement.volume = volume;
                 if (callback) callback();
             });
         }
-
         function startAdScheduler() {
             if (adIntervalId) clearInterval(adIntervalId);
-            adIntervalId = setInterval(() => {
-                if (musicChannels.includes(currentChannel)) {
-                    playAd();
-                }
-            }, 1800000); // 30 minutes
+            adIntervalId = setInterval(() => { if (musicChannels.includes(currentChannel)) playAd(); }, 1800000);
         }
-
         function clearAdScheduler() {
-            if (adIntervalId) {
-                clearInterval(adIntervalId);
-                adIntervalId = null;
-            }
+            if (adIntervalId) { clearInterval(adIntervalId); adIntervalId = null; }
         }
 
         // ========== CHANNEL MANAGEMENT ==========
         function playStream() {
             if (!audioElement) createAudioElement();
-            // Clear all intervals and timeouts
             if (continuousMixInterval) { clearInterval(continuousMixInterval); continuousMixInterval = null; }
             if (mixBulletinTimeoutId) { clearTimeout(mixBulletinTimeoutId); mixBulletinTimeoutId = null; }
             if (sportFlashInterval) { clearInterval(sportFlashInterval); sportFlashInterval = null; }
@@ -827,26 +736,13 @@
                 const randomStream = randomStreams[Math.floor(Math.random() * randomStreams.length)];
                 audioElement.src = randomStream.url;
                 audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; });
-
                 const performBulletin = () => {
                     if (currentChannel !== 'mix' || isDebating || isMuted) return;
                     audioElement.pause();
-                    if (newsPool.length === 0) {
-                        fetchWorldNews().then(() => {
-                            speakMixBulletin();
-                        });
-                    } else {
-                        speakMixBulletin();
-                    }
+                    if (newsPool.length === 0) { fetchWorldNews().then(() => { speakMixBulletin(); }); } else { speakMixBulletin(); }
                 };
-
-                // First bulletin after 10 seconds, then every 15 minutes
-                mixBulletinTimeoutId = setTimeout(() => {
-                    performBulletin();
-                    continuousMixInterval = setInterval(performBulletin, 900000); // 15 minutes
-                }, 10000);
+                mixBulletinTimeoutId = setTimeout(() => { performBulletin(); continuousMixInterval = setInterval(performBulletin, 900000); }, 10000);
             } else if (currentChannel === 'sportflash') {
-                // Sport Flash channel with music background
                 document.getElementById('anchorContainer').classList.remove('active');
                 document.getElementById('now-playing').style.display = 'block';
                 document.getElementById('audioStatus').textContent = '🏈 Sport Flash Active';
@@ -858,36 +754,17 @@
                 const randomStream = randomStreams[Math.floor(Math.random() * randomStreams.length)];
                 audioElement.src = randomStream.url;
                 audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; });
-
-                // Fetch sports news if not available
                 if (sportNewsPool.length === 0) {
-                    fetchSportsNews().then(() => {
-                        // Initial flash after 10 seconds
-                        sportFlashTimeoutId = setTimeout(() => {
-                            performSportsFlash();
-                            sportFlashInterval = setInterval(performSportsFlash, 900000); // 15 minutes
-                        }, 10000);
-                    });
+                    fetchSportsNews().then(() => { sportFlashTimeoutId = setTimeout(() => { performSportsFlash(); sportFlashInterval = setInterval(performSportsFlash, 900000); }, 10000); });
                 } else {
-                    sportFlashTimeoutId = setTimeout(() => {
-                        performSportsFlash();
-                        sportFlashInterval = setInterval(performSportsFlash, 900000);
-                    }, 10000);
+                    sportFlashTimeoutId = setTimeout(() => { performSportsFlash(); sportFlashInterval = setInterval(performSportsFlash, 900000); }, 10000);
                 }
-
                 function performSportsFlash() {
                     if (currentChannel !== 'sportflash' || isDebating || isMuted) return;
                     audioElement.pause();
-                    speakSportsFlash(() => {
-                        // Resume music after flash
-                        if (audioElement && !isMuted) {
-                            audioElement.volume = volume;
-                            audioElement.play().catch(() => {});
-                        }
-                    });
+                    speakSportsFlash(() => { if (audioElement && !isMuted) { audioElement.volume = volume; audioElement.play().catch(() => {}); } });
                 }
             } else {
-                // Music channels
                 document.getElementById('anchorContainer').classList.remove('active');
                 document.getElementById('now-playing').style.display = 'block';
                 document.getElementById('audioStatus').textContent = '📡 Connecting...';
@@ -900,10 +777,7 @@
                 audioElement.src = stream.url;
                 if (audioElement) audioElement.pause();
                 playAd(() => {
-                    if (audioElement && !isMuted) {
-                        audioElement.volume = volume;
-                        audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; });
-                    }
+                    if (audioElement && !isMuted) { audioElement.volume = volume; audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; }); }
                     startAdScheduler();
                 });
             }
@@ -921,10 +795,7 @@
             document.getElementById('anchorNewsText').textContent = bulletinText;
             speakLongText(bulletinText, false, () => {
                 if (currentChannel === 'mix') {
-                    if (audioElement && !isMuted) {
-                        audioElement.volume = volume;
-                        audioElement.play().catch(() => {});
-                    }
+                    if (audioElement && !isMuted) { audioElement.volume = volume; audioElement.play().catch(() => {}); }
                     const now = new Date();
                     const nextUpdate = new Date(now.getTime() + 15 * 60000);
                     const timeString = nextUpdate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -939,13 +810,11 @@
                 sportNewsPool = backupSportsNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
             }
             let flashText = "This is JP AI Radio Sports Flash. Scores: ";
-            // Add scores from available data (we'll simulate with headlines)
             for (let i = 0; i < 3; i++) {
                 const item = sportNewsPool[(sportNewsIndex + i) % sportNewsPool.length];
                 flashText += `${item.title}. `;
             }
             sportNewsIndex = (sportNewsIndex + 3) % sportNewsPool.length;
-            // Add upcoming games
             flashText += "Upcoming games: ";
             upcomingGames.forEach(game => {
                 flashText += `${game.away} at ${game.home} on ${game.date} at ${game.time}. `;
@@ -964,21 +833,15 @@
             const btns = document.querySelectorAll('.channel-btn');
             if (btns[idx]) btns[idx].classList.add('active');
             playStream();
-            if (channel === 'mix' || channel === 'debate') {
-                if (newsPool.length === 0) fetchWorldNews();
-            }
-            if (channel === 'sportflash') {
-                if (sportNewsPool.length === 0) fetchSportsNews();
-            }
+            if (channel === 'mix' || channel === 'debate') { if (newsPool.length === 0) fetchWorldNews(); }
+            if (channel === 'sportflash') { if (sportNewsPool.length === 0) fetchSportsNews(); }
         }
 
         function togglePlay() {
             if (currentChannel === 'debate') return;
             if (!audioElement) { createAudioElement(); playStream(); return; }
-            if (isPlaying) audioElement.pause();
-            else audioElement.play();
+            if (isPlaying) audioElement.pause(); else audioElement.play();
         }
-
         function toggleMute() {
             isMuted = !isMuted;
             if (audioElement) {
@@ -989,7 +852,6 @@
             if (speechSynth) { if (isMuted) speechSynth.cancel(); }
             document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🔊';
         }
-
         function adjustVolume(value) {
             volume = value/100;
             if (audioElement && !isMuted) {
@@ -997,7 +859,6 @@
                 else audioElement.volume = volume;
             }
         }
-
         function nextStation() {
             if (currentChannel === 'mix' || currentChannel === 'debate' || currentChannel === 'sportflash') return;
             const streams = radioStations[currentChannel].streams;
@@ -1033,7 +894,6 @@
                 }
             } catch(e) {}
         }
-
         async function fetchSportsScores() {
             try {
                 const r = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard');
@@ -1118,7 +978,6 @@
             setInterval(updateScheduleHighlight, 60000);
         }
 
-        // Initialize
         createVisualizer();
         updateScheduleHighlight();
         document.getElementById('cityInput').value = 'Boston, MA';
