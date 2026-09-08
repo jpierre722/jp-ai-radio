@@ -1,15 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- trigger redeploy -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link rel="icon" href="/jp-logo-blue.png?v=3" type="image/png">
-    <link rel="shortcut icon" href="/jp-logo-blue.png?v=3" type="image/png">   
-
     <title>JP AI Radio - 24/7 Live Stream</title>
-</head>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; color: white; }
@@ -47,7 +41,7 @@
         .anchor-controls { display: flex; gap: 10px; justify-content: center; margin-top: 15px; flex-wrap: wrap; }
         .anchor-btn { background: rgba(78,205,196,0.2); border: 1px solid rgba(78,205,196,0.5); color: white; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.8em; transition: all 0.3s; }
         .anchor-btn:hover { background: rgba(78,205,196,0.4); }
-        .channels { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin: 15px 0; }
+        .channels { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin: 15px 0; }
         .channel-btn { background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); color: white; padding: 12px 6px; border-radius: 12px; cursor: pointer; transition: all 0.3s; text-align: center; font-size: 0.7em; }
         .channel-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
         .channel-btn.active { background: rgba(78,205,196,0.3); border-color: #4ecdc4; box-shadow: 0 0 20px rgba(78,205,196,0.3); }
@@ -86,50 +80,30 @@
         .start-info { color: #aaa; text-align: center; font-size: 0.85em; line-height: 1.5; }
         .audio-status { text-align: center; padding: 3px; font-size: 0.75em; color: #4ecdc4; }
         .data-status { text-align: center; padding: 3px; font-size: 0.7em; color: #888; }
-        @media (max-width: 600px) { .radio-container { padding: 12px; margin: 6px; } .header h1 { font-size: 1.8em; } .channels { grid-template-columns: repeat(3, 1fr); } .info-section { grid-template-columns: 1fr; } .control-btn { width: 35px; height: 35px; font-size: 1em; } .control-btn.play { width: 45px; height: 45px; } .track-title { font-size: 1.2em; } .anchor-avatar { width: 60px; height: 60px; font-size: 2em; } }
+        @media (max-width: 600px) { .radio-container { padding: 12px; margin: 6px; } .header h1 { font-size: 1.8em; } .channels { grid-template-columns: repeat(4, 1fr); } .info-section { grid-template-columns: 1fr; } .control-btn { width: 35px; height: 35px; font-size: 1em; } .control-btn.play { width: 45px; height: 45px; } .track-title { font-size: 1.2em; } .anchor-avatar { width: 60px; height: 60px; font-size: 2em; } }
     </style>
 </head>
 <body>
-
-<!-- Start Screen -->
-<div class="start-screen" id="startScreen">
-    <button class="start-button" onclick="startRadio()">📻 Tune In to JP AI Radio 📻</button>
-    <div class="start-info">
-        🎵 Real Music • 🗣️ Political Debate Channel • 🏈 Sports • 🌤️ Weather<br>
-        🎧 Continuous Feed • 🌎 World News Ticker<br>
-        📍 Boston, MA • 📧 Contact: jpierre722@yahoo.com
+    <!-- Start Screen -->
+    <div class="start-screen" id="startScreen">
+        <button class="start-button" onclick="startRadio()">📻 Tune In to JP AI Radio 📻</button>
+        <div class="start-info">
+            🎵 Real Music • 🗣️ Political Debate Channel • 🏈 Sports Flash • 🌤️ Weather<br>
+            🎧 Continuous Feed • 🌎 World News Ticker<br>
+            📍 Boston, MA • 📧 Contact: jpierre722@yahoo.com
+        </div>
     </div>
-</div>
 
-<!-- Radio Container -->
-<div class="radio-container">
-
-    <div class="header" 
-     style="
-        width:100%;
-        display:flex; 
-        align-items:center; 
-        justify-content:center; 
-        gap:15px;
-        padding:20px 0;
-        background:#0a0a0a;
-        border-bottom:2px solid #4ecdc4;
-        box-shadow:0 2px 6px rgba(0,0,0,0.3);">
-
-    <img src="/jp-logo-blue.png" alt="JP AI Radio Logo" 
-         style="width:60px; height:auto; border-radius:8px;">
-
-    <h1 style="margin:0; font-size:34px; font-weight:700; color:white;">
-        🎙️ JP AI Radio
-    </h1>
-</div>
-
-    <div class="status-bar" 
-     style="display:flex; justify-content:center; gap:25px; padding:10px 0;">
-    <div class="live-indicator"><div class="live-dot"></div>LIVE 24/7</div>
-    <div class="time-display">🕐 <span id="currentTime">00:00:00</span></div>
-    <div class="listener-count">👥 <span id="listeners">1500</span></div>
-</div>
+    <!-- Radio Container -->
+    <div class="radio-container">
+        <div class="header">
+            <h1>🎙️ JP AI Radio</h1>
+            <div class="status-bar">
+                <div class="live-indicator"><div class="live-dot"></div>LIVE 24/7</div>
+                <div class="time-display">🕐 <span id="currentTime">00:00:00</span></div>
+                <div class="listener-count">👥 <span id="listeners">1500</span></div>
+            </div>
+        </div>
 
         <!-- Now Playing -->
         <div class="now-playing" id="now-playing">
@@ -159,7 +133,7 @@
             </div>
         </div>
 
-        <!-- Channels -->
+        <!-- Channels: 7 buttons now -->
         <div class="channels">
             <button class="channel-btn active" onclick="switchChannel('rnb')"><span class="channel-icon">🎤</span>R&B / Hip-Hop</button>
             <button class="channel-btn" onclick="switchChannel('rock')"><span class="channel-icon">🎸</span>Classic Rock</button>
@@ -167,6 +141,7 @@
             <button class="channel-btn" onclick="switchChannel('electronic')"><span class="channel-icon">⚡</span>Electronic</button>
             <button class="channel-btn" onclick="switchChannel('debate')"><span class="channel-icon">🗣️</span>Debate</button>
             <button class="channel-btn" onclick="switchChannel('mix')"><span class="channel-icon">🎧</span>Continuous Feed</button>
+            <button class="channel-btn" onclick="switchChannel('sportflash')"><span class="channel-icon">🏈</span>Sport Flash</button>
         </div>
 
         <!-- Controls -->
@@ -246,7 +221,7 @@
 
     <script>
         // ============================================
-        // JP AI RADIO - COMPLETE WORKING VERSION
+        // JP AI RADIO - FULL WORKING VERSION
         // ============================================
         let audioElement = null;
         let isPlaying = false;
@@ -273,6 +248,12 @@
         let adIndex = 0;
         let debateTimeoutId = null;
         let mixBulletinTimeoutId = null;
+        let sportFlashInterval = null;
+        let sportFlashTimeoutId = null;
+        let sportMusicInterval = null;
+        let sportNewsPool = [];
+        let sportNewsIndex = 0;
+        let upcomingGames = [];
         const musicChannels = ['rnb', 'rock', 'classical', 'electronic'];
         const BOSTON_LOCATION = {
             lat: 42.3601, lon: -71.0589,
@@ -320,10 +301,14 @@
             mix: {
                 name: "Continuous Feed", genre: "Music + News Bulletins", icon: "🎧",
                 streams: []
+            },
+            sportflash: {
+                name: "Sport Flash", genre: "Sports Updates", icon: "🏈",
+                streams: []
             }
         };
 
-        // World news feeds (including political)
+        // World news feeds
         const worldFeeds = [
             'https://feeds.bbci.co.uk/news/world/rss.xml',
             'https://feeds.bbci.co.uk/news/world/asia/rss.xml',
@@ -341,6 +326,27 @@
             "Asian markets surge amid trade agreement",
             "Middle East peace talks progress",
             "Latin American countries sign historic treaty"
+        ];
+
+        // Sports feeds
+        const sportsFeeds = [
+            'https://feeds.bbci.co.uk/sport/rss.xml',
+            'https://www.espn.com/espn/rss/news',
+            'https://rss.nytimes.com/services/xml/rss/nyt/Sports.xml'
+        ];
+        const backupSportsNews = [
+            "Lakers defeat Warriors in overtime",
+            "Patriots win against Jets",
+            "Red Sox beat Yankees",
+            "Champions League final set"
+        ];
+
+        // Static upcoming games (will be replaced by fetched data if available)
+        const upcomingGamesData = [
+            { home: "Lakers", away: "Warriors", date: "Tomorrow", time: "7:30 PM" },
+            { home: "Patriots", away: "Jets", date: "Sunday", time: "1:00 PM" },
+            { home: "Red Sox", away: "Yankees", date: "Saturday", time: "4:05 PM" },
+            { home: "Manchester City", away: "Liverpool", date: "Next Wednesday", time: "3:00 PM" }
         ];
 
         // ========== SPEECH ENGINE ==========
@@ -458,6 +464,39 @@
             }
         }
 
+        // ========== SPORTS NEWS FETCHING ==========
+        async function fetchSportsNews() {
+            try {
+                let allItems = [];
+                for (const feedUrl of sportsFeeds) {
+                    try {
+                        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
+                        const response = await fetch(proxyUrl);
+                        const data = await response.json();
+                        const parser = new DOMParser();
+                        const xml = parser.parseFromString(data.contents, 'text/xml');
+                        const items = xml.querySelectorAll('item');
+                        items.forEach(item => {
+                            const title = item.querySelector('title')?.textContent || '';
+                            const description = item.querySelector('description')?.textContent || '';
+                            const pubDate = item.querySelector('pubDate')?.textContent || '';
+                            if (title) allItems.push({ title, description: description.replace(/<[^>]*>/g, ''), pubDate });
+                        });
+                    } catch(e) { /* skip */ }
+                }
+                if (allItems.length > 0) {
+                    sportNewsPool = allItems.sort(() => Math.random() - 0.5).slice(0, 50);
+                } else {
+                    sportNewsPool = backupSportsNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+                }
+                sportNewsIndex = 0;
+            } catch(e) {
+                sportNewsPool = backupSportsNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+            }
+            // Set upcoming games (static for now)
+            upcomingGames = upcomingGamesData;
+        }
+
         function displayNextNews() {
             if (newsPool.length === 0) return;
             const item = newsPool[newsIndex % newsPool.length];
@@ -471,7 +510,7 @@
             fetchWorldNews();
         }
 
-        // ========== DEBATE (FIXED DELAY, 30 MIN) ==========
+        // ========== DEBATE (TOPIC-AWARE, 30 MIN) ==========
         function startDebateLoop() {
             if (debateLoopActive) return;
             debateLoopActive = true;
@@ -483,7 +522,7 @@
             if (newsPool.length === 0) {
                 newsPool = backupWorldNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
             }
-            const politicalKeywords = ['election', 'president', 'government', 'senate', 'congress', 'policy', 'law', 'vote', 'minister', 'prime minister', 'political', 'parliament', 'bill'];
+            const politicalKeywords = ['election', 'president', 'government', 'senate', 'congress', 'policy', 'law', 'vote', 'minister', 'prime minister', 'political', 'parliament', 'bill', 'tax', 'health', 'immigration', 'climate', 'energy', 'defense', 'education', 'trade'];
             const politicalItems = newsPool.filter(item => 
                 politicalKeywords.some(keyword => (item.title + ' ' + item.description).toLowerCase().includes(keyword))
             );
@@ -508,19 +547,123 @@
             document.getElementById('anchorStatus').textContent = 'Moderated by JP';
             document.getElementById('anchorNewsText').textContent = `Debate: ${topic.title}`;
 
+            const topicText = (topic.title + ' ' + (topic.description || '')).toLowerCase();
+            const argumentsMap = {
+                election: {
+                    aff: [
+                        "Free and fair elections are the cornerstone of democracy.",
+                        "Expanding access to voting strengthens our republic.",
+                        "Modernizing election infrastructure is long overdue.",
+                        "We must protect the integrity of every vote."
+                    ],
+                    neg: [
+                        "Election reforms must be carefully balanced to prevent fraud.",
+                        "We should not rush changes that could undermine voter confidence.",
+                        "Local control of elections is essential.",
+                        "Unintended consequences of new laws could disenfranchise voters."
+                    ]
+                },
+                tax: {
+                    aff: [
+                        "Lowering taxes stimulates economic growth.",
+                        "The current tax code is overly complex and burdensome.",
+                        "Tax relief for middle-class families is overdue.",
+                        "We can fund essential services while cutting waste."
+                    ],
+                    neg: [
+                        "Tax cuts for the wealthy increase inequality.",
+                        "We need revenue to invest in infrastructure and education.",
+                        "The deficit cannot be ignored.",
+                        "Targeted tax credits are more effective than broad cuts."
+                    ]
+                },
+                health: {
+                    aff: [
+                        "Expanding healthcare access is a moral imperative.",
+                        "Preventive care reduces long-term costs.",
+                        "We cannot leave millions uninsured.",
+                        "A healthier population is a more productive workforce."
+                    ],
+                    neg: [
+                        "Government-run healthcare leads to inefficiency.",
+                        "We must preserve patient choice and private insurance.",
+                        "Cost controls are needed before expansion.",
+                        "One-size-fits-all approaches fail patients."
+                    ]
+                },
+                immigration: {
+                    aff: [
+                        "Immigrants strengthen our economy and communities.",
+                        "A pathway to citizenship is fair and just.",
+                        "We need comprehensive immigration reform.",
+                        "Diversity is our nation's strength."
+                    ],
+                    neg: [
+                        "Border security must come first.",
+                        "We cannot reward illegal behavior.",
+                        "Immigration levels must be sustainable.",
+                        "Local communities should have a say."
+                    ]
+                },
+                climate: {
+                    aff: [
+                        "Climate change is an existential threat requiring urgent action.",
+                        "Investing in renewable energy creates jobs.",
+                        "We owe future generations a livable planet.",
+                        "The cost of inaction far exceeds the cost of action."
+                    ],
+                    neg: [
+                        "Climate policies must not harm our economy.",
+                        "The transition to green energy must be gradual.",
+                        "We should focus on adaptation, not just mitigation.",
+                        "International cooperation is necessary before domestic action."
+                    ]
+                },
+                default: {
+                    aff: [
+                        "This policy is necessary for progress.",
+                        "The evidence supports our position.",
+                        "We must act now for future generations.",
+                        "Our approach is both fair and effective."
+                    ],
+                    neg: [
+                        "We must consider the unintended consequences.",
+                        "There are better alternatives available.",
+                        "The proposed solution is too costly.",
+                        "We need more time to study the issue."
+                    ]
+                }
+            };
+
+            let category = 'default';
+            for (const key of Object.keys(argumentsMap)) {
+                if (key !== 'default' && topicText.includes(key)) {
+                    category = key;
+                    break;
+                }
+            }
+
+            const affArgs = argumentsMap[category].aff;
+            const negArgs = argumentsMap[category].neg;
+
             const statements = [
                 { text: `Good evening, I'm JP, and welcome to The Political Debate. Our topic tonight: ${topic.title}. ${topic.description ? topic.description : ''}`, isFemale: false },
-                { text: `The affirmative position is clear: this is a necessary step forward for our nation.`, isFemale: false },
-                { text: `But we must consider the impact on working families and the most vulnerable members of society.`, isFemale: true },
-                { text: `The data from independent studies supports our position.`, isFemale: false },
-                { text: `Those studies have been criticized for methodological flaws and do not reflect current conditions.`, isFemale: true },
-                { text: `We have seen similar policies succeed in other developed nations, and we can learn from their experience.`, isFemale: false },
-                { text: `But each country has unique circumstances that cannot be ignored; we cannot simply copy and paste solutions.`, isFemale: true },
-                { text: `The long-term benefits far outweigh the short-term challenges, and we must act now for future generations.`, isFemale: false },
-                { text: `The opposition believes a more cautious approach is prudent, with additional safeguards.`, isFemale: true },
-                { text: `We urge the audience to consider the evidence carefully and support the affirmative position.`, isFemale: false },
-                { text: `In closing, the affirmative stands by its position.`, isFemale: false },
-                { text: `The opposition respectfully disagrees and encourages voters to reject this proposal.`, isFemale: true },
+                { text: `Let's begin with opening statements. The affirmative goes first.`, isFemale: false },
+                { text: affArgs[0], isFemale: false },
+                { text: negArgs[0], isFemale: true },
+                { text: affArgs[1], isFemale: false },
+                { text: negArgs[1], isFemale: true },
+                { text: `Now let's move to rebuttals.`, isFemale: false },
+                { text: affArgs[2], isFemale: false },
+                { text: negArgs[2], isFemale: true },
+                { text: affArgs[3], isFemale: false },
+                { text: negArgs[3], isFemale: true },
+                { text: `We'll now have cross-talk. The affirmative may respond.`, isFemale: false },
+                { text: `We stand by our position and urge the audience to consider the evidence.`, isFemale: false },
+                { text: `The opposition respectfully disagrees and asks for a more cautious approach.`, isFemale: true },
+                { text: `Finally, closing statements.`, isFemale: false },
+                { text: `In conclusion, the affirmative believes this is the right path forward.`, isFemale: false },
+                { text: `The opposition urges a no vote until further safeguards are in place.`, isFemale: true },
                 { text: `That concludes our debate for this hour. Thank you for listening.`, isFemale: false }
             ];
 
@@ -537,7 +680,6 @@
                     isFemale: s.isFemale,
                     onEndCallback: () => {
                         step++;
-                        // Short pause between statements (0.5s), not fixed long delay
                         setTimeout(nextStep, 500);
                     }
                 });
@@ -577,7 +719,7 @@
         }
 
         function pickNextTopic() {
-            const politicalKeywords = ['election', 'president', 'government', 'senate', 'congress', 'policy', 'law', 'vote', 'minister', 'prime minister', 'political', 'parliament', 'bill'];
+            const politicalKeywords = ['election', 'president', 'government', 'senate', 'congress', 'policy', 'law', 'vote', 'minister', 'prime minister', 'political', 'parliament', 'bill', 'tax', 'health', 'immigration', 'climate', 'energy', 'defense', 'education', 'trade'];
             const politicalItems = newsPool.filter(item => 
                 !item.debated && politicalKeywords.some(keyword => (item.title + ' ' + item.description).toLowerCase().includes(keyword))
             );
@@ -641,8 +783,12 @@
         // ========== CHANNEL MANAGEMENT ==========
         function playStream() {
             if (!audioElement) createAudioElement();
+            // Clear all intervals and timeouts
             if (continuousMixInterval) { clearInterval(continuousMixInterval); continuousMixInterval = null; }
             if (mixBulletinTimeoutId) { clearTimeout(mixBulletinTimeoutId); mixBulletinTimeoutId = null; }
+            if (sportFlashInterval) { clearInterval(sportFlashInterval); sportFlashInterval = null; }
+            if (sportFlashTimeoutId) { clearTimeout(sportFlashTimeoutId); sportFlashTimeoutId = null; }
+            if (sportMusicInterval) { clearInterval(sportMusicInterval); sportMusicInterval = null; }
             clearAdScheduler();
 
             if (currentChannel === 'debate') {
@@ -682,10 +828,52 @@
                     }
                 };
 
+                // First bulletin after 10 seconds, then every 15 minutes
                 mixBulletinTimeoutId = setTimeout(() => {
                     performBulletin();
-                    continuousMixInterval = setInterval(performBulletin, 1800000); // every 30 min
+                    continuousMixInterval = setInterval(performBulletin, 900000); // 15 minutes
                 }, 10000);
+            } else if (currentChannel === 'sportflash') {
+                // Sport Flash channel with music background
+                document.getElementById('anchorContainer').classList.remove('active');
+                document.getElementById('now-playing').style.display = 'block';
+                document.getElementById('audioStatus').textContent = '🏈 Sport Flash Active';
+                document.getElementById('trackTitle').textContent = 'Sport Flash';
+                document.getElementById('trackArtist').textContent = 'Music + Sports Updates';
+                document.getElementById('trackGenre').textContent = 'Every 15 Minutes';
+                const randomChannel = musicChannels[Math.floor(Math.random() * musicChannels.length)];
+                const randomStreams = radioStations[randomChannel].streams;
+                const randomStream = randomStreams[Math.floor(Math.random() * randomStreams.length)];
+                audioElement.src = randomStream.url;
+                audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; });
+
+                // Fetch sports news if not available
+                if (sportNewsPool.length === 0) {
+                    fetchSportsNews().then(() => {
+                        // Initial flash after 10 seconds
+                        sportFlashTimeoutId = setTimeout(() => {
+                            performSportsFlash();
+                            sportFlashInterval = setInterval(performSportsFlash, 900000); // 15 minutes
+                        }, 10000);
+                    });
+                } else {
+                    sportFlashTimeoutId = setTimeout(() => {
+                        performSportsFlash();
+                        sportFlashInterval = setInterval(performSportsFlash, 900000);
+                    }, 10000);
+                }
+
+                function performSportsFlash() {
+                    if (currentChannel !== 'sportflash' || isDebating || isMuted) return;
+                    audioElement.pause();
+                    speakSportsFlash(() => {
+                        // Resume music after flash
+                        if (audioElement && !isMuted) {
+                            audioElement.volume = volume;
+                            audioElement.play().catch(() => {});
+                        }
+                    });
+                }
             } else {
                 // Music channels
                 document.getElementById('anchorContainer').classList.remove('active');
@@ -711,10 +899,13 @@
 
         function speakMixBulletin() {
             if (newsPool.length === 0) return;
-            const item = newsPool[anchorNewsIndex % newsPool.length];
-            anchorNewsIndex++;
-            const timeStr = item.pubDate ? new Date(item.pubDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'Now';
-            const bulletinText = `This is JP AI Radio News update. ${item.title}. ${item.description} That's your update for now.`;
+            let bulletinText = "This is JP AI Radio News flash. ";
+            for (let i = 0; i < 4; i++) {
+                const item = newsPool[(anchorNewsIndex + i) % newsPool.length];
+                bulletinText += `${item.title}. ${item.description} `;
+            }
+            anchorNewsIndex = (anchorNewsIndex + 4) % newsPool.length;
+            bulletinText += "That's your news flash for now.";
             document.getElementById('anchorNewsText').textContent = bulletinText;
             speakLongText(bulletinText, false, () => {
                 if (currentChannel === 'mix') {
@@ -723,7 +914,7 @@
                         audioElement.play().catch(() => {});
                     }
                     const now = new Date();
-                    const nextUpdate = new Date(now.getTime() + 30 * 60000);
+                    const nextUpdate = new Date(now.getTime() + 15 * 60000);
                     const timeString = nextUpdate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
                     const nextAnnouncement = `Next news flash will be at ${timeString}.`;
                     speakLongText(nextAnnouncement, false, () => {});
@@ -731,17 +922,41 @@
             });
         }
 
+        function speakSportsFlash(onComplete = null) {
+            if (sportNewsPool.length === 0) {
+                sportNewsPool = backupSportsNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+            }
+            let flashText = "This is JP AI Radio Sports Flash. Scores: ";
+            // Add scores from available data (we'll simulate with headlines)
+            for (let i = 0; i < 3; i++) {
+                const item = sportNewsPool[(sportNewsIndex + i) % sportNewsPool.length];
+                flashText += `${item.title}. `;
+            }
+            sportNewsIndex = (sportNewsIndex + 3) % sportNewsPool.length;
+            // Add upcoming games
+            flashText += "Upcoming games: ";
+            upcomingGames.forEach(game => {
+                flashText += `${game.away} at ${game.home} on ${game.date} at ${game.time}. `;
+            });
+            flashText += "That's your sports update for now.";
+            document.getElementById('anchorNewsText').textContent = flashText;
+            speakLongText(flashText, false, onComplete);
+        }
+
         function switchChannel(channel) {
             currentChannel = channel;
             currentStationIndex = 0;
             document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
-            const map = ['rnb','rock','classical','electronic','debate','mix'];
+            const map = ['rnb','rock','classical','electronic','debate','mix','sportflash'];
             const idx = map.indexOf(channel);
             const btns = document.querySelectorAll('.channel-btn');
             if (btns[idx]) btns[idx].classList.add('active');
             playStream();
             if (channel === 'mix' || channel === 'debate') {
                 if (newsPool.length === 0) fetchWorldNews();
+            }
+            if (channel === 'sportflash') {
+                if (sportNewsPool.length === 0) fetchSportsNews();
             }
         }
 
@@ -756,7 +971,7 @@
             isMuted = !isMuted;
             if (audioElement) {
                 if (isMuted) audioElement.volume = 0;
-                else if (adInProgress || (currentChannel === 'mix' && isSpeaking)) audioElement.volume = 0.15;
+                else if (adInProgress || (currentChannel === 'mix' && isSpeaking) || (currentChannel === 'sportflash' && isSpeaking)) audioElement.volume = 0.15;
                 else audioElement.volume = volume;
             }
             if (speechSynth) { if (isMuted) speechSynth.cancel(); }
@@ -766,25 +981,25 @@
         function adjustVolume(value) {
             volume = value/100;
             if (audioElement && !isMuted) {
-                if (adInProgress || (currentChannel === 'mix' && isSpeaking)) audioElement.volume = 0.15;
+                if (adInProgress || (currentChannel === 'mix' && isSpeaking) || (currentChannel === 'sportflash' && isSpeaking)) audioElement.volume = 0.15;
                 else audioElement.volume = volume;
             }
         }
 
         function nextStation() {
-            if (currentChannel === 'mix' || currentChannel === 'debate') return;
+            if (currentChannel === 'mix' || currentChannel === 'debate' || currentChannel === 'sportflash') return;
             const streams = radioStations[currentChannel].streams;
             currentStationIndex = (currentStationIndex+1)%streams.length;
             playStream();
         }
         function previousStation() {
-            if (currentChannel === 'mix' || currentChannel === 'debate') return;
+            if (currentChannel === 'mix' || currentChannel === 'debate' || currentChannel === 'sportflash') return;
             const streams = radioStations[currentChannel].streams;
             currentStationIndex = (currentStationIndex-1+streams.length)%streams.length;
             playStream();
         }
 
-        // ========== WEATHER & SPORTS ==========
+        // ========== WEATHER & SPORTS SCORES ==========
         async function fetchWeather() {
             try {
                 if (!userLocation) userLocation = BOSTON_LOCATION;
@@ -875,11 +1090,13 @@
             if (speechSynth) speechSynth.onvoiceschanged = setupVoices;
             playStream();
             fetchWorldNews();
+            fetchSportsNews();
             fetchWeather();
             fetchSportsScores();
             updateClock();
             setInterval(updateClock, 1000);
-            setInterval(fetchWorldNews, 3600000); // update news every hour
+            setInterval(fetchWorldNews, 3600000);
+            setInterval(fetchSportsNews, 3600000);
             setInterval(fetchWeather, 600000);
             setInterval(fetchSportsScores, 60000);
             setInterval(displayNextNews, 10000);
@@ -893,7 +1110,7 @@
         createVisualizer();
         updateScheduleHighlight();
         document.getElementById('cityInput').value = 'Boston, MA';
-        console.log('JP AI Radio ready');
+        console.log('JP AI Radio ready with enhanced Sport Flash');
     </script>
 </body>
 </html>
