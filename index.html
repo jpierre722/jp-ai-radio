@@ -7,7 +7,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; color: white; }
-        .radio-container { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border-radius: 30px; padding: 25px; width: 90%; max-width: 900px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); margin: 15px; }
+        .radio-container { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border-radius: 30px; padding: 25px; width: 90%; max-width: 1000px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); margin: 15px; }
         .header { text-align: center; margin-bottom: 20px; }
         .header h1 { font-size: 2.5em; background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: gradient 3s ease infinite; }
         @keyframes gradient { 0%, 100% { filter: hue-rotate(0deg); } 50% { filter: hue-rotate(30deg); } }
@@ -41,8 +41,9 @@
         .anchor-controls { display: flex; gap: 10px; justify-content: center; margin-top: 15px; flex-wrap: wrap; }
         .anchor-btn { background: rgba(78,205,196,0.2); border: 1px solid rgba(78,205,196,0.5); color: white; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.8em; transition: all 0.3s; }
         .anchor-btn:hover { background: rgba(78,205,196,0.4); }
-        .channels { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin: 15px 0; }
-        .channel-btn { background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); color: white; padding: 12px 6px; border-radius: 12px; cursor: pointer; transition: all 0.3s; text-align: center; font-size: 0.7em; }
+        /* Now 9 channels */
+        .channels { display: grid; grid-template-columns: repeat(9, 1fr); gap: 8px; margin: 15px 0; }
+        .channel-btn { background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); color: white; padding: 12px 6px; border-radius: 12px; cursor: pointer; transition: all 0.3s; text-align: center; font-size: 0.65em; }
         .channel-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
         .channel-btn.active { background: rgba(78,205,196,0.3); border-color: #4ecdc4; box-shadow: 0 0 20px rgba(78,205,196,0.3); }
         .channel-btn .channel-icon { font-size: 1.8em; display: block; margin-bottom: 3px; }
@@ -80,7 +81,8 @@
         .start-info { color: #aaa; text-align: center; font-size: 0.85em; line-height: 1.5; }
         .audio-status { text-align: center; padding: 3px; font-size: 0.75em; color: #4ecdc4; }
         .data-status { text-align: center; padding: 3px; font-size: 0.7em; color: #888; }
-        @media (max-width: 600px) { .radio-container { padding: 12px; margin: 6px; } .header h1 { font-size: 1.8em; } .channels { grid-template-columns: repeat(4, 1fr); } .info-section { grid-template-columns: 1fr; } .control-btn { width: 35px; height: 35px; font-size: 1em; } .control-btn.play { width: 45px; height: 45px; } .track-title { font-size: 1.2em; } .anchor-avatar { width: 60px; height: 60px; font-size: 2em; } }
+        @media (max-width: 768px) { .channels { grid-template-columns: repeat(5, 1fr); } }
+        @media (max-width: 600px) { .radio-container { padding: 12px; margin: 6px; } .header h1 { font-size: 1.8em; } .channels { grid-template-columns: repeat(3, 1fr); } .info-section { grid-template-columns: 1fr; } .control-btn { width: 35px; height: 35px; font-size: 1em; } .control-btn.play { width: 45px; height: 45px; } .track-title { font-size: 1.2em; } .anchor-avatar { width: 60px; height: 60px; font-size: 2em; } }
     </style>
 </head>
 <body>
@@ -88,36 +90,23 @@
     <div class="start-screen" id="startScreen">
         <button class="start-button" onclick="startRadio()">📻 Tune In to JP AI Radio 📻</button>
         <div class="start-info">
-            🎵 Real Music • 🗣️ Political Debate Channel • 🏈 Sports Flash • 🌤️ Weather<br>
-            🎧 Continuous Feed • 🌎 World News Ticker<br>
+            🎵 Real Music • 🇫🇷 French Songs • 🇭🇹 Haitian Music • 🗣️ Debate Channel<br>
+            🏈 Sports Flash • 🎧 Continuous Feed • 🌎 World News Ticker<br>
             📍 Boston, MA • 📧 Contact: jpierre722@yahoo.com
         </div>
     </div>
 
     <!-- Radio Container -->
-    <!-- Radio Container -->
-<div class="radio-container">
+    <div class="radio-container">
 
-    <div class="header" 
-     style="
-        width:100%;
-        display:flex; 
-        align-items:center; 
-        justify-content:center; 
-        gap:15px;
-        padding:20px 0;
-        background:#0a0a0a;
-        border-bottom:2px solid #4ecdc4;
-        box-shadow:0 2px 6px rgba(0,0,0,0.3);">
-
-    <img src="/jp-logo-blue.png" alt="JP AI Radio Logo" 
-         style="width:60px; height:auto; border-radius:8px;">
-
-    <h1 style="margin:0; font-size:34px; font-weight:700; color:white;">
-        🎙️ JP AI Radio
-    </h1>
-</div>
-
+        <div class="header" style="width:100%; display:flex; align-items:center; justify-content:center; gap:15px; padding:20px 0; background:#0a0a0a; border-bottom:2px solid #4ecdc4; box-shadow:0 2px 6px rgba(0,0,0,0.3);">
+            <!-- Inline SVG logo (always displays, no external file needed) -->
+            <svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" rx="15" fill="#4ecdc4"/>
+                <text x="50" y="65" font-size="50" text-anchor="middle" fill="white" font-family="Arial" font-weight="bold">JP</text>
+            </svg>
+            <h1 style="margin:0; font-size:34px; font-weight:700; color:white;">🎙️ JP AI Radio</h1>
+        </div>
 
         <div class="status-bar" style="display:flex; justify-content:center; gap:25px; padding:10px 0;">
             <div class="live-indicator"><div class="live-dot"></div>LIVE 24/7</div>
@@ -125,7 +114,7 @@
             <div class="listener-count">👥 <span id="listeners">1500</span></div>
         </div>
 
-        <!-- Now Playing Section (reinserted) -->
+        <!-- Now Playing -->
         <div class="now-playing" id="now-playing">
             <div class="track-title" id="trackTitle">Click Start to Play</div>
             <div class="track-artist" id="trackArtist">JP AI Radio Station</div>
@@ -153,12 +142,14 @@
             </div>
         </div>
 
-        <!-- Channels: 7 buttons -->
+        <!-- Channels: 9 buttons now -->
         <div class="channels">
             <button class="channel-btn active" onclick="switchChannel('rnb')"><span class="channel-icon">🎤</span>R&B / Hip-Hop</button>
             <button class="channel-btn" onclick="switchChannel('rock')"><span class="channel-icon">🎸</span>Classic Rock</button>
             <button class="channel-btn" onclick="switchChannel('classical')"><span class="channel-icon">🎻</span>Classical</button>
             <button class="channel-btn" onclick="switchChannel('electronic')"><span class="channel-icon">⚡</span>Electronic</button>
+            <button class="channel-btn" onclick="switchChannel('french')"><span class="channel-icon">🇫🇷</span>French Songs</button>
+            <button class="channel-btn" onclick="switchChannel('haitian')"><span class="channel-icon">🇭🇹</span>Haitian Music</button>
             <button class="channel-btn" onclick="switchChannel('debate')"><span class="channel-icon">🗣️</span>Debate</button>
             <button class="channel-btn" onclick="switchChannel('mix')"><span class="channel-icon">🎧</span>Continuous Feed</button>
             <button class="channel-btn" onclick="switchChannel('sportflash')"><span class="channel-icon">🏈</span>Sport Flash</button>
@@ -231,7 +222,7 @@
             <div class="schedule-item"><span>00:00-06:00</span><span>🌙 Late Night R&B</span></div>
             <div class="schedule-item"><span>06:00-10:00</span><span>🌅 Morning Classics</span></div>
             <div class="schedule-item"><span>10:00-14:00</span><span>🎸 Classic Rock</span></div>
-            <div class="schedule-item"><span>14:00-18:00</span><span>⚡ Electronic Beats</span></div>
+            <div class="schedule-item"><span>14:00-18:00</span><span>⚡ Electronic & World Beats</span></div>
             <div class="schedule-item"><span>18:00-22:00</span><span>🎤 R&B Evening</span></div>
             <div class="schedule-item"><span>22:00-00:00</span><span>🎻 Classical Night</span></div>
         </div>
@@ -240,14 +231,8 @@
     </div>
 
     <script>
-        // The entire JavaScript from the previous full file remains exactly the same
-        // ... (paste the complete script here, unchanged from the last full version)
-        // To avoid duplicate length, I am indicating that the script is identical.
-        // In the final answer, I will include the full script as before.
-        // For the purpose of this correction, I will include the script entirely.
-
         // ============================================
-        // JP AI RADIO - FULL WORKING VERSION
+        // JP AI RADIO - WITH FRENCH & HAITIAN CHANNELS
         // ============================================
         let audioElement = null;
         let isPlaying = false;
@@ -280,7 +265,8 @@
         let sportNewsPool = [];
         let sportNewsIndex = 0;
         let upcomingGames = [];
-        const musicChannels = ['rnb', 'rock', 'classical', 'electronic'];
+        // Add French and Haitian to music channels so ads play on them too
+        const musicChannels = ['rnb', 'rock', 'classical', 'electronic', 'french', 'haitian'];
         const BOSTON_LOCATION = {
             lat: 42.3601, lon: -71.0589,
             city: 'Boston', region: 'Massachusetts', country: 'US', source: 'Default'
@@ -313,11 +299,27 @@
                 ]
             },
             electronic: {
-                name: "French Songs", genre: "EDM, House, Techno", icon: "⚡",
+                name: "Electronic", genre: "EDM, House, Techno", icon: "⚡",
                 streams: [
-                    { name: "EDM Festival", description: "Electronic Dance Music", url: "https://chantefrance90-2000.ice.infomaniak.ch/chantefrance90-2000-96.aac?" },
+                    { name: "EDM Festival", description: "Electronic Dance Music", url: "https://ice1.somafm.com/cliqhop-128-mp3" },
                     { name: "Deep House", description: "Deep & Tech House", url: "https://ice1.somafm.com/defcon-128-mp3" },
                     { name: "Synthwave", description: "Synthwave & Retro", url: "https://ice1.somafm.com/suburbsofgoa-128-mp3" }
+                ]
+            },
+            french: {
+                name: "French Songs", genre: "Chanson Française / Variété", icon: "🇫🇷",
+                streams: [
+                    { name: "Chante France 90-2000", description: "Hits Français 90-2000", url: "https://chantefrance90-2000.ice.infomaniak.ch/chantefrance90-2000-96.aac" },
+                    { name: "Chante France 80-96 (alt)", description: "Hits Français 80-96", url: "https://chantefrance80s.ice.infomaniak.ch/chantefrance80s-96.aac?" },
+                    { name: "Chante France 70-96 (alt)", description: "Hits Français 70-96", url: "https://chantefrance70s.ice.infomaniak.ch/chantefrance70s-96.aac?" }
+                ]
+            },
+            haitian: {
+                name: "Haitian Music", genre: "Konpa / Kompa / Zouk", icon: "🇭🇹",
+                streams: [
+                    { name: "Konpa Hits", description: "Haitian Kompa & Zouk", url: "https://stream.zeno.fm/" },
+                    { name: "Radio Kiskeya Haiti", description: "Haitian Music & Culture", url: "https://stream.zeno.fm/huv" },
+                    { name: "Kompa 509", description: "Haitian Kompa Classics", url: "https://stream.zeno.fm/nuv" }
                 ]
             },
             debate: {
@@ -765,6 +767,7 @@
                     speakSportsFlash(() => { if (audioElement && !isMuted) { audioElement.volume = volume; audioElement.play().catch(() => {}); } });
                 }
             } else {
+                // Music channels (rnb, rock, classical, electronic, french, haitian)
                 document.getElementById('anchorContainer').classList.remove('active');
                 document.getElementById('now-playing').style.display = 'block';
                 document.getElementById('audioStatus').textContent = '📡 Connecting...';
@@ -828,7 +831,7 @@
             currentChannel = channel;
             currentStationIndex = 0;
             document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
-            const map = ['rnb','rock','classical','electronic','debate','mix','sportflash'];
+            const map = ['rnb','rock','classical','electronic','french','haitian','debate','mix','sportflash'];
             const idx = map.indexOf(channel);
             const btns = document.querySelectorAll('.channel-btn');
             if (btns[idx]) btns[idx].classList.add('active');
@@ -981,7 +984,7 @@
         createVisualizer();
         updateScheduleHighlight();
         document.getElementById('cityInput').value = 'Boston, MA';
-        console.log('JP AI Radio ready with enhanced Sport Flash');
+        console.log('JP AI Radio ready with French and Haitian channels');
     </script>
 </body>
 </html>
