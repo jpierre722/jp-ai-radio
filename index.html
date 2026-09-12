@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JP AI Radio · 24/7 Live Stream</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; color: white; }
+        .radio-container { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border-radius: 30px; padding: 25px; width: 90%; max-width: 1000px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); margin: 15px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { font-size: 2.5em; background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: gradient 3s ease infinite; }
+        @keyframes gradient { 0%, 100% { filter: hue-rotate(0deg); } 50% { filter: hue-rotate(30deg); } }
+        .status-bar { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+        .live-indicator, .time-display, .listener-count { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 50px; font-size: 0.8em; }
+        .live-indicator { background: rgba(255,0,0,0.2); border: 1px solid rgba(255,0,0,0.5); }
+        .time-display { background: rgba(78,205,196,0.2); border: 1px solid rgba(78,205,196,0.5); }
+        .listener-count { background: rgba(255,107,107,0.2); border: 1px solid rgba(255,107,107,0.5); }
+        .live-dot { width: 8px; height: 8px; background: #ff0000; border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } }
+        .now-playing { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 20px; margin: 15px 0; text-align: center; }
+        .track-title { font-size: 1.6em; font-weight: bold; margin-bottom: 3px; }
+        .track-artist { font-size: 1em; color: #4ecdc4; margin-bottom: 3px; }
+        .track-genre { font-size: 0.8em; color: #ff6b6b; margin-bottom: 10px; }
+        .visualizer { display: flex; justify-content: center; gap: 3px; height: 40px; margin: 10px 0; }
+        .visualizer-bar { width: 5px; background: linear-gradient(to top, #4ecdc4, #ff6b6b); border-radius: 10px; animation: visualize 0.6s ease-in-out infinite; }
+        @keyframes visualize { 0%, 100% { height: 8px; } 50% { height: 40px; } }
+        .anchor-container { display: none; background: linear-gradient(135deg, rgba(69,183,209,0.15), rgba(78,205,196,0.15)); border: 2px solid rgba(78,205,196,0.4); border-radius: 20px; padding: 20px; margin: 15px 0; text-align: center; }
+        .anchor-container.active { display: block; }
+        .anchor-header { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 15px; }
+        .anchor-avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(45deg, #4ecdc4, #45b7d1); display: flex; align-items: center; justify-content: center; font-size: 3em; animation: anchorPulse 3s ease-in-out infinite; border: 3px solid #4ecdc4; box-shadow: 0 0 30px rgba(78,205,196,0.5); }
+        @keyframes anchorPulse { 0%, 100% { box-shadow: 0 0 20px rgba(78,205,196,0.3); } 50% { box-shadow: 0 0 40px rgba(78,205,196,0.7); } }
+        .anchor-info h2 { font-size: 1.4em; color: #4ecdc4; margin-bottom: 3px; }
+        .anchor-info p { font-size: 0.8em; color: #aaa; }
+        .anchor-speaking { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 10px 0; }
+        .speaking-dot { width: 6px; height: 6px; background: #4ecdc4; border-radius: 50%; animation: speaking 0.8s ease-in-out infinite; }
+        .speaking-dot:nth-child(2) { animation-delay: 0.2s; }
+        .speaking-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes speaking { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.5); opacity: 1; } }
+        .anchor-news-text { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 15px; font-size: 1em; line-height: 1.6; min-height: 80px; display: flex; align-items: center; justify-content: center; color: #e0e0e0; }
+        .debate-role { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.7em; margin-bottom: 6px; font-weight: bold; }
+        .debate-role.aff { background: rgba(78,205,196,0.3); border: 1px solid #4ecdc4; color: #4ecdc4; }
+        .debate-role.neg { background: rgba(255,107,107,0.3); border: 1px solid #ff6b6b; color: #ff6b6b; }
+        .debate-role.mod { background: rgba(69,183,209,0.3); border: 1px solid #45b7d1; color: #45b7d1; }
+        .channels { display: grid; grid-template-columns: repeat(9, 1fr); gap: 8px; margin: 15px 0; }
+        .channel-btn { background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); color: white; padding: 12px 6px; border-radius: 12px; cursor: pointer; transition: all 0.3s; text-align: center; font-size: 0.65em; }
+        .channel-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+        .channel-btn.active { background: rgba(78,205,196,0.3); border-color: #4ecdc4; box-shadow: 0 0 20px rgba(78,205,196,0.3); }
+        .channel-btn .channel-icon { font-size: 1.8em; display: block; margin-bottom: 3px; }
+        .controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 15px 0; }
+        .control-btn { background: rgba(255,255,255,0.1); border: none; color: white; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 1.2em; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+        .control-btn:hover { background: rgba(255,255,255,0.25); transform: scale(1.1); }
+        .control-btn.play { background: #4ecdc4; width: 55px; height: 55px; font-size: 1.4em; }
+        .volume-control { display: flex; align-items: center; gap: 8px; justify-content: center; margin: 10px 0; }
+        .volume-slider { width: 120px; accent-color: #4ecdc4; }
+        .ticker-container { background: rgba(255,107,107,0.15); border-left: 3px solid #ff6b6b; padding: 10px 12px; margin: 10px 0; border-radius: 0 8px 8px 0; overflow: hidden; }
+        .ticker-label { display: inline-block; background: #ff6b6b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7em; font-weight: bold; margin-right: 10px; }
+        .ticker-content { display: inline; font-size: 0.8em; }
+        .contact-section { background: rgba(78,205,196,0.1); border: 1px solid rgba(78,205,196,0.3); border-radius: 10px; padding: 12px; margin: 10px 0; text-align: center; font-size: 0.85em; }
+        .contact-section a { color: #4ecdc4; text-decoration: none; font-weight: bold; }
+        .contact-section a:hover { text-decoration: underline; color: #ff6b6b; }
+        .location-selector { text-align: center; margin: 10px 0; font-size: 0.75em; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        .location-selector input { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 5px; padding: 5px 10px; color: white; width: 150px; }
+        .location-selector button { background: #4ecdc4; border: none; border-radius: 5px; padding: 5px 15px; color: white; cursor: pointer; font-weight: bold; }
+        .info-section { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+        .weather-widget { background: rgba(69,183,209,0.1); border-radius: 10px; padding: 12px; text-align: center; }
+        .weather-widget h3 { color: #45b7d1; margin-bottom: 8px; font-size: 0.9em; }
+        .weather-main { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px; }
+        .weather-temp { font-size: 2em; font-weight: bold; }
+        .weather-icon { font-size: 2.5em; }
+        .weather-details { display: flex; justify-content: space-around; font-size: 0.75em; color: #aaa; margin-top: 5px; }
+        .sports-widget { background: rgba(255,165,0,0.1); border-radius: 10px; padding: 12px; text-align: center; }
+        .sports-widget h3 { color: #ffa500; margin-bottom: 8px; font-size: 0.9em; }
+        .sports-score { font-size: 0.8em; margin-bottom: 5px; padding: 5px; background: rgba(255,255,255,0.05); border-radius: 5px; }
+        .schedule { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-top: 15px; }
+        .schedule h3 { margin-bottom: 10px; color: #4ecdc4; font-size: 0.9em; }
+        .schedule-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); border-radius: 4px; font-size: 0.8em; }
+        .start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.93); display: flex; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; gap: 15px; }
+        .start-button { background: linear-gradient(45deg, #ff6b6b, #4ecdc4); border: none; color: white; padding: 20px 40px; font-size: 1.5em; border-radius: 50px; cursor: pointer; font-weight: bold; animation: pulseButton 2s infinite; }
+        @keyframes pulseButton { 0%, 100% { box-shadow: 0 0 20px rgba(78,205,196,0.5); } 50% { box-shadow: 0 0 40px rgba(78,205,196,0.9); } }
+        .start-info { color: #aaa; text-align: center; font-size: 0.85em; line-height: 1.5; }
+        .audio-status { text-align: center; padding: 3px; font-size: 0.75em; color: #4ecdc4; }
+        .data-status { text-align: center; padding: 3px; font-size: 0.7em; color: #888; }
+        @media (max-width: 768px) { .channels { grid-template-columns: repeat(5, 1fr); } }
+        @media (max-width: 600px) { .radio-container { padding: 12px; margin: 6px; } .header h1 { font-size: 1.8em; } .channels { grid-template-columns: repeat(3, 1fr); } .info-section { grid-template-columns: 1fr; } .control-btn { width: 35px; height: 35px; font-size: 1em; } .control-btn.play { width: 45px; height: 45px; } .track-title { font-size: 1.2em; } .anchor-avatar { width: 60px; height: 60px; font-size: 2em; } }
+    </style>
+</head>
+<body>
+    <!-- Start Screen -->
+    <div class="start-screen" id="startScreen">
+        <button class="start-button" onclick="startRadio()">📻 Tune In to JP AI Radio 📻</button>
+        <div class="start-info">
+            🎵 Real Music • 🇫🇷 French Songs • 🇭🇹 Haitian Music • 🗣️ Debate Channel<br>
+            🏈 Sports Flash • 🎧 Continuous Feed • 🌎 World News Ticker<br>
+            📍 Boston, MA • 📧 Contact: jpierre722@yahoo.com
+        </div>
+    </div>
+
+    <!-- Radio Container -->
+    <div class="radio-container">
+
+        <!-- Header with LOGO preserved exactly -->
+        <div class="header" style="width:100%; display:flex; align-items:center; justify-content:center; gap:15px; padding:20px 0; background:#0a0a0a; border-bottom:2px solid #4ecdc4; box-shadow:0 2px 6px rgba(0,0,0,0.3);">
+            <img src="/jp-logo-blue.png" alt="JP AI Radio Logo" style="width:60px; height:auto; border-radius:8px;">
+            <h1 style="margin:0; font-size:34px; font-weight:700; color:white;">🎙️ JP AI Radio</h1>
+        </div>
+
+        <div class="status-bar" style="display:flex; justify-content:center; gap:25px; padding:10px 0;">
+            <div class="live-indicator"><div class="live-dot"></div>LIVE 24/7</div>
+            <div class="time-display">🕐 <span id="currentTime">00:00:00</span></div>
+            <div class="listener-count">👥 <span id="listeners">1500</span></div>
+        </div>
+
+        <!-- Now Playing -->
+        <div class="now-playing" id="now-playing">
+            <div class="track-title" id="trackTitle">Click Start to Play</div>
+            <div class="track-artist" id="trackArtist">JP AI Radio Station</div>
+            <div class="track-genre" id="trackGenre">Real Music Streams</div>
+            <div class="visualizer" id="visualizer"></div>
+        </div>
+
+        <!-- Anchor Container (for Debate) -->
+        <div class="anchor-container" id="anchorContainer">
+            <div class="anchor-header">
+                <div class="anchor-avatar" id="anchorAvatar">🗣️</div>
+                <div class="anchor-info">
+                    <h2 id="anchorName">The Political Debate</h2>
+                    <p id="anchorStatus">Moderated by JP</p>
+                </div>
+            </div>
+            <div class="anchor-speaking">
+                <span class="speaking-dot"></span>
+                <span class="speaking-dot"></span>
+                <span class="speaking-dot"></span>
+                <span style="font-size: 0.75em; color: #4ecdc4;">Live</span>
+            </div>
+            <div style="text-align:center; margin-bottom:6px;">
+                <span class="debate-role mod" id="currentSpeakerRole">🎙️ Moderator</span>
+            </div>
+            <div class="anchor-news-text" id="anchorNewsText">
+                Welcome to the Political Debate. Select the Debate channel to begin.
+            </div>
+        </div>
+
+        <!-- Channels: 9 buttons -->
+        <div class="channels">
+            <button class="channel-btn active" onclick="switchChannel('rnb')"><span class="channel-icon">🎤</span>R&B / Hip-Hop</button>
+            <button class="channel-btn" onclick="switchChannel('rock')"><span class="channel-icon">🎸</span>Classic Rock</button>
+            <button class="channel-btn" onclick="switchChannel('classical')"><span class="channel-icon">🎻</span>Classical</button>
+            <button class="channel-btn" onclick="switchChannel('electronic')"><span class="channel-icon">⚡</span>Electronic</button>
+            <button class="channel-btn" onclick="switchChannel('french')"><span class="channel-icon">🇫🇷</span>French Songs</button>
+            <button class="channel-btn" onclick="switchChannel('haitian')"><span class="channel-icon">🇭🇹</span>Haitian Music</button>
+            <button class="channel-btn" onclick="switchChannel('debate')"><span class="channel-icon">🗣️</span>Debate</button>
+            <button class="channel-btn" onclick="switchChannel('mix')"><span class="channel-icon">🎧</span>Continuous Feed</button>
+            <button class="channel-btn" onclick="switchChannel('sportflash')"><span class="channel-icon">🏈</span>Sport Flash</button>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="control-btn" onclick="previousStation()">⏮️</button>
+            <button class="control-btn play" id="playBtn" onclick="togglePlay()">▶️</button>
+            <button class="control-btn" onclick="nextStation()">⏭️</button>
+            <button class="control-btn" onclick="toggleMute()" id="muteBtn">🔊</button>
+        </div>
+
+        <!-- Volume -->
+        <div class="volume-control">
+            <span>🔉</span>
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70" onchange="adjustVolume(this.value)">
+            <span>🔊</span>
+        </div>
+
+        <!-- World News button -->
+        <div style="text-align:center; margin:10px 0;">
+            <button class="news-category-btn active" onclick="refreshWorldNews()">🌎 World News</button>
+        </div>
+
+        <!-- News Ticker -->
+        <div class="ticker-container">
+            <span class="ticker-label">📰 WORLD NEWS</span>
+            <span class="ticker-content" id="newsTicker">Loading real-time news...</span>
+        </div>
+
+        <!-- Contact -->
+        <div class="contact-section">
+            📧 For your suggestions or supports, please contact me at: 
+            <a href="mailto:jpierre722@yahoo.com">jpierre722@yahoo.com</a>
+        </div>
+
+        <!-- Location -->
+        <div class="location-selector">
+            <label>📍 Set City:</label>
+            <input type="text" id="cityInput" placeholder="Boston, MA" value="Boston, MA">
+            <button onclick="setCustomCity()">Update Weather</button>
+        </div>
+
+        <!-- Info Section -->
+        <div class="info-section">
+            <div class="weather-widget">
+                <h3>🌤️ LIVE WEATHER</h3>
+                <div class="weather-main">
+                    <span class="weather-icon" id="weatherIcon">🌤️</span>
+                    <span class="weather-temp" id="weatherTemp">--°</span>
+                </div>
+                <div id="weatherLocation">📍 Boston, Massachusetts</div>
+                <div id="weatherDescription"></div>
+                <div class="weather-details">
+                    <span>💨 <span id="weatherWind">--</span></span>
+                    <span>💧 <span id="weatherHumidity">--</span></span>
+                    <span>🌡️ <span id="weatherFeels">--</span></span>
+                </div>
+            </div>
+            <div class="sports-widget">
+                <h3>🏈 LIVE SPORTS</h3>
+                <div id="sportsScores"><div class="sports-score">Loading scores...</div></div>
+            </div>
+        </div>
+
+        <!-- Schedule -->
+        <div class="schedule">
+            <h3>📅 Program Schedule</h3>
+            <div class="schedule-item"><span>00:00-06:00</span><span>🌙 Late Night R&B</span></div>
+            <div class="schedule-item"><span>06:00-10:00</span><span>🌅 Morning Classics</span></div>
+            <div class="schedule-item"><span>10:00-14:00</span><span>🎸 Classic Rock</span></div>
+            <div class="schedule-item"><span>14:00-18:00</span><span>⚡ Electronic & World Beats</span></div>
+            <div class="schedule-item"><span>18:00-22:00</span><span>🎤 R&B Evening</span></div>
+            <div class="schedule-item"><span>22:00-00:00</span><span>🎻 Classical Night</span></div>
+        </div>
+        <div class="audio-status" id="audioStatus"></div>
+        <div class="data-status" id="dataStatus">📡 Waiting to fetch live data...</div>
+    </div>
+
+    <script>
+        // ============================================
+        // JP AI RADIO - WITH FRENCH & HAITIAN CHANNELS
+        // ============================================
+        let audioElement = null;
+        let isPlaying = false;
+        let isMuted = false;
+        let volume = 0.7;
+        let currentChannel = 'rnb';
+        let currentStationIndex = 0;
+        let listeners = 1500;
+        let userLocation = null;
+        let newsPool = [];
+        let newsIndex = 0;
+        let anchorNewsIndex = 0;
+        let speechSynth = window.speechSynthesis;
+        let maleVoice = null;
+        let femaleVoice = null;
+        let debateLoopActive = false;
+        let isDebating = false;
+        let debateTimers = [];
+        let speechQueue = [];
+        let isSpeaking = false;
+        let continuousMixInterval = null;
+        let adIntervalId = null;
+        let adInProgress = false;
+        let adIndex = 0;
+        let debateTimeoutId = null;
+        let mixBulletinTimeoutId = null;
+        let sportFlashInterval = null;
+        let sportFlashTimeoutId = null;
+        let sportMusicInterval = null;
+        let sportNewsPool = [];
+        let sportNewsIndex = 0;
+        let upcomingGames = [];
+        const musicChannels = ['rnb', 'rock', 'classical', 'electronic', 'french', 'haitian'];
+        const BOSTON_LOCATION = {
+            lat: 42.3601, lon: -71.0589,
+            city: 'Boston', region: 'Massachusetts', country: 'US', source: 'Default'
+        };
+
+        // Radio streams
+        const radioStations = {
+            rnb: {
+                name: "R&B / Soul", genre: "R&B, Soul, Funk", icon: "🎤",
+                streams: [
+                    { name: "Smooth Grooves", description: "Smooth R&B & Soul", url: "https://ice1.somafm.com/illstreet-128-mp3" },
+                    { name: "Urban Soul", description: "Urban & Soul Music", url: "https://ice1.somafm.com/secretagent-128-mp3" },
+                    { name: "Funk & Soul", description: "Funk & Soul Classics", url: "https://ice1.somafm.com/u80s-128-mp3" }
+                ]
+            },
+            rock: {
+                name: "Classic Rock", genre: "Rock, Classic Rock", icon: "🎸",
+                streams: [
+                    { name: "Classic Rock", description: "Rock Classics", url: "https://ice1.somafm.com/bootliquor-128-mp3" },
+                    { name: "Indie Rock", description: "Indie & Alternative", url: "https://ice1.somafm.com/indiepop-128-mp3" },
+                    { name: "Heavy Rock", description: "Heavy & Hard Rock", url: "https://ice1.somafm.com/metal-128-mp3" }
+                ]
+            },
+            classical: {
+                name: "Classical", genre: "Classical, Orchestral", icon: "🎻",
+                streams: [
+                    { name: "Classical FM", description: "Classical Masterpieces", url: "https://ice1.somafm.com/brfm-128-mp3" },
+                    { name: "Ambient Classical", description: "Ambient & Classical", url: "https://ice1.somafm.com/dronezone-128-mp3" },
+                    { name: "Piano Classics", description: "Piano & Chamber", url: "https://ice1.somafm.com/deepspaceone-128-mp3" }
+                ]
+            },
+            electronic: {
+                name: "Electronic", genre: "EDM, House, Techno", icon: "⚡",
+                streams: [
+                    { name: "EDM Festival", description: "Electronic Dance Music", url: "https://ice1.somafm.com/cliqhop-128-mp3" },
+                    { name: "Deep House", description: "Deep & Tech House", url: "https://ice1.somafm.com/defcon-128-mp3" },
+                    { name: "Synthwave", description: "Synthwave & Retro", url: "https://ice1.somafm.com/suburbsofgoa-128-mp3" }
+                ]
+            },
+            french: {
+                name: "French Songs", genre: "Chanson Française / Variété", icon: "🇫🇷",
+                streams: [
+                    { name: "Chante France 90-2000", description: "Hits Français 90-2000", url: "https://chantefrance90-2000.ice.infomaniak.ch/chantefrance90-2000-96.aac" },
+                    { name: "Chante France 80-96", description: "Hits Français 80-96", url: "https://chantefrance80s.ice.infomaniak.ch/chantefrance80s-96.aac" },
+                    { name: "Chante France 70-96", description: "Hits Français 70-96", url: "https://chantefrance70s.ice.infomaniak.ch/chantefrance70s-96.aac" }
+                ]
+            },
+            haitian: {
+                name: "Haitian Music", genre: "Konpa / Kompa / Zouk", icon: "🇭🇹",
+                streams: [
+                    { name: "Super Star", description: "Haitian Konpa & Zouk", url: "http://s6.voscast.com:10368" },
+                    { name: "Konpa Hits", description: "Haitian Music & Culture", url: "https://stream.zeno.fm/huv" },
+                    { name: "Konpa 509", description: "Haitian Konpa Classics", url: "https://stream.zeno.fm/nuv" }
+                ]
+            },
+            debate: {
+                name: "Debate Channel", genre: "Political Debate", icon: "🗣️",
+                streams: []
+            },
+            mix: {
+                name: "Continuous Feed", genre: "Music + News Bulletins", icon: "🎧",
+                streams: []
+            },
+            sportflash: {
+                name: "Sport Flash", genre: "Sports Updates", icon: "🏈",
+                streams: []
+            }
+        };
+
+        // World news feeds
+        const worldFeeds = [
+            'https://feeds.bbci.co.uk/news/world/rss.xml',
+            'https://feeds.bbci.co.uk/news/world/asia/rss.xml',
+            'https://feeds.bbci.co.uk/news/world/europe/rss.xml',
+            'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml',
+            'https://feeds.bbci.co.uk/news/world/africa/rss.xml',
+            'https://feeds.bbci.co.uk/news/world/latin_america/rss.xml',
+            'https://feeds.npr.org/1014/rss.xml',
+            'https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml'
+        ];
+
+        const backupWorldNews = [
+            "UN Security Council holds emergency session",
+            "European Union announces new climate accord",
+            "Asian markets surge amid trade agreement",
+            "Middle East peace talks progress",
+            "Latin American countries sign historic treaty"
+        ];
+
+        // Sports feeds
+        const sportsFeeds = [
+            'https://feeds.bbci.co.uk/sport/rss.xml',
+            'https://www.espn.com/espn/rss/news',
+            'https://rss.nytimes.com/services/xml/rss/nyt/Sports.xml'
+        ];
+        const backupSportsNews = [
+            "Lakers defeat Warriors in overtime",
+            "Patriots win against Jets",
+            "Red Sox beat Yankees",
+            "Champions League final set"
+        ];
+
+        // Static upcoming games
+        const upcomingGamesData = [
+            { home: "Lakers", away: "Warriors", date: "Tomorrow", time: "7:30 PM" },
+            { home: "Patriots", away: "Jets", date: "Sunday", time: "1:00 PM" },
+            { home: "Red Sox", away: "Yankees", date: "Saturday", time: "4:05 PM" },
+            { home: "Manchester City", away: "Liverpool", date: "Next Wednesday", time: "3:00 PM" }
+        ];
+
+        // ========== SPEECH ENGINE ==========
+        function setupVoices() {
+            if (!speechSynth) return;
+            let voices = speechSynth.getVoices();
+            if (voices.length === 0) {
+                speechSynth.onvoiceschanged = () => { setupVoices(); };
+                return;
+            }
+            maleVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Microsoft David') || v.name.includes('Daniel') || v.name.includes('Male')) || voices[0];
+            femaleVoice = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Microsoft Zira') || v.name.includes('Samantha') || v.name.includes('Female') || v.name.includes('Victoria')) || voices[voices.length-1];
+        }
+
+        function speakSingle(text, options = {}) {
+            if (!speechSynth) return null;
+            const { isFemale = false, rate = 0.95, pitch = null, onEndCallback = null } = options;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = rate;
+            utterance.pitch = pitch !== null ? pitch : (isFemale ? 1.2 : 0.9);
+            utterance.volume = isMuted ? 0 : volume;
+            utterance.lang = 'en-US';
+            if (isFemale && femaleVoice) utterance.voice = femaleVoice;
+            else if (!isFemale && maleVoice) utterance.voice = maleVoice;
+            if (onEndCallback) utterance.onend = onEndCallback;
+            speechSynth.speak(utterance);
+            return utterance;
+        }
+
+        function speakLongText(text, isFemale = false, onComplete = null) {
+            stopSpeech();
+            speechQueue = [];
+            const chunks = splitTextIntoChunks(text, 250);
+            chunks.forEach(chunk => { speechQueue.push({ text: chunk, isFemale }); });
+            if (onComplete) window.speechQueueComplete = onComplete;
+            processSpeechQueue();
+        }
+
+        function splitTextIntoChunks(text, maxLength) {
+            const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+            const chunks = [];
+            let currentChunk = '';
+            for (let sentence of sentences) {
+                if ((currentChunk + sentence).length > maxLength) {
+                    if (currentChunk) chunks.push(currentChunk.trim());
+                    currentChunk = sentence;
+                } else {
+                    currentChunk += ' ' + sentence;
+                }
+            }
+            if (currentChunk) chunks.push(currentChunk.trim());
+            return chunks;
+        }
+
+        function processSpeechQueue() {
+            if (speechQueue.length === 0) {
+                isSpeaking = false;
+                if (window.speechQueueComplete) {
+                    const cb = window.speechQueueComplete;
+                    window.speechQueueComplete = null;
+                    cb();
+                }
+                return;
+            }
+            isSpeaking = true;
+            const item = speechQueue.shift();
+            speakSingle(item.text, { isFemale: item.isFemale, onEndCallback: () => { setTimeout(processSpeechQueue, 300); }});
+        }
+
+        function stopSpeech() {
+            if (speechSynth) speechSynth.cancel();
+            speechQueue = [];
+            isSpeaking = false;
+            window.speechQueueComplete = null;
+            if (adInProgress) {
+                if (audioElement && !isMuted && musicChannels.includes(currentChannel)) {
+                    audioElement.volume = volume;
+                }
+                adInProgress = false;
+            }
+        }
+
+        // ========== WORLD NEWS FETCHING ==========
+        async function fetchWorldNews() {
+            try {
+                let allItems = [];
+                for (const feedUrl of worldFeeds) {
+                    try {
+                        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
+                        const response = await fetch(proxyUrl);
+                        const data = await response.json();
+                        const parser = new DOMParser();
+                        const xml = parser.parseFromString(data.contents, 'text/xml');
+                        const items = xml.querySelectorAll('item');
+                        items.forEach(item => {
+                            const title = item.querySelector('title')?.textContent || '';
+                            const description = item.querySelector('description')?.textContent || '';
+                            const pubDate = item.querySelector('pubDate')?.textContent || '';
+                            if (title) allItems.push({ title, description: description.replace(/<[^>]*>/g, ''), pubDate });
+                        });
+                    } catch(e) { /* skip */ }
+                }
+                if (allItems.length > 0) {
+                    newsPool = allItems.sort(() => Math.random() - 0.5).slice(0, 100);
+                } else {
+                    newsPool = backupWorldNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+                }
+                newsIndex = 0;
+                anchorNewsIndex = 0;
+                displayNextNews();
+                document.getElementById('dataStatus').textContent = `✅ World news updated`;
+            } catch(e) {
+                newsPool = backupWorldNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+                displayNextNews();
+            }
+        }
+
+        // ========== SPORTS NEWS FETCHING ==========
+        async function fetchSportsNews() {
+            try {
+                let allItems = [];
+                for (const feedUrl of sportsFeeds) {
+                    try {
+                        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
+                        const response = await fetch(proxyUrl);
+                        const data = await response.json();
+                        const parser = new DOMParser();
+                        const xml = parser.parseFromString(data.contents, 'text/xml');
+                        const items = xml.querySelectorAll('item');
+                        items.forEach(item => {
+                            const title = item.querySelector('title')?.textContent || '';
+                            const description = item.querySelector('description')?.textContent || '';
+                            const pubDate = item.querySelector('pubDate')?.textContent || '';
+                            if (title) allItems.push({ title, description: description.replace(/<[^>]*>/g, ''), pubDate });
+                        });
+                    } catch(e) { /* skip */ }
+                }
+                if (allItems.length > 0) {
+                    sportNewsPool = allItems.sort(() => Math.random() - 0.5).slice(0, 50);
+                } else {
+                    sportNewsPool = backupSportsNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+                }
+                sportNewsIndex = 0;
+            } catch(e) {
+                sportNewsPool = backupSportsNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+            }
+            upcomingGames = upcomingGamesData;
+        }
+
+        function displayNextNews() {
+            if (newsPool.length === 0) return;
+            const item = newsPool[newsIndex % newsPool.length];
+            const timeStr = item.pubDate ? new Date(item.pubDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'Now';
+            const desc = item.description ? ` - ${item.description}` : '';
+            document.getElementById('newsTicker').textContent = `${item.title}${desc} (${timeStr})`;
+            newsIndex++;
+        }
+
+        function refreshWorldNews() { fetchWorldNews(); }
+
+        // ========== DEBATE ENGINE (TOPIC-MATCHED, REAL ARGUMENTS) ==========
+        // Each category provides a complete pro/con opening, arguments, rebuttals, and closings
+        // that actually address the topic — NOT generic unrelated talking points.
+        const debatePlaybook = {
+            election: {
+                label: "Election & Voting",
+                aff: {
+                    opening: (t) => `The affirmative stands firmly on this issue: "${t}". Free and fair elections are the bedrock of our democracy, and any reform must expand access, protect integrity, and modernize how we vote.`,
+                    args: [
+                        (t) => `First, on "${t}" — expanding access to the ballot is not a partisan idea; it is a constitutional promise. When more eligible citizens vote, the result reflects the will of the people more accurately.`,
+                        (t) => `Second, modernizing election infrastructure — paper trails, audited machines, and secure registration — protects every vote from fraud and error alike.`,
+                        (t) => `Third, we must remove barriers like long lines, limited polling hours, and restrictive ID laws that disproportionately burden working families and minority communities.`
+                    ],
+                    cross: (t) => `We reject the premise that security and access are in conflict. On "${t}", we can and must do both.`,
+                    closing: (t) => `In closing, the affirmative believes "${t}" is an opportunity to strengthen democracy, not weaken it. We urge a yes.`
+                },
+                neg: {
+                    opening: (t) => `The opposition takes a cautious view of "${t}". Election law is delicate; rushed changes — however well-intentioned — can undermine confidence, invite fraud, and disenfranchise voters in new ways.`,
+                    args: [
+                        (t) => `First, on "${t}", we cannot ignore the risk of fraud and error. Verification and local control are essential safeguards that must not be bypassed.`,
+                        (t) => `Second, one-size-fits-all federal mandates ignore the diversity of our states and counties. What works in one jurisdiction may fail in another.`,
+                        (t) => `Third, the cost of poorly designed reforms falls on taxpayers and election officials who are already stretched thin.`
+                    ],
+                    cross: (t) => `We are not against reform — we are against reckless reform. On "${t}", prudence must prevail.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}" until safeguards and local input are guaranteed.`
+                }
+            },
+            tax: {
+                label: "Tax Policy",
+                aff: {
+                    opening: (t) => `The affirmative is clear on "${t}": our tax code is too complex, too burdensome, and too often punishes hard work. Reform is overdue.`,
+                    args: [
+                        (t) => `First, on "${t}" — lowering rates and simplifying the code stimulates growth, encourages investment, and puts money back in the pockets of middle-class families.`,
+                        (t) => `Second, we can cut waste and close loopholes so that essential services are funded without raising taxes on working people.`,
+                        (t) => `Third, tax relief is not a giveaway — it is a stimulus that creates jobs and strengthens our economy from the ground up.`
+                    ],
+                    cross: (t) => `On "${t}", the evidence is clear: pro-growth tax policy benefits everyone, not just the wealthy.`,
+                    closing: (t) => `In closing, the affirmative believes "${t}" is the path to prosperity. We urge a yes.`
+                },
+                neg: {
+                    opening: (t) => `The opposition sees "${t}" very differently. Tax cuts sound good, but they must be paid for — and the bill often comes due in cuts to schools, roads, and healthcare.`,
+                    args: [
+                        (t) => `First, on "${t}" — broad tax cuts for the wealthy increase inequality and explode the deficit. We cannot afford that.`,
+                        (t) => `Second, we need revenue to invest in infrastructure, education, and research — the true engines of long-term growth.`,
+                        (t) => `Third, targeted tax credits for working families are far more effective than across-the-board cuts that mostly benefit the top bracket.`
+                    ],
+                    cross: (t) => `On "${t}", fairness matters. The opposition stands for a tax code that works for everyone, not just donors.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}" until it is paid for and fair.`
+                }
+            },
+            health: {
+                label: "Healthcare",
+                aff: {
+                    opening: (t) => `The affirmative believes "${t}" is a moral test. Healthcare is a right, not a privilege, and too many families are one diagnosis away from bankruptcy.`,
+                    args: [
+                        (t) => `First, on "${t}" — expanding coverage saves lives. Preventive care and early treatment reduce suffering and long-term costs.`,
+                        (t) => `Second, no one should be denied care because of pre-existing conditions, income, or zip code. Universal access is achievable.`,
+                        (t) => `Third, a healthier population is a more productive workforce. Investing in health is investing in our economy.`
+                    ],
+                    cross: (t) => `On "${t}", we reject the false choice between quality and access. We can have both.`,
+                    closing: (t) => `In closing, the affirmative believes "${t}" is the right thing to do — morally and economically. We urge a yes.`
+                },
+                neg: {
+                    opening: (t) => `The opposition approaches "${t}" with realism. Government-run healthcare sounds compassionate, but it often means longer waits, fewer choices, and higher costs.`,
+                    args: [
+                        (t) => `First, on "${t}" — we must preserve patient choice and private insurance. A one-size-fits-all system fails patients with complex needs.`,
+                        (t) => `Second, cost controls must come before expansion. We cannot promise coverage we cannot pay for.`,
+                        (t) => `Third, innovation in medicine depends on a competitive market, not a government monopoly.`
+                    ],
+                    cross: (t) => `On "${t}", the opposition stands for choice, quality, and fiscal responsibility.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}" until costs are controlled and choice is protected.`
+                }
+            },
+            immigration: {
+                label: "Immigration",
+                aff: {
+                    opening: (t) => `The affirmative welcomes the debate on "${t}". Immigrants are not a threat — they are entrepreneurs, workers, neighbors, and patriots in the making.`,
+                    args: [
+                        (t) => `First, on "${t}" — immigrants strengthen our economy, fill labor shortages, and start businesses at higher rates than native-born citizens.`,
+                        (t) => `Second, a pathway to citizenship is fair, just, and practical. We cannot deport our way out of this challenge.`,
+                        (t) => `Third, comprehensive reform — not raids and rhetoric — is the only lasting solution.`
+                    ],
+                    cross: (t) => `On "${t}", the affirmative stands for dignity, due process, and the American dream.`,
+                    closing: (t) => `In closing, the affirmative believes "${t}" is an opportunity to live up to our values. We urge a yes.`
+                },
+                neg: {
+                    opening: (t) => `The opposition insists on order on "${t}". A nation without borders is not a nation, and we cannot reward illegal behavior.`,
+                    args: [
+                        (t) => `First, on "${t}" — border security must come first. Without it, any reform is amnesty by another name.`,
+                        (t) => `Second, immigration levels must be sustainable and tied to the needs of our workforce and communities.`,
+                        (t) => `Third, local communities should have a say in how immigration policy affects their schools, hospitals, and housing.`
+                    ],
+                    cross: (t) => `On "${t}", the opposition stands for law, order, and sovereignty.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}" until the border is secure and the rules are enforced.`
+                }
+            },
+            climate: {
+                label: "Climate & Energy",
+                aff: {
+                    opening: (t) => `The affirmative treats "${t}" as an emergency. Climate change is an existential threat, and delay is denial.`,
+                    args: [
+                        (t) => `First, on "${t}" — investing in renewable energy creates jobs, lowers costs, and secures our energy independence.`,
+                        (t) => `Second, we owe future generations a livable planet. The cost of inaction far exceeds the cost of action.`,
+                        (t) => `Third, clean air and water are not partisan issues — they are public health imperatives.`
+                    ],
+                    cross: (t) => `On "${t}", the affirmative refuses to trade the planet for short-term profit.`,
+                    closing: (t) => `In closing, the affirmative believes "${t}" is the defining challenge of our time. We urge a yes.`
+                },
+                neg: {
+                    opening: (t) => `The opposition is not against the environment, but we are against "${t}" as written. Climate policy must not wreck our economy or punish working families.`,
+                    args: [
+                        (t) => `First, on "${t}" — the transition to green energy must be gradual and affordable. We cannot shut down reliable power overnight.`,
+                        (t) => `Second, we should focus on adaptation and innovation, not just mandates and taxes.`,
+                        (t) => `Third, international cooperation is necessary. Acting alone puts our businesses at a disadvantage.`
+                    ],
+                    cross: (t) => `On "${t}", the opposition stands for balance, affordability, and American competitiveness.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}" until it is fair, affordable, and globally coordinated.`
+                }
+            },
+            gun: {
+                label: "Gun Policy",
+                aff: {
+                    opening: (t) => `The affirmative confronts "${t}" with urgency. Gun violence is a public health crisis, and thoughts and prayers are not enough.`,
+                    args: [
+                        (t) => `First, on "${t}" — universal background checks and red-flag laws save lives without infringing on responsible gun owners.`,
+                        (t) => `Second, banning assault-style weapons and high-capacity magazines reduces mass-casualty events.`,
+                        (t) => `Third, safe-storage laws protect children and reduce suicides and accidental shootings.`
+                    ],
+                    cross: (t) => `On "${t}", the affirmative believes common-sense reform and the Second Amendment can coexist.`,
+                    closing: (t) => `In closing, the affirmative urges a yes on "${t}" to protect our communities.`
+                },
+                neg: {
+                    opening: (t) => `The opposition defends the Second Amendment on "${t}". More gun laws only disarm law-abiding citizens while criminals ignore them.`,
+                    args: [
+                        (t) => `First, on "${t}" — enforcement of existing laws, not new restrictions, is what actually reduces violence.`,
+                        (t) => `Second, law-abiding citizens have a right to self-defense. Confiscation schemes and registries threaten that right.`,
+                        (t) => `Third, mental health and school security are the real solutions — not blaming lawful gun owners.`
+                    ],
+                    cross: (t) => `On "${t}", the opposition stands for liberty, self-defense, and constitutional rights.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}" until rights are protected.`
+                }
+            },
+            education: {
+                label: "Education",
+                aff: {
+                    opening: (t) => `The affirmative champions "${t}". Every child deserves a world-class education, regardless of zip code or income.`,
+                    args: [
+                        (t) => `First, on "${t}" — increasing funding for public schools, teachers, and resources closes achievement gaps.`,
+                        (t) => `Second, affordable higher education and vocational training open doors to opportunity.`,
+                        (t) => `Third, early childhood education pays dividends for decades.`
+                    ],
+                    cross: (t) => `On "${t}", the affirmative believes education is the great equalizer.`,
+                    closing: (t) => `In closing, the affirmative urges a yes on "${t}" to invest in our future.`
+                },
+                neg: {
+                    opening: (t) => `The opposition insists on accountability on "${t}". Throwing money at failing schools does not help students.`,
+                    args: [
+                        (t) => `First, on "${t}" — parental choice and competition drive improvement.`,
+                        (t) => `Second, we must focus on basics — reading, writing, math — not ideological experiments.`,
+                        (t) => `Third, local control, not federal mandates, is what works.`
+                    ],
+                    cross: (t) => `On "${t}", the opposition stands for parents, students, and results.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}" until accountability is guaranteed.`
+                }
+            },
+            default: {
+                label: "General Policy",
+                aff: {
+                    opening: (t) => `The affirmative takes a clear position on "${t}": this is the right path forward, and the evidence supports it.`,
+                    args: [
+                        (t) => `First, on "${t}" — acting now is better than waiting. Delay costs more than action.`,
+                        (t) => `Second, fairness and effectiveness are not opposites; our approach achieves both.`,
+                        (t) => `Third, future generations will thank us for the courage to act.`
+                    ],
+                    cross: (t) => `On "${t}", the affirmative stands for progress and principle.`,
+                    closing: (t) => `In closing, the affirmative urges a yes on "${t}".`
+                },
+                neg: {
+                    opening: (t) => `The opposition urges caution on "${t}". Good intentions are not enough; we must consider consequences.`,
+                    args: [
+                        (t) => `First, on "${t}" — unintended consequences can be severe. We need more study.`,
+                        (t) => `Second, there are better alternatives that cost less and work better.`,
+                        (t) => `Third, the burden of proof is on those who want change.`
+                    ],
+                    cross: (t) => `On "${t}", the opposition stands for prudence and accountability.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}".`
+                }
+            }
+        };
+
+        function detectDebateCategory(topicText) {
+            const t = topicText.toLowerCase();
+            const map = [
+                { key: 'election', words: ['election','vote','voting','ballot','senate','congress','parliament','primary','poll'] },
+                { key: 'tax', words: ['tax','taxes','irs','revenue','budget','deficit','tariff'] },
+                { key: 'health', words: ['health','healthcare','medicare','medicaid','hospital','insurance','drug','pharma','vaccine'] },
+                { key: 'immigration', words: ['immigration','immigrant','border','migrant','asylum','visa','deport'] },
+                { key: 'climate', words: ['climate','energy','green','carbon','emission','renewable','oil','gas','environment'] },
+                { key: 'gun', words: ['gun','firearm','shooting','weapon','second amendment','nra'] },
+                { key: 'education', words: ['education','school','student','teacher','university','college','curriculum'] }
+            ];
+            for (const entry of map) {
+                if (entry.words.some(w => t.includes(w))) return entry.key;
+            }
+            return 'default';
+        }
+
+        function startDebateLoop() {
+            if (debateLoopActive) return;
+            debateLoopActive = true;
+            pickAndStartDebate();
+        }
+
+        function pickAndStartDebate() {
+            if (!debateLoopActive) return;
+            if (newsPool.length === 0) {
+                newsPool = backupWorldNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+            }
+            const politicalKeywords = ['election','president','government','senate','congress','policy','law','vote','minister','prime minister','political','parliament','bill','tax','health','immigration','climate','energy','defense','education','trade','gun','border','budget'];
+            const politicalItems = newsPool.filter(item =>
+                politicalKeywords.some(keyword => (item.title + ' ' + item.description).toLowerCase().includes(keyword))
+            );
+            const topic = politicalItems.length > 0 ? politicalItems[0] : newsPool[0];
+            if (!topic) return;
+            topic.debated = true;
+            if (newsPool.every(item => item.debated)) {
+                newsPool.forEach(item => item.debated = false);
+            }
+            runProfessionalDebate(topic, 1800000);
+        }
+
+        function runProfessionalDebate(topic, duration) {
+            isDebating = true;
+            stopSpeech();
+            document.getElementById('anchorContainer').classList.add('active');
+            document.getElementById('now-playing').style.display = 'none';
+            document.getElementById('anchorName').textContent = 'The Political Debate';
+            document.getElementById('anchorAvatar').textContent = '🗣️';
+            document.getElementById('anchorStatus').textContent = 'Moderated by JP';
+
+            const topicTitle = topic.title;
+            const topicDesc = topic.description || '';
+            const fullTopicText = (topicTitle + ' ' + topicDesc).toLowerCase();
+            const categoryKey = detectDebateCategory(fullTopicText);
+            const playbook = debatePlaybook[categoryKey] || debatePlaybook.default;
+
+            // Build a full debate script where EVERY line references the actual topic
+            const statements = [
+                // Moderator intro — states the topic explicitly
+                { role: 'mod', text: `Good evening, I'm JP, and welcome to The Political Debate. Our topic tonight: "${topicTitle}". ${topicDesc ? topicDesc + '. ' : ''}We have two guests with us: the affirmative, who supports action on this issue, and the opposition, who urges caution. Let's begin with opening statements. The affirmative goes first.`, isFemale: false },
+
+                // Affirmative opening — matches the topic category
+                { role: 'aff', text: `Thank you, JP. The affirmative's position on "${topicTitle}" is clear. ${playbook.aff.opening(topicTitle)}`, isFemale: false },
+
+                // Negative opening — matches the topic category
+                { role: 'neg', text: `Thank you, JP. The opposition sees "${topicTitle}" differently. ${playbook.neg.opening(topicTitle)}`, isFemale: true },
+
+                // Moderator transitions to arguments
+                { role: 'mod', text: `Thank you both. Let's move to the arguments. Affirmative, your first point.`, isFemale: false },
+
+                // Affirmative argument 1
+                { role: 'aff', text: playbook.aff.args[0](topicTitle), isFemale: false },
+
+                // Negative response 1
+                { role: 'neg', text: playbook.neg.args[0](topicTitle), isFemale: true },
+
+                // Affirmative argument 2
+                { role: 'aff', text: playbook.aff.args[1](topicTitle), isFemale: false },
+
+                // Negative response 2
+                { role: 'neg', text: playbook.neg.args[1](topicTitle), isFemale: true },
+
+                // Moderator transitions to rebuttals
+                { role: 'mod', text: `Now let's move to rebuttals. Affirmative, you may respond.`, isFemale: false },
+
+                // Affirmative argument 3
+                { role: 'aff', text: playbook.aff.args[2](topicTitle), isFemale: false },
+
+                // Negative response 3
+                { role: 'neg', text: playbook.neg.args[2](topicTitle), isFemale: true },
+
+                // Cross-talk
+                { role: 'mod', text: `We'll now have cross-talk. The affirmative may respond directly to the opposition.`, isFemale: false },
+                { role: 'aff', text: playbook.aff.cross(topicTitle), isFemale: false },
+                { role: 'neg', text: playbook.neg.cross(topicTitle), isFemale: true },
+
+                // Moderator transitions to closing
+                { role: 'mod', text: `Finally, closing statements. Affirmative, you may close.`, isFemale: false },
+
+                // Affirmative closing
+                { role: 'aff', text: playbook.aff.closing(topicTitle), isFemale: false },
+
+                // Negative closing
+                { role: 'neg', text: playbook.neg.closing(topicTitle), isFemale: true },
+
+                // Moderator thanks and wraps up
+                { role: 'mod', text: `That concludes our debate on "${topicTitle}". Thank you to both guests and to our audience. Stay tuned for our next topic.`, isFemale: false }
+            ];
+
+            let step = 0;
+            const roleEl = document.getElementById('currentSpeakerRole');
+
+            function updateRoleBadge(role) {
+                if (!roleEl) return;
+                roleEl.className = 'debate-role ' + (role === 'aff' ? 'aff' : role === 'neg' ? 'neg' : 'mod');
+                roleEl.textContent = role === 'aff' ? '🟢 Affirmative Guest' : role === 'neg' ? '🔴 Opposition Guest' : '🎙️ Moderator';
+            }
+
+            function nextStep() {
+                if (!isDebating) return;
+                if (step >= statements.length) { endDebate(); return; }
+                const s = statements[step];
+                updateRoleBadge(s.role);
+                document.getElementById('anchorNewsText').textContent = s.text;
+                speakSingle(s.text, { isFemale: s.isFemale, onEndCallback: () => { step++; setTimeout(nextStep, 500); } });
+            }
+            nextStep();
+
+            const safetyTimer = setTimeout(() => { if (isDebating) endDebate(); }, duration + 5000);
+            debateTimers.push(safetyTimer);
+
+            function endDebate() {
+                isDebating = false;
+                document.getElementById('anchorContainer').classList.remove('active');
+                document.getElementById('now-playing').style.display = 'block';
+                document.getElementById('anchorName').textContent = 'The Political Debate';
+                document.getElementById('anchorAvatar').textContent = '🗣️';
+                document.getElementById('anchorStatus').textContent = 'Moderated by JP';
+                updateRoleBadge('mod');
+                const nextTopic = pickNextTopic();
+                if (nextTopic) {
+                    const reminder = `Thank you for listening. Our next debate topic will be: ${nextTopic.title}. Stay tuned.`;
+                    document.getElementById('anchorNewsText').textContent = reminder;
+                    if (!isMuted) speakLongText(reminder, false);
+                }
+                if (debateLoopActive) {
+                    const now = new Date();
+                    const nextHour = new Date(now);
+                    nextHour.setHours(now.getHours() + 1, 0, 0, 0);
+                    const msUntilNextHour = nextHour - now;
+                    debateTimeoutId = setTimeout(() => { pickAndStartDebate(); }, msUntilNextHour);
+                }
+            }
+        }
+
+        function pickNextTopic() {
+            const politicalKeywords = ['election','president','government','senate','congress','policy','law','vote','minister','prime minister','political','parliament','bill','tax','health','immigration','climate','energy','defense','education','trade','gun','border','budget'];
+            const politicalItems = newsPool.filter(item => !item.debated && politicalKeywords.some(keyword => (item.title + ' ' + item.description).toLowerCase().includes(keyword)));
+            return politicalItems.length > 0 ? politicalItems[0] : newsPool.find(item => !item.debated) || newsPool[0];
+        }
+
+        function stopDebateLoop() {
+            debateLoopActive = false;
+            isDebating = false;
+            debateTimers.forEach(t => clearTimeout(t));
+            debateTimers = [];
+            if (debateTimeoutId) clearTimeout(debateTimeoutId);
+            document.getElementById('anchorContainer').classList.remove('active');
+            document.getElementById('now-playing').style.display = 'block';
+        }
+
+        // ========== ADS ==========
+        const adScripts = [
+            "This is JP AI Radio. Geico can save you 15% or more on car insurance. Visit Geico.com today.",
+            "This is JP AI Radio. Liberty Mutual customizes your car insurance so you only pay for what you need. Only pay for what you need."
+        ];
+        function playAd(callback) {
+            if (!musicChannels.includes(currentChannel) || isMuted || isDebating || adInProgress) { if (callback) callback(); return; }
+            adInProgress = true;
+            const adText = adScripts[adIndex % adScripts.length];
+            adIndex++;
+            const isInitialAd = !audioElement || audioElement.paused;
+            if (!isInitialAd) audioElement.volume = 0.15;
+            document.getElementById('anchorNewsText').textContent = adText;
+            speakLongText(adText, false, () => {
+                adInProgress = false;
+                if (!isInitialAd && audioElement && !isMuted) audioElement.volume = volume;
+                if (callback) callback();
+            });
+        }
+        function startAdScheduler() {
+            if (adIntervalId) clearInterval(adIntervalId);
+            adIntervalId = setInterval(() => { if (musicChannels.includes(currentChannel)) playAd(); }, 1800000);
+        }
+        function clearAdScheduler() {
+            if (adIntervalId) { clearInterval(adIntervalId); adIntervalId = null; }
+        }
+
+        // ========== CHANNEL MANAGEMENT ==========
+        function playStream() {
+            if (!audioElement) createAudioElement();
+            if (continuousMixInterval) { clearInterval(continuousMixInterval); continuousMixInterval = null; }
+            if (mixBulletinTimeoutId) { clearTimeout(mixBulletinTimeoutId); mixBulletinTimeoutId = null; }
+            if (sportFlashInterval) { clearInterval(sportFlashInterval); sportFlashInterval = null; }
+            if (sportFlashTimeoutId) { clearTimeout(sportFlashTimeoutId); sportFlashTimeoutId = null; }
+            if (sportMusicInterval) { clearInterval(sportMusicInterval); sportMusicInterval = null; }
+            clearAdScheduler();
+
+            if (currentChannel === 'debate') {
+                document.getElementById('anchorContainer').classList.add('active');
+                document.getElementById('now-playing').style.display = 'none';
+                document.getElementById('audioStatus').textContent = '🗣️ Debate Mode';
+                if (audioElement) audioElement.pause();
+                stopSpeech();
+                debateTimers.forEach(t => clearTimeout(t));
+                debateTimers = [];
+                if (debateTimeoutId) clearTimeout(debateTimeoutId);
+                debateLoopActive = false;
+                isDebating = false;
+                startDebateLoop();
+            } else if (currentChannel === 'mix') {
+                document.getElementById('anchorContainer').classList.remove('active');
+                document.getElementById('now-playing').style.display = 'block';
+                document.getElementById('audioStatus').textContent = '🎧 Continuous Feed Active';
+                document.getElementById('trackTitle').textContent = 'Continuous Feed';
+                document.getElementById('trackArtist').textContent = 'Music + News Mix';
+                document.getElementById('trackGenre').textContent = 'Auto Mix';
+                const randomChannel = musicChannels[Math.floor(Math.random() * musicChannels.length)];
+                const randomStreams = radioStations[randomChannel].streams;
+                const randomStream = randomStreams[Math.floor(Math.random() * randomStreams.length)];
+                audioElement.src = randomStream.url;
+                audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; });
+                const performBulletin = () => {
+                    if (currentChannel !== 'mix' || isDebating || isMuted) return;
+                    audioElement.pause();
+                    if (newsPool.length === 0) { fetchWorldNews().then(() => { speakMixBulletin(); }); } else { speakMixBulletin(); }
+                };
+                mixBulletinTimeoutId = setTimeout(() => { performBulletin(); continuousMixInterval = setInterval(performBulletin, 900000); }, 10000);
+            } else if (currentChannel === 'sportflash') {
+                document.getElementById('anchorContainer').classList.remove('active');
+                document.getElementById('now-playing').style.display = 'block';
+                document.getElementById('audioStatus').textContent = '🏈 Sport Flash Active';
+                document.getElementById('trackTitle').textContent = 'Sport Flash';
+                document.getElementById('trackArtist').textContent = 'Music + Sports Updates';
+                document.getElementById('trackGenre').textContent = 'Every 15 Minutes';
+                const randomChannel = musicChannels[Math.floor(Math.random() * musicChannels.length)];
+                const randomStreams = radioStations[randomChannel].streams;
+                const randomStream = randomStreams[Math.floor(Math.random() * randomStreams.length)];
+                audioElement.src = randomStream.url;
+                audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; });
+                if (sportNewsPool.length === 0) {
+                    fetchSportsNews().then(() => { sportFlashTimeoutId = setTimeout(() => { performSportsFlash(); sportFlashInterval = setInterval(performSportsFlash, 900000); }, 10000); });
+                } else {
+                    sportFlashTimeoutId = setTimeout(() => { performSportsFlash(); sportFlashInterval = setInterval(performSportsFlash, 900000); }, 10000);
+                }
+                function performSportsFlash() {
+                    if (currentChannel !== 'sportflash' || isDebating || isMuted) return;
+                    audioElement.pause();
+                    speakSportsFlash(() => { if (audioElement && !isMuted) { audioElement.volume = volume; audioElement.play().catch(() => {}); } });
+                }
+            } else {
+                // Music channels
+                document.getElementById('anchorContainer').classList.remove('active');
+                document.getElementById('now-playing').style.display = 'block';
+                document.getElementById('audioStatus').textContent = '📡 Connecting...';
+                stopSpeech();
+                if (debateLoopActive) stopDebateLoop();
+                const stream = radioStations[currentChannel].streams[currentStationIndex];
+                document.getElementById('trackTitle').textContent = stream.name;
+                document.getElementById('trackArtist').textContent = radioStations[currentChannel].name;
+                document.getElementById('trackGenre').textContent = stream.description;
+                audioElement.src = stream.url;
+                if (audioElement) audioElement.pause();
+                playAd(() => {
+                    if (audioElement && !isMuted) { audioElement.volume = volume; audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; }); }
+                    startAdScheduler();
+                });
+            }
+        }
+
+        function speakMixBulletin() {
+            if (newsPool.length === 0) return;
+            let bulletinText = "This is JP AI Radio News flash. ";
+            for (let i = 0; i < 4; i++) {
+                const item = newsPool[(anchorNewsIndex + i) % newsPool.length];
+                bulletinText += `${item.title}. ${item.description} `;
+            }
+            anchorNewsIndex = (anchorNewsIndex + 4) % newsPool.length;
+            bulletinText += "That's your news flash for now.";
+            document.getElementById('anchorNewsText').textContent = bulletinText;
+            speakLongText(bulletinText, false, () => {
+                if (currentChannel === 'mix') {
+                    if (audioElement && !isMuted) { audioElement.volume = volume; audioElement.play().catch(() => {}); }
+                    const now = new Date();
+                    const nextUpdate = new Date(now.getTime() + 15 * 60000);
+                    const timeString = nextUpdate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                    const nextAnnouncement = `Next news flash will be at ${timeString}.`;
+                    speakLongText(nextAnnouncement, false, () => {});
+                }
+            });
+        }
+
+        function speakSportsFlash(onComplete = null) {
+            if (sportNewsPool.length === 0) {
+                sportNewsPool = backupSportsNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+            }
+            let flashText = "This is JP AI Radio Sports Flash. Scores: ";
+            for (let i = 0; i < 3; i++) {
+                const item = sportNewsPool[(sportNewsIndex + i) % sportNewsPool.length];
+                flashText += `${item.title}. `;
+            }
+            sportNewsIndex = (sportNewsIndex + 3) % sportNewsPool.length;
+            flashText += "Upcoming games: ";
+            upcomingGames.forEach(game => {
+                flashText += `${game.away} at ${game.home} on ${game.date} at ${game.time}. `;
+            });
+            flashText += "That's your sports update for now.";
+            document.getElementById('anchorNewsText').textContent = flashText;
+            speakLongText(flashText, false, onComplete);
+        }
+
+        function switchChannel(channel) {
+            currentChannel = channel;
+            currentStationIndex = 0;
+            document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
+            const map = ['rnb','rock','classical','electronic','french','haitian','debate','mix','sportflash'];
+            const idx = map.indexOf(channel);
+            const btns = document.querySelectorAll('.channel-btn');
+            if (btns[idx]) btns[idx].classList.add('active');
+            playStream();
+            if (channel === 'mix' || channel === 'debate') { if (newsPool.length === 0) fetchWorldNews(); }
+            if (channel === 'sportflash') { if (sportNewsPool.length === 0) fetchSportsNews(); }
+        }
+
+        function togglePlay() {
+            if (currentChannel === 'debate') return;
+            if (!audioElement) { createAudioElement(); playStream(); return; }
+            if (isPlaying) audioElement.pause(); else audioElement.play();
+        }
+        function toggleMute() {
+            isMuted = !isMuted;
+            if (audioElement) {
+                if (isMuted) audioElement.volume = 0;
+                else if (adInProgress || (currentChannel === 'mix' && isSpeaking) || (currentChannel === 'sportflash' && isSpeaking)) audioElement.volume = 0.15;
+                else audioElement.volume = volume;
+            }
+            if (speechSynth) { if (isMuted) speechSynth.cancel(); }
+            document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🔊';
+        }
+        function adjustVolume(value) {
+            volume = value/100;
+            if (audioElement && !isMuted) {
+                if (adInProgress || (currentChannel === 'mix' && isSpeaking) || (currentChannel === 'sportflash' && isSpeaking)) audioElement.volume = 0.15;
+                else audioElement.volume = volume;
+            }
+        }
+        function nextStation() {
+            if (currentChannel === 'mix' || currentChannel === 'debate' || currentChannel === 'sportflash') return;
+            const streams = radioStations[currentChannel].streams;
+            currentStationIndex = (currentStationIndex+1)%streams.length;
+            playStream();
+        }
+        function previousStation() {
+            if (currentChannel === 'mix' || currentChannel === 'debate' || currentChannel === 'sportflash') return;
+            const streams = radioStations[currentChannel].streams;
+            currentStationIndex = (currentStationIndex-1+streams.length)%streams.length;
+            playStream();
+        }
+
+        // ========== WEATHER & SPORTS SCORES ==========
+        async function fetchWeather() {
+            try {
+                if (!userLocation) userLocation = BOSTON_LOCATION;
+                const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${userLocation.lat}&longitude=${userLocation.lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&timezone=America%2FNew_York`);
+                const d = await r.json();
+                if (d.current) {
+                    const tempF = Math.round(d.current.temperature_2m * 9/5 + 32);
+                    const humidity = Math.round(d.current.relative_humidity_2m);
+                    const wind = Math.round(d.current.wind_speed_10m);
+                    const code = d.current.weather_code;
+                    const wmap = {0:{icon:'☀️',desc:'Clear Sky'},1:{icon:'🌤️',desc:'Mostly Clear'},2:{icon:'⛅',desc:'Partly Cloudy'},3:{icon:'☁️',desc:'Overcast'},45:{icon:'🌫️',desc:'Foggy'},61:{icon:'🌧️',desc:'Light Rain'},63:{icon:'🌧️',desc:'Rain'},65:{icon:'🌧️',desc:'Heavy Rain'},71:{icon:'🌨️',desc:'Light Snow'},95:{icon:'⛈️',desc:'Thunderstorm'}};
+                    const w = wmap[code]||{icon:'🌤️',desc:'Unknown'};
+                    document.getElementById('weatherIcon').textContent = w.icon;
+                    document.getElementById('weatherTemp').textContent = `${tempF}°F`;
+                    document.getElementById('weatherLocation').textContent = `📍 ${userLocation.city}, ${userLocation.region}`;
+                    document.getElementById('weatherDescription').textContent = w.desc;
+                    document.getElementById('weatherWind').textContent = `${wind} km/h`;
+                    document.getElementById('weatherHumidity').textContent = `${humidity}%`;
+                }
+            } catch(e) {}
+        }
+        async function fetchSportsScores() {
+            try {
+                const r = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard');
+                const d = await r.json();
+                if (d.events && d.events.length > 0) displaySportsScores(d.events);
+            } catch(e) {}
+        }
+        function displaySportsScores(events) {
+            const c = document.getElementById('sportsScores');
+            c.innerHTML = '';
+            events.slice(0,3).forEach(ev => {
+                const comp = ev.competitions[0];
+                const home = comp.competitors.find(x => x.homeAway === 'home');
+                const away = comp.competitors.find(x => x.homeAway === 'away');
+                if (home && away) {
+                    const div = document.createElement('div');
+                    div.className = 'sports-score';
+                    div.innerHTML = `<strong>${away.team.displayName}</strong> ${away.score||'0'} - ${home.score||'0'} <strong>${home.team.displayName}</strong><br><small>${comp.status.type.detail||'Upcoming'}</small>`;
+                    c.appendChild(div);
+                }
+            });
+        }
+
+        function setCustomCity() {
+            const input = document.getElementById('cityInput').value.trim();
+            if (!input) return;
+            userLocation = { ...BOSTON_LOCATION, city: input, region: '', source: 'Custom' };
+            fetchWeather();
+            document.getElementById('dataStatus').textContent = `📍 Weather city set to ${input}`;
+        }
+
+        // ========== INIT ==========
+        function createVisualizer() {
+            const viz = document.getElementById('visualizer');
+            viz.innerHTML = '';
+            for (let i=0; i<32; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'visualizer-bar';
+                bar.style.animationDelay = `${i*0.06}s`;
+                bar.style.animationDuration = `${0.4+Math.random()*0.8}s`;
+                viz.appendChild(bar);
+            }
+        }
+        function createAudioElement() {
+            if (audioElement) { audioElement.pause(); audioElement.remove(); }
+            audioElement = new Audio();
+            audioElement.crossOrigin = "anonymous";
+            audioElement.volume = isMuted ? 0 : volume;
+            audioElement.addEventListener('play', () => { isPlaying = true; document.getElementById('playBtn').textContent='⏸️'; document.getElementById('audioStatus').textContent='🔊 Streaming Live'; });
+            audioElement.addEventListener('pause', () => { isPlaying = false; document.getElementById('playBtn').textContent='▶️'; document.getElementById('audioStatus').textContent='⏸️ Paused'; });
+            audioElement.addEventListener('playing', () => { document.getElementById('audioStatus').textContent='✅ Playing'; });
+            audioElement.addEventListener('error', () => { document.getElementById('audioStatus').textContent='⚠️ Stream error'; });
+        }
+        function updateClock() {
+            document.getElementById('currentTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        }
+        function updateListeners() {
+            listeners += Math.floor(Math.random()*20)-5;
+            listeners = Math.max(1500, Math.min(5000, listeners));
+            document.getElementById('listeners').textContent = listeners + ' listening';
+        }
+        function updateScheduleHighlight() {
+            const hour = new Date().getHours();
+            const items = document.querySelectorAll('.schedule-item');
+            items.forEach(i => { i.style.background='transparent'; i.style.fontWeight='normal'; });
+            let idx = hour<6?0:hour<10?1:hour<14?2:hour<18?3:hour<22?4:5;
+            if (items[idx]) { items[idx].style.background='rgba(78,205,196,0.2)'; items[idx].style.fontWeight='bold'; }
+        }
+
+        function startRadio() {
+            document.getElementById('startScreen').style.display = 'none';
+            createAudioElement();
+            setupVoices();
+            if (speechSynth) speechSynth.onvoiceschanged = setupVoices;
+            playStream();
+            fetchWorldNews();
+            fetchSportsNews();
+            fetchWeather();
+            fetchSportsScores();
+            updateClock();
+            setInterval(updateClock, 1000);
+            setInterval(fetchWorldNews, 3600000);
+            setInterval(fetchSportsNews, 3600000);
+            setInterval(fetchWeather, 600000);
+            setInterval(fetchSportsScores, 60000);
+            setInterval(displayNextNews, 10000);
+            updateListeners();
+            setInterval(updateListeners, 15000);
+            updateScheduleHighlight();
+            setInterval(updateScheduleHighlight, 60000);
+        }
+
+        window.refreshWorldNews = fetchWorldNews;
+
+        createVisualizer();
+        updateScheduleHighlight();
+        document.getElementById('cityInput').value = 'Boston, MA';
+        console.log('JP AI Radio ready — debate engine now matches topics to arguments');
+    </script>
+</body>
+</html>
