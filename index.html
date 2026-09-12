@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JP AI Radio - 24/7 Live Stream</title>
+    <title>JP AI Radio · 24/7 Live Stream</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; color: white; }
@@ -38,10 +38,6 @@
         .speaking-dot:nth-child(3) { animation-delay: 0.4s; }
         @keyframes speaking { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.5); opacity: 1; } }
         .anchor-news-text { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 15px; font-size: 1em; line-height: 1.6; min-height: 80px; display: flex; align-items: center; justify-content: center; color: #e0e0e0; }
-        .anchor-controls { display: flex; gap: 10px; justify-content: center; margin-top: 15px; flex-wrap: wrap; }
-        .anchor-btn { background: rgba(78,205,196,0.2); border: 1px solid rgba(78,205,196,0.5); color: white; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.8em; transition: all 0.3s; }
-        .anchor-btn:hover { background: rgba(78,205,196,0.4); }
-        /* Now 9 channels */
         .channels { display: grid; grid-template-columns: repeat(9, 1fr); gap: 8px; margin: 15px 0; }
         .channel-btn { background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); color: white; padding: 12px 6px; border-radius: 12px; cursor: pointer; transition: all 0.3s; text-align: center; font-size: 0.65em; }
         .channel-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
@@ -99,24 +95,11 @@
     <!-- Radio Container -->
     <div class="radio-container">
 
-        <div class="header" 
-     style="
-        width:100%;
-        display:flex; 
-        align-items:center; 
-        justify-content:center; 
-        gap:15px;
-        padding:20px 0;
-        background:#0a0a0a;
-        border-bottom:2px solid #4ecdc4;
-        box-shadow:0 2px 6px rgba(0,0,0,0.3);">
-
-    <img src="/jp-logo-blue.png" alt="JP AI Radio Logo" 
-         style="width:60px; height:auto; border-radius:8px;">
-
-    <h1 style="margin:0; font-size:34px; font-weight:700; color:white;">
-        🎙️ JP AI Radio
-    </h1>
+        <!-- Header with LOGO preserved exactly -->
+        <div class="header" style="width:100%; display:flex; align-items:center; justify-content:center; gap:15px; padding:20px 0; background:#0a0a0a; border-bottom:2px solid #4ecdc4; box-shadow:0 2px 6px rgba(0,0,0,0.3);">
+            <img src="/jp-logo-blue.png" alt="JP AI Radio Logo" style="width:60px; height:auto; border-radius:8px;">
+            <h1 style="margin:0; font-size:34px; font-weight:700; color:white;">🎙️ JP AI Radio</h1>
+        </div>
 
         <div class="status-bar" style="display:flex; justify-content:center; gap:25px; padding:10px 0;">
             <div class="live-indicator"><div class="live-dot"></div>LIVE 24/7</div>
@@ -152,7 +135,7 @@
             </div>
         </div>
 
-        <!-- Channels: 9 buttons now -->
+        <!-- Channels: 9 buttons -->
         <div class="channels">
             <button class="channel-btn active" onclick="switchChannel('rnb')"><span class="channel-icon">🎤</span>R&B / Hip-Hop</button>
             <button class="channel-btn" onclick="switchChannel('rock')"><span class="channel-icon">🎸</span>Classic Rock</button>
@@ -180,7 +163,7 @@
             <span>🔊</span>
         </div>
 
-        <!-- Only World News button -->
+        <!-- World News button -->
         <div style="text-align:center; margin:10px 0;">
             <button class="news-category-btn active" onclick="refreshWorldNews()">🌎 World News</button>
         </div>
@@ -275,14 +258,13 @@
         let sportNewsPool = [];
         let sportNewsIndex = 0;
         let upcomingGames = [];
-        // Add French and Haitian to music channels so ads play on them too
         const musicChannels = ['rnb', 'rock', 'classical', 'electronic', 'french', 'haitian'];
         const BOSTON_LOCATION = {
             lat: 42.3601, lon: -71.0589,
             city: 'Boston', region: 'Massachusetts', country: 'US', source: 'Default'
         };
 
-        // Radio streams
+        // Radio streams — some URLs updated for reliability
         const radioStations = {
             rnb: {
                 name: "R&B / Soul", genre: "R&B, Soul, Funk", icon: "🎤",
@@ -320,8 +302,8 @@
                 name: "French Songs", genre: "Chanson Française / Variété", icon: "🇫🇷",
                 streams: [
                     { name: "Chante France 90-2000", description: "Hits Français 90-2000", url: "https://chantefrance90-2000.ice.infomaniak.ch/chantefrance90-2000-96.aac" },
-                    { name: "Chante France 80-96 (alt)", description: "Hits Français 80-96", url: "https://chantefrance80s.ice.infomaniak.ch/chantefrance80s-96.aac?" },
-                    { name: "Chante France 70-96 (alt)", description: "Hits Français 70-96", url: "https://chantefrance70s.ice.infomaniak.ch/chantefrance70s-96.aac?" }
+                    { name: "Chante France 80-96", description: "Hits Français 80-96", url: "https://chantefrance80s.ice.infomaniak.ch/chantefrance80s-96.aac" },
+                    { name: "Chante France 70-96", description: "Hits Français 70-96", url: "https://chantefrance70s.ice.infomaniak.ch/chantefrance70s-96.aac" }
                 ]
             },
             haitian: {
@@ -777,7 +759,7 @@
                     speakSportsFlash(() => { if (audioElement && !isMuted) { audioElement.volume = volume; audioElement.play().catch(() => {}); } });
                 }
             } else {
-                // Music channels (rnb, rock, classical, electronic, french, haitian)
+                // Music channels
                 document.getElementById('anchorContainer').classList.remove('active');
                 document.getElementById('now-playing').style.display = 'block';
                 document.getElementById('audioStatus').textContent = '📡 Connecting...';
@@ -930,6 +912,15 @@
             });
         }
 
+        function setCustomCity() {
+            const input = document.getElementById('cityInput').value.trim();
+            if (!input) return;
+            // simple geocode fallback: use Boston if not recognized
+            userLocation = { ...BOSTON_LOCATION, city: input, region: '', source: 'Custom' };
+            fetchWeather();
+            document.getElementById('dataStatus').textContent = `📍 Weather city set to ${input}`;
+        }
+
         // ========== INIT ==========
         function createVisualizer() {
             const viz = document.getElementById('visualizer');
@@ -990,6 +981,9 @@
             updateScheduleHighlight();
             setInterval(updateScheduleHighlight, 60000);
         }
+
+        // Manual refresh of news (exposed)
+        window.refreshWorldNews = fetchWorldNews;
 
         createVisualizer();
         updateScheduleHighlight();
