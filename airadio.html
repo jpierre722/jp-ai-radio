@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JP AI Radio · Premium 24/7 Broadcast</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --obsidian: #0a0a0d;
+            --onyx: #101015;
+            --graphite: #16161d;
+            --slate: #1c1c24;
+            --gold: #c9a961;
+            --gold-bright: #e5c988;
+            --gold-dim: #8a7440;
+            --champagne: #d4af7a;
+            --platinum: #e8e4dc;
+            --mist: #a8a49c;
+            --ink: #6b675f;
+            --crimson: #b83232;
+            --emerald: #4a8f6a;
+            --hairline: rgba(201, 169, 97, 0.18);
+            --hairline-strong: rgba(201, 169, 97, 0.35);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--obsidian);
+            background-image:
+                radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201, 169, 97, 0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 100%, rgba(201, 169, 97, 0.04) 0%, transparent 60%),
+                linear-gradient(180deg, #0a0a0d 0%, #0d0d11 40%, #0a0a0d 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--platinum);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding: 32px 16px;
+            letter-spacing: 0.01em;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.035;
+            z-index: 1;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+        }
+        .radio-container {
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(180deg, rgba(22, 22, 29, 0.85) 0%, rgba(16, 16, 21, 0.9) 100%);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--hairline);
+            border-radius: 4px;
+            padding: 0;
+            width: 100%;
+            max-width: 1080px;
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.03) inset,
+                0 40px 100px rgba(0, 0, 0, 0.7),
+                0 0 0 1px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 28px 40px;
+            background: linear-gradient(180deg, rgba(10, 10, 13, 0.9), rgba(16, 16, 21, 0.4));
+            border-bottom: 1px solid var(--hairline);
+            position: relative;
+        }
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px; left: 40px; right: 40px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            opacity: 0.5;
+        }
+        .brand-lockup { display: flex; align-items: center; gap: 18px; }
+        .brand-logo {
+            width: 56px; height: 56px;
+            border-radius: 2px;
+            border: 1px solid var(--hairline-strong);
+            padding: 4px;
+            background: rgba(201, 169, 97, 0.04);
+            object-fit: contain;
+            box-shadow: 0 0 20px rgba(201, 169, 97, 0.15);
+        }
+        .brand-text { display: flex; flex-direction: column; gap: 2px; }
+        .brand-title {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 30px; font-weight: 600;
+            letter-spacing: 0.02em;
+            color: var(--platinum);
+            line-height: 1;
+            background: linear-gradient(180deg, #f5f0e8 0%, #c9a961 120%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .brand-tagline {
+            font-size: 10px;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 500;
+            opacity: 0.85;
+        }
+        .header-meta {
+            display: flex; align-items: center; gap: 20px;
+            font-size: 11px; letter-spacing: 0.15em;
+            text-transform: uppercase; color: var(--mist);
+        }
+        .header-meta .meta-divider { width: 1px; height: 22px; background: var(--hairline); }
+        .header-meta .meta-item { display: flex; flex-direction: column; gap: 3px; }
+        .header-meta .meta-item span:first-child { color: var(--ink); font-size: 9px; letter-spacing: 0.25em; }
+        .header-meta .meta-item span:last-child { color: var(--platinum); font-weight: 500; letter-spacing: 0.08em; text-transform: none; font-size: 12px; }
+        .status-bar {
+            display: flex; justify-content: center; align-items: center;
+            gap: 32px; padding: 14px 40px;
+            background: rgba(10, 10, 13, 0.4);
+            border-bottom: 1px solid var(--hairline);
+            flex-wrap: wrap;
+        }
+        .live-indicator, .time-display, .listener-count {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 10.5px; letter-spacing: 0.18em;
+            text-transform: uppercase; font-weight: 500; color: var(--mist);
+        }
+        .live-dot {
+            width: 7px; height: 7px; background: var(--crimson);
+            border-radius: 50%; animation: pulse 1.8s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(184, 50, 50, 0.8);
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+        .live-indicator span:last-child { color: var(--crimson); font-weight: 600; }
+        .time-display span:last-child, .listener-count span:last-child { color: var(--platinum); font-weight: 500; letter-spacing: 0.08em; font-variant-numeric: tabular-nums; }
+        .content-pad { padding: 32px 40px; }
+        .now-playing {
+            position: relative;
+            background:
+                linear-gradient(135deg, rgba(201, 169, 97, 0.06) 0%, rgba(201, 169, 97, 0.01) 100%),
+                linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+            border: 1px solid var(--hairline);
+            border-radius: 3px;
+            padding: 32px 36px;
+            margin-bottom: 24px;
+            text-align: center;
+            overflow: hidden;
+        }
+        .now-playing::before {
+            content: 'NOW PLAYING';
+            position: absolute; top: 14px; left: 20px;
+            font-size: 9px; letter-spacing: 0.35em;
+            color: var(--gold); opacity: 0.6; font-weight: 600;
+        }
+        .now-playing::after {
+            content: '';
+            position: absolute; top: 50%; right: 24px;
+            transform: translateY(-50%);
+            width: 40px; height: 40px; border-radius: 50%;
+            border: 1px solid var(--hairline);
+            background: radial-gradient(circle, rgba(201, 169, 97, 0.12), transparent 70%);
+            animation: spin 12s linear infinite;
+        }
+        @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+        .now-playing::after {
+            background-image:
+                radial-gradient(circle at center, var(--gold) 2px, transparent 3px),
+                radial-gradient(circle, rgba(201, 169, 97, 0.12), transparent 70%);
+        }
+        .track-title {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 34px; font-weight: 600;
+            letter-spacing: 0.01em; color: var(--platinum);
+            margin-bottom: 8px; line-height: 1.15;
+        }
+        .track-artist { font-size: 12px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; font-weight: 500; }
+        .track-genre { font-size: 11px; color: var(--mist); letter-spacing: 0.05em; font-style: italic; }
+        .visualizer { display: flex; justify-content: center; align-items: flex-end; gap: 2px; height: 28px; margin-top: 20px; opacity: 0.85; }
+        .visualizer-bar { width: 2px; background: linear-gradient(to top, var(--gold-dim), var(--gold-bright)); border-radius: 1px; animation: visualize 0.6s ease-in-out infinite; }
+        @keyframes visualize { 0%, 100% { height: 4px; opacity: 0.4; } 50% { height: 26px; opacity: 1; } }
+        .anchor-container {
+            display: none;
+            background:
+                linear-gradient(135deg, rgba(201, 169, 97, 0.05), rgba(201, 169, 97, 0.01)),
+                rgba(10, 10, 13, 0.5);
+            border: 1px solid var(--hairline-strong);
+            border-radius: 3px;
+            padding: 32px 36px;
+            margin-bottom: 24px;
+            text-align: center;
+            position: relative;
+        }
+        .anchor-container.active { display: block; }
+        .anchor-header { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 20px; }
+        .anchor-avatar {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: linear-gradient(135deg, rgba(201, 169, 97, 0.2), rgba(201, 169, 97, 0.05));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px; border: 1px solid var(--hairline-strong);
+            box-shadow: 0 0 0 4px rgba(201, 169, 97, 0.05), 0 0 30px rgba(201, 169, 97, 0.2);
+        }
+        .anchor-info { text-align: left; }
+        .anchor-info h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 24px; font-weight: 600; color: var(--platinum); letter-spacing: 0.02em; margin-bottom: 2px; }
+        .anchor-info p { font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); font-weight: 500; }
+        .anchor-speaking { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 12px 0; }
+        .speaking-dot { width: 4px; height: 4px; background: var(--gold); border-radius: 50%; animation: speaking 0.8s ease-in-out infinite; }
+        .speaking-dot:nth-child(2) { animation-delay: 0.2s; }
+        .speaking-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes speaking { 0%, 100% { transform: scale(1); opacity: 0.4; } 50% { transform: scale(1.6); opacity: 1; } }
+        .debate-role { display: inline-block; padding: 4px 14px; border-radius: 100px; font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 600; margin-bottom: 12px; }
+        .debate-role.aff { background: rgba(74, 143, 106, 0.15); border: 1px solid rgba(74, 143, 106, 0.5); color: #7bc296; }
+        .debate-role.neg { background: rgba(184, 50, 50, 0.15); border: 1px solid rgba(184, 50, 50, 0.5); color: #e88383; }
+        .debate-role.mod { background: rgba(201, 169, 97, 0.15); border: 1px solid var(--hairline-strong); color: var(--gold-bright); }
+        .anchor-news-text {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 2px;
+            padding: 24px 28px;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 19px; line-height: 1.6;
+            letter-spacing: 0.01em; min-height: 90px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--platinum); font-weight: 500;
+            max-height: 420px; overflow-y: auto;
+        }
+        .section-label {
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 18px;
+            font-size: 10px; letter-spacing: 0.35em;
+            text-transform: uppercase; color: var(--gold); font-weight: 600;
+        }
+        .section-label::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--hairline-strong), transparent); }
+        .channels { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 28px; }
+        .channel-btn {
+            background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.005));
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--mist);
+            padding: 14px 6px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.2, 0.7, 0.3, 1);
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-size: 9px; letter-spacing: 0.1em;
+            text-transform: uppercase; font-weight: 500;
+            position: relative; overflow: hidden; line-height: 1.35;
+        }
+        .channel-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(201, 169, 97, 0.12), transparent); opacity: 0; transition: opacity 0.35s; }
+        .channel-btn:hover { border-color: var(--hairline-strong); color: var(--platinum); transform: translateY(-1px); }
+        .channel-btn:hover::before { opacity: 0.6; }
+        .channel-btn.active { background: linear-gradient(180deg, rgba(201, 169, 97, 0.14), rgba(201, 169, 97, 0.03)); border-color: var(--gold); color: var(--gold-bright); box-shadow: 0 0 0 1px rgba(201, 169, 97, 0.2), 0 8px 24px rgba(201, 169, 97, 0.12); }
+        .channel-btn.active::before { opacity: 1; }
+        .channel-btn .channel-icon { font-size: 22px; display: block; margin-bottom: 6px; filter: saturate(0.85); transition: transform 0.35s; }
+        .channel-btn.active .channel-icon { filter: saturate(1.2) drop-shadow(0 0 8px rgba(201, 169, 97, 0.4)); transform: scale(1.05); }
+        .controls { display: flex; justify-content: center; align-items: center; gap: 18px; margin-bottom: 24px; padding: 20px 0; }
+        .control-btn {
+            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--platinum);
+            width: 46px; height: 46px; border-radius: 50%;
+            cursor: pointer; font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.2, 0.7, 0.3, 1);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .control-btn:hover { border-color: var(--hairline-strong); background: linear-gradient(180deg, rgba(201, 169, 97, 0.12), rgba(201, 169, 97, 0.02)); color: var(--gold-bright); transform: translateY(-1px); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 8px 20px rgba(201, 169, 97, 0.15); }
+        .control-btn.play { background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 100%); border-color: var(--gold); color: var(--obsidian); width: 60px; height: 60px; font-size: 18px; font-weight: 700; box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 0 0 4px rgba(201, 169, 97, 0.1), 0 12px 32px rgba(201, 169, 97, 0.3); }
+        .control-btn.play:hover { background: linear-gradient(180deg, #f0d69a 0%, var(--gold-bright) 100%); color: var(--obsidian); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 0 0 4px rgba(201, 169, 97, 0.18), 0 16px 40px rgba(201, 169, 97, 0.45); }
+        .volume-control { display: flex; align-items: center; gap: 14px; justify-content: center; margin-bottom: 28px; font-size: 12px; color: var(--mist); }
+        .volume-slider { width: 200px; height: 2px; -webkit-appearance: none; appearance: none; background: linear-gradient(90deg, var(--gold) 0%, var(--gold) 70%, rgba(255,255,255,0.08) 70%); border-radius: 2px; outline: none; cursor: pointer; }
+        .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; background: var(--platinum); border-radius: 50%; border: 1px solid var(--gold); box-shadow: 0 0 12px rgba(201, 169, 97, 0.5); cursor: pointer; transition: transform 0.2s; }
+        .volume-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
+        .volume-slider::-moz-range-thumb { width: 14px; height: 14px; background: var(--platinum); border: 1px solid var(--gold); border-radius: 50%; cursor: pointer; box-shadow: 0 0 12px rgba(201, 169, 97, 0.5); }
+        .news-btn-wrap { text-align: center; margin-bottom: 16px; }
+        .news-category-btn { background: transparent; border: 1px solid var(--hairline-strong); color: var(--gold); padding: 8px 22px; border-radius: 100px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase; font-weight: 600; transition: all 0.3s; }
+        .news-category-btn:hover { background: rgba(201, 169, 97, 0.1); border-color: var(--gold); color: var(--gold-bright); }
+        .ticker-container { background: rgba(10, 10, 13, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); border-left: 2px solid var(--gold); padding: 14px 20px; margin-bottom: 24px; border-radius: 0 2px 2px 0; overflow: hidden; display: flex; align-items: center; gap: 16px; }
+        .ticker-label { display: inline-block; background: transparent; color: var(--gold); font-size: 9px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; white-space: nowrap; padding-right: 16px; border-right: 1px solid var(--hairline); }
+        .ticker-content { display: inline; font-size: 12.5px; color: var(--mist); line-height: 1.5; letter-spacing: 0.01em; }
+        .contact-section { background: rgba(201, 169, 97, 0.03); border: 1px solid var(--hairline); border-radius: 2px; padding: 16px 0; margin-bottom: 20px; overflow: hidden; position: relative; }
+        .contact-marquee { display: inline-block; white-space: nowrap; padding-left: 100%; animation: marquee 55s linear infinite; font-size: 12.5px; color: var(--mist); letter-spacing: 0.02em; }
+        .contact-marquee:hover { animation-play-state: paused; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        .contact-marquee a { color: var(--gold); text-decoration: none; font-weight: 500; border-bottom: 1px solid transparent; transition: all 0.3s; }
+        .contact-marquee a:hover { color: var(--gold-bright); border-bottom-color: var(--gold-bright); }
+        .contact-marquee .marquee-divider { display: inline-block; margin: 0 32px; color: var(--gold-dim); opacity: 0.5; }
+        .contact-marquee .marquee-em { color: var(--gold); font-weight: 600; }
+        .location-selector { text-align: center; margin-bottom: 20px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; color: var(--mist); letter-spacing: 0.1em; text-transform: uppercase; }
+        .location-selector input { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 2px; padding: 8px 14px; color: var(--platinum); width: 180px; font-family: 'Inter', sans-serif; font-size: 12px; letter-spacing: 0.05em; outline: none; transition: all 0.3s; }
+        .location-selector input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.1); }
+        .location-selector button { background: transparent; border: 1px solid var(--hairline-strong); border-radius: 2px; padding: 8px 18px; color: var(--gold); cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; transition: all 0.3s; }
+        .location-selector button:hover { background: rgba(201, 169, 97, 0.1); border-color: var(--gold); color: var(--gold-bright); }
+        .info-section { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+        .weather-widget, .sports-widget { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.005)); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 3px; padding: 20px 22px; position: relative; }
+        .weather-widget h3, .sports-widget h3 { font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; font-weight: 600; color: var(--gold); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .weather-main { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 10px; }
+        .weather-temp { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 44px; font-weight: 600; color: var(--platinum); letter-spacing: -0.02em; line-height: 1; }
+        .weather-icon { font-size: 36px; opacity: 0.9; }
+        #weatherLocation { text-align: center; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; font-weight: 500; }
+        #weatherDescription { text-align: center; font-size: 12px; color: var(--mist); margin-bottom: 12px; font-style: italic; }
+        .weather-details { display: flex; justify-content: space-around; font-size: 11px; color: var(--mist); padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05); letter-spacing: 0.05em; }
+        .sports-score { font-size: 12px; margin-bottom: 8px; padding: 10px 12px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 2px; line-height: 1.5; color: var(--mist); }
+        .sports-score strong { color: var(--platinum); font-weight: 600; }
+        .sports-score small { color: var(--gold); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+        .schedule { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.005)); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 3px; padding: 22px 24px; margin-bottom: 16px; }
+        .schedule h3 { font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; font-weight: 600; color: var(--gold); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .schedule-item { display: flex; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.04); font-size: 12px; color: var(--mist); letter-spacing: 0.03em; border-radius: 2px; transition: background 0.3s; }
+        .schedule-item:last-child { border-bottom: none; }
+        .schedule-item span:first-child { font-variant-numeric: tabular-nums; color: var(--gold); font-weight: 500; letter-spacing: 0.1em; }
+        .schedule-item span:last-child { color: var(--platinum); }
+        .audio-status, .data-status { text-align: center; padding: 6px; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 500; }
+        .audio-status { color: var(--gold); }
+        .data-status { color: var(--ink); }
+        .start-screen {
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse at center, rgba(201, 169, 97, 0.08), transparent 60%),
+                rgba(5, 5, 8, 0.97);
+            backdrop-filter: blur(20px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; flex-direction: column; gap: 32px; padding: 24px;
+        }
+        .start-logo { width: 80px; height: 80px; object-fit: contain; margin-bottom: 8px; border-radius: 4px; border: 1px solid var(--hairline-strong); padding: 6px; background: rgba(201, 169, 97, 0.04); box-shadow: 0 0 40px rgba(201, 169, 97, 0.2); }
+        .start-title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 44px; font-weight: 600; letter-spacing: 0.02em; background: linear-gradient(180deg, #f5f0e8 0%, #c9a961 130%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-align: center; line-height: 1.1; }
+        .start-subtitle { font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); margin-top: -8px; }
+        .start-button { background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 100%); border: 1px solid var(--gold); color: var(--obsidian); padding: 18px 44px; font-family: 'Inter', sans-serif; font-size: 12px; border-radius: 2px; cursor: pointer; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase; transition: all 0.4s cubic-bezier(0.2, 0.7, 0.3, 1); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 0 0 4px rgba(201, 169, 97, 0.08), 0 16px 40px rgba(201, 169, 97, 0.25); }
+        .start-button:hover { transform: translateY(-2px); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 0 0 4px rgba(201, 169, 97, 0.15), 0 24px 56px rgba(201, 169, 97, 0.4); }
+        .start-info { color: var(--mist); text-align: center; font-size: 12px; line-height: 2; letter-spacing: 0.08em; max-width: 560px; }
+        @media (max-width: 980px) { .channels { grid-template-columns: repeat(5, 1fr); } }
+        @media (max-width: 900px) { .info-section { grid-template-columns: 1fr; } }
+        @media (max-width: 700px) {
+            body { padding: 12px 8px; }
+            .header { padding: 20px 22px; flex-direction: column; align-items: flex-start; gap: 14px; }
+            .header-meta { display: none; }
+            .brand-title { font-size: 24px; }
+            .content-pad { padding: 20px 22px; }
+            .status-bar { padding: 12px 22px; gap: 16px; }
+            .channels { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+            .channel-btn { padding: 10px 3px 8px; font-size: 8px; letter-spacing: 0.06em; }
+            .channel-btn .channel-icon { font-size: 17px; margin-bottom: 4px; }
+            .track-title { font-size: 24px; }
+            .control-btn { width: 40px; height: 40px; font-size: 12px; }
+            .control-btn.play { width: 52px; height: 52px; font-size: 15px; }
+            .now-playing { padding: 24px 20px; }
+            .now-playing::before { left: 14px; top: 10px; }
+            .now-playing::after { display: none; }
+            .anchor-container { padding: 24px 20px; }
+            .anchor-header { gap: 14px; }
+            .anchor-avatar { width: 56px; height: 56px; font-size: 24px; }
+            .anchor-info h2 { font-size: 18px; }
+            .anchor-news-text { font-size: 16px; padding: 18px 20px; max-height: 320px; }
+            .weather-temp { font-size: 34px; }
+            .start-title { font-size: 32px; }
+            .start-button { padding: 16px 32px; font-size: 11px; letter-spacing: 0.2em; }
+            .volume-slider { width: 140px; }
+            .contact-marquee { font-size: 11px; animation-duration: 70s; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Start Screen -->
+    <div class="start-screen" id="startScreen">
+        <img src="/jp-logo-blue.png" alt="JP AI Radio Logo" class="start-logo">
+        <div>
+            <div class="start-title">JP AI Radio</div>
+            <div class="start-subtitle">Est. · Broadcasting Worldwide · 24/7</div>
+        </div>
+        <button class="start-button" onclick="startRadio()">Tune In</button>
+        <div class="start-info">
+            R&amp;B · Classic Rock · Classical · Electronic · French · Haitian<br>
+            AI Music · AI Religious · Bible Reading · Prayer · Debate<br>
+            Sports Flash · Continuous Feed · World News Ticker · Boston, MA
+        </div>
+    </div>
+
+    <!-- Radio Container -->
+    <div class="radio-container">
+
+        <!-- Header -->
+        <div class="header">
+            <div class="brand-lockup">
+                <img src="/jp-logo-blue.png" alt="JP AI Radio Logo" class="brand-logo">
+                <div class="brand-text">
+                    <div class="brand-title">JP AI Radio</div>
+                    <div class="brand-tagline">Premium · Global · Broadcast</div>
+                </div>
+            </div>
+            <div class="header-meta">
+                <div class="meta-item"><span>Station</span><span>JP-AI-01</span></div>
+                <div class="meta-divider"></div>
+                <div class="meta-item"><span>Location</span><span>Boston, MA</span></div>
+                <div class="meta-divider"></div>
+                <div class="meta-item"><span>Signal</span><span>Digital HD</span></div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="live-indicator"><div class="live-dot"></div>LIVE 24/7</div>
+            <div class="time-display">🕐 <span id="currentTime">00:00:00</span></div>
+            <div class="listener-count">👥 <span id="listeners">1,500</span></div>
+        </div>
+
+        <div class="content-pad">
+
+            <!-- Now Playing -->
+            <div class="now-playing" id="now-playing">
+                <div class="track-title" id="trackTitle">Awaiting Transmission</div>
+                <div class="track-artist" id="trackArtist">JP AI Radio Station</div>
+                <div class="track-genre" id="trackGenre">Real Music Streams</div>
+                <div class="visualizer" id="visualizer"></div>
+            </div>
+
+            <!-- Anchor / Reading / Debate Container -->
+            <div class="anchor-container" id="anchorContainer">
+                <div class="anchor-header">
+                    <div class="anchor-avatar" id="anchorAvatar">🗣️</div>
+                    <div class="anchor-info">
+                        <h2 id="anchorName">The Political Debate</h2>
+                        <p id="anchorStatus">Moderated by JP</p>
+                    </div>
+                </div>
+                <div class="anchor-speaking">
+                    <span class="speaking-dot"></span>
+                    <span class="speaking-dot"></span>
+                    <span class="speaking-dot"></span>
+                    <span style="font-size: 9px; color: var(--gold); letter-spacing: 0.3em; text-transform: uppercase; margin-left: 8px;">On Air</span>
+                </div>
+                <div style="text-align:center; margin-bottom:10px;">
+                    <span class="debate-role mod" id="currentSpeakerRole">🎙️ Moderator</span>
+                </div>
+                <div class="anchor-news-text" id="anchorNewsText">
+                    Welcome to the Political Debate. Select the Debate channel to begin.
+                </div>
+            </div>
+
+            <!-- Channels -->
+            <div class="section-label">Channels</div>
+            <div class="channels" id="channelsGrid">
+                <button class="channel-btn active" onclick="switchChannel('rnb')"><span class="channel-icon">🎤</span>R&amp;B / Hip-Hop</button>
+                <button class="channel-btn" onclick="switchChannel('rock')"><span class="channel-icon">🎸</span>Classic Rock</button>
+                <button class="channel-btn" onclick="switchChannel('classical')"><span class="channel-icon">🎻</span>Classical</button>
+                <button class="channel-btn" onclick="switchChannel('electronic')"><span class="channel-icon">⚡</span>Electronic</button>
+                <button class="channel-btn" onclick="switchChannel('french')"><span class="channel-icon">🇫🇷</span>French</button>
+                <button class="channel-btn" onclick="switchChannel('haitian')"><span class="channel-icon">🇭🇹</span>Haitian</button>
+                <button class="channel-btn" onclick="switchChannel('aimusic')"><span class="channel-icon">🤖</span>AI Music</button>
+                <button class="channel-btn" onclick="switchChannel('aireligious')"><span class="channel-icon">✝️</span>AI Religious</button>
+                <button class="channel-btn" onclick="switchChannel('bible')"><span class="channel-icon">📖</span>Bible Reading</button>
+                <button class="channel-btn" onclick="switchChannel('prayer')"><span class="channel-icon">🙏</span>Prayer</button>
+                <button class="channel-btn" onclick="switchChannel('debate')"><span class="channel-icon">🗣️</span>Debate</button>
+                <button class="channel-btn" onclick="switchChannel('mix')"><span class="channel-icon">🎧</span>Continuous</button>
+                <button class="channel-btn" onclick="switchChannel('sportflash')"><span class="channel-icon">🏈</span>Sport Flash</button>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button class="control-btn" onclick="previousStation()" title="Previous">⏮</button>
+                <button class="control-btn play" id="playBtn" onclick="togglePlay()" title="Play/Pause">▶</button>
+                <button class="control-btn" onclick="nextStation()" title="Next">⏭</button>
+                <button class="control-btn" onclick="toggleMute()" id="muteBtn" title="Mute">🔊</button>
+            </div>
+
+            <!-- Volume -->
+            <div class="volume-control">
+                <span>🔉</span>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70" oninput="adjustVolume(this.value)">
+                <span>🔊</span>
+            </div>
+
+            <!-- World News -->
+            <div class="news-btn-wrap">
+                <button class="news-category-btn" onclick="refreshWorldNews()">🌎 World News · Refresh</button>
+            </div>
+
+            <!-- News Ticker -->
+            <div class="ticker-container">
+                <span class="ticker-label">📰 Wire</span>
+                <span class="ticker-content" id="newsTicker">Loading real-time news...</span>
+            </div>
+
+            <!-- Contact (Scrolling Marquee) -->
+            <div class="contact-section">
+                <div class="contact-marquee">
+                    📧 <span class="marquee-em">For suggestions or support:</span> <a href="mailto:jpierre722@yahoo.com">jpierre722@yahoo.com</a>
+                    <span class="marquee-divider">◆</span>
+                    ⏭ <span class="marquee-em">Tip:</span> Click the forward (⏭) button to listen to a different station within the same category channel
+                    <span class="marquee-divider">◆</span>
+                    📖 <span class="marquee-em">Bible Reading:</span> English · Français — ":" reads as "verse" (EN) and "verset" (FR)
+                    <span class="marquee-divider">◆</span>
+                    🙏 <span class="marquee-em">Prayer Channel:</span> English · Français — each prayer includes a full meditation (homily)
+                    <span class="marquee-divider">◆</span>
+                    🌅 <span class="marquee-em">Daily Rotation:</span> Verses, prayers &amp; meditations change each day — come back tomorrow
+                    <span class="marquee-divider">◆</span>
+                    🗣️ <span class="marquee-em">Debate Channel:</span> Send your opinions to jpierre722@yahoo.com — we want to hear from you!
+                    <span class="marquee-divider">◆</span>
+                    📻 <span class="marquee-em">JP AI Radio</span> — broadcasting live 24/7 from Boston, MA
+                    <span class="marquee-divider">◆</span>
+                </div>
+            </div>
+
+            <!-- Location -->
+            <div class="location-selector">
+                <label>📍 Set City</label>
+                <input type="text" id="cityInput" placeholder="Boston, MA" value="Boston, MA">
+                <button onclick="setCustomCity()">Update Weather</button>
+            </div>
+
+            <!-- Info Section -->
+            <div class="info-section">
+                <div class="weather-widget">
+                    <h3>🌤 Live Weather</h3>
+                    <div class="weather-main">
+                        <span class="weather-icon" id="weatherIcon">🌤️</span>
+                        <span class="weather-temp" id="weatherTemp">--°</span>
+                    </div>
+                    <div id="weatherLocation">📍 Boston, Massachusetts</div>
+                    <div id="weatherDescription"></div>
+                    <div class="weather-details">
+                        <span>💨 <span id="weatherWind">--</span></span>
+                        <span>💧 <span id="weatherHumidity">--</span></span>
+                        <span>🌡️ <span id="weatherFeels">--</span></span>
+                    </div>
+                </div>
+                <div class="sports-widget">
+                    <h3>🏈 Live Sports</h3>
+                    <div id="sportsScores"><div class="sports-score">Loading scores...</div></div>
+                </div>
+            </div>
+
+            <!-- Schedule -->
+            <div class="schedule">
+                <h3>📅 Program Schedule</h3>
+                <div class="schedule-item"><span>00:00 – 06:00</span><span>Late Night R&amp;B</span></div>
+                <div class="schedule-item"><span>06:00 – 10:00</span><span>Morning Classics</span></div>
+                <div class="schedule-item"><span>10:00 – 14:00</span><span>Classic Rock</span></div>
+                <div class="schedule-item"><span>14:00 – 18:00</span><span>Electronic &amp; World Beats</span></div>
+                <div class="schedule-item"><span>18:00 – 22:00</span><span>R&amp;B Evening</span></div>
+                <div class="schedule-item"><span>22:00 – 00:00</span><span>Classical Night</span></div>
+            </div>
+
+            <div class="audio-status" id="audioStatus"></div>
+            <div class="data-status" id="dataStatus">📡 Waiting to fetch live data...</div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // JP AI RADIO — PREMIUM EDITION v7
+        // Bible Reading: English + Français only
+        // Prayer Channel: English + Français only
+        // ":" reads as "verse" (EN) / "verset" (FR)
+        // ============================================
+
+        // ============================================================
+        // 🌴 NATURAL HAITIAN VOICE — MASTER PROMPT (retained for reference) 🌴
+        // Built from the How-To Creole pronunciation guides:
+        //  - howtocreole.com/p/haitian-creole-pronunciation.html
+        //  - howtocreole.com/2025/09/haitian-creole-alphabet-sounds.html
+        //  - howtocreole.com/2016/06/correct-pronunciation-haitian-creole.html
+        // ============================================================
+        const HAITIAN_VOICE_MASTER_PROMPT = {
+            enabled: true,
+            tone: 'dous, cho, natif natal',
+            pronunciation: 'kreyòl ayisyen klè',
+            nasalRule: 'an, en, on, oun byen make — n pa yon konsòn separe',
+            substitutions: {
+                'ou': 'oo',
+                'è':  'eh',
+                'ò':  'aw',
+                'ay': 'eye',
+                'im': 'eem'
+            },
+            constraints: [
+                'pa tradui',
+                'pa chanje mo yo',
+                'li egzak jan li ekri',
+                'ritm natirèl yon Ayisyen'
+            ],
+            delivery: {
+                rate: 0.72,
+                pitch: 0.92,
+                volume: 1.0,
+                pauseBetweenSentences: 900,
+                pauseBetweenChunks: 1400
+            }
+        };
+
+        function applyHaitianVoiceMasterPrompt(text, voiceKind) {
+            if (!HAITIAN_VOICE_MASTER_PROMPT.enabled) return text;
+            if (!text) return text;
+            if (voiceKind === 'native') return text;
+
+            let t = text;
+
+            if (voiceKind === 'french') {
+                t = t.replace(/ò/g, 'aw').replace(/Ò/g, 'Aw');
+                t = t.replace(/en/gi, 'in');
+            } else {
+                t = t
+                    .replace(/oun/gi, 'oong')
+                    .replace(/ann/gi, 'un')
+                    .replace(/enn/gi, 'en')
+                    .replace(/onn/gi, 'on')
+                    .replace(/tch/gi, 'ch')
+                    .replace(/ay/gi,  'eye')
+                    .replace(/im/gi,  'eem')
+                    .replace(/dj/gi,  'j')
+                    .replace(/ui/gi,  'yoowee')
+                    .replace(/an/gi,  'ung')
+                    .replace(/en/gi,  'eng')
+                    .replace(/on/gi,  'ong')
+                    .replace(/in/gi,  'eeng')
+                    .replace(/ou/gi,  'oo')
+                    .replace(/ch/gi,  'sh')
+                    .replace(/è/g, 'eh').replace(/È/g, 'Eh')
+                    .replace(/ò/g, 'aw').replace(/Ò/g, 'Aw')
+                    .replace(/é/g, 'ay').replace(/É/g, 'Ay')
+                    .replace(/j/g, 'zh').replace(/J/g, 'Zh');
+            }
+
+            return t;
+        }
+
+        function pickVoiceKind(langCode) {
+            if (langCode === 'ht') {
+                if (haitianVoice) return 'native';
+                if (frenchVoice) return 'french';
+                return 'english';
+            }
+            if (langCode === 'fr') return frenchVoice ? 'french' : 'english';
+            return 'english';
+        }
+
+        // ============================================================
+        // BIBLE REFERENCE PRONUNCIATION
+        // ":" reads as "verse" (EN) / "verset" (FR)
+        // Examples:
+        //   Psalm 23:4   →  "Psalm 23 verse 4"
+        //   Psaume 23:4  →  "Psaume 23 verset 4"
+        // ============================================================
+        function formatReferenceForSpeech(ref, langCode) {
+            if (!ref) return ref;
+            if (langCode === 'fr') return ref.replace(/:/g, ' verset ');
+            return ref.replace(/:/g, ' verse ');
+        }
+
+        // ============================================
+        // STATE
+        // ============================================
+        let audioElement = null;
+        let isPlaying = false;
+        let isMuted = false;
+        let volume = 0.7;
+        let currentChannel = 'rnb';
+        let currentStationIndex = 0;
+        let listeners = 1500;
+        let userLocation = null;
+        let newsPool = [];
+        let newsIndex = 0;
+        let anchorNewsIndex = 0;
+        let speechSynth = window.speechSynthesis;
+        let maleVoice = null;
+        let femaleVoice = null;
+        let frenchVoice = null;
+        let haitianVoice = null;
+        let debateLoopActive = false;
+        let isDebating = false;
+        let debateTimers = [];
+        let speechQueue = [];
+        let isSpeaking = false;
+        let continuousMixInterval = null;
+        let adIntervalId = null;
+        let adInProgress = false;
+        let adIndex = 0;
+        let debateTimeoutId = null;
+        let mixBulletinTimeoutId = null;
+        let sportFlashInterval = null;
+        let sportFlashTimeoutId = null;
+        let sportMusicInterval = null;
+        let sportNewsPool = [];
+        let sportNewsIndex = 0;
+        let upcomingGames = [];
+        let debateTransitionPending = false;
+        let readingLoopTimeoutId = null;
+        let readingIndex = 0;
+        let readingPhase = 'prayer';
+
+        const musicChannels = ['rnb', 'rock', 'classical', 'electronic', 'french', 'haitian', 'aimusic', 'aireligious'];
+        const voiceChannels = ['bible', 'prayer'];
+        const BOSTON_LOCATION = { lat: 42.3601, lon: -71.0589, city: 'Boston', region: 'Massachusetts', country: 'US', source: 'Default' };
+
+        // ============================================
+        // CHANNEL STREAMS
+        // ============================================
+        const radioStations = {
+            rnb: { name: "R&B / Soul", genre: "R&B, Soul, Funk", icon: "🎤",
+                streams: [
+                    { name: "Smooth Grooves", description: "Smooth R&B & Soul", url: "https://ice1.somafm.com/illstreet-128-mp3" },
+                    { name: "Urban Soul", description: "Urban & Soul Music", url: "https://ice1.somafm.com/secretagent-128-mp3" },
+                    { name: "Funk & Soul", description: "Funk & Soul Classics", url: "https://ice1.somafm.com/u80s-128-mp3" }
+                ] },
+            rock: { name: "Classic Rock", genre: "Rock, Classic Rock", icon: "🎸",
+                streams: [
+                    { name: "Classic Rock", description: "Rock Classics", url: "https://ice1.somafm.com/bootliquor-128-mp3" },
+                    { name: "Indie Rock", description: "Indie & Alternative", url: "https://ice1.somafm.com/indiepop-128-mp3" },
+                    { name: "Heavy Rock", description: "Heavy & Hard Rock", url: "https://ice1.somafm.com/metal-128-mp3" }
+                ] },
+            classical: { name: "Classical", genre: "Classical, Orchestral", icon: "🎻",
+                streams: [
+                    { name: "Classical FM", description: "Classical Masterpieces", url: "https://ice1.somafm.com/brfm-128-mp3" },
+                    { name: "Ambient Classical", description: "Ambient & Classical", url: "https://ice1.somafm.com/dronezone-128-mp3" },
+                    { name: "Piano Classics", description: "Piano & Chamber", url: "https://ice1.somafm.com/deepspaceone-128-mp3" }
+                ] },
+            electronic: { name: "Electronic", genre: "EDM, House, Techno", icon: "⚡",
+                streams: [
+                    { name: "EDM Festival", description: "Electronic Dance Music", url: "https://ice1.somafm.com/cliqhop-128-mp3" },
+                    { name: "Deep House", description: "Deep & Tech House", url: "https://ice1.somafm.com/defcon-128-mp3" },
+                    { name: "Synthwave", description: "Synthwave & Retro", url: "https://ice1.somafm.com/suburbsofgoa-128-mp3" }
+                ] },
+            french: { name: "French Songs", genre: "Chanson Française / Variété", icon: "🇫🇷",
+                streams: [
+                    { name: "Chante France 90-2000", description: "Hits Français 90-2000", url: "https://chantefrance90-2000.ice.infomaniak.ch/chantefrance90-2000-96.aac" },
+                    { name: "Chante France 80-96", description: "Hits Français 80-96", url: "https://chantefrance80s.ice.infomaniak.ch/chantefrance80s-96.aac" },
+                    { name: "Chante France 70-96", description: "Hits Français 70-96", url: "https://chantefrance70s.ice.infomaniak.ch/chantefrance70s-96.aac" }
+                ] },
+            haitian: { name: "Haitian Music", genre: "Konpa / Kompa / Zouk", icon: "🇭🇹",
+                streams: [
+                    { name: "Super Star", description: "Haitian Konpa & Zouk", url: "http://s6.voscast.com:10368" },
+                    { name: "Konpa Hits", description: "Haitian Music & Culture", url: "https://stream.zeno.fm/huv" },
+                    { name: "Konpa 509", description: "Haitian Konpa Classics", url: "https://stream.zeno.fm/nuv" }
+                ] },
+            aimusic: { name: "AI Music", genre: "AI-Generated Music / Electronic / Ambient", icon: "🤖",
+                streams: [
+                    { name: "Neural Beats", description: "AI-Generated Beats & Melodies", url: "https://ice1.somafm.com/cliqhop-128-mp3" },
+                    { name: "Synth Cortex", description: "AI Synth & Ambient", url: "https://ice1.somafm.com/dronezone-128-mp3" },
+                    { name: "Algorithmic Flow", description: "Algorithmic Compositions", url: "https://ice1.somafm.com/defcon-128-mp3" }
+                ] },
+            aireligious: { name: "AI Religious", genre: "AI Gospel / Worship / Spiritual", icon: "✝️",
+                streams: [
+                    { name: "AI Gospel Choir", description: "AI-Generated Gospel & Worship", url: "https://ice1.somafm.com/brfm-128-mp3" },
+                    { name: "Sacred Synth", description: "Ambient Spiritual & Sacred", url: "https://ice1.somafm.com/deepspaceone-128-mp3" },
+                    { name: "Devotional Flow", description: "Devotional & Meditative AI Music", url: "https://ice1.somafm.com/dronezone-128-mp3" }
+                ] },
+            bible: { name: "Bible Reading", genre: "24/7 Voice-Over Scripture + Daily Rotation", icon: "📖",
+                streams: [
+                    { name: "Holy Bible · English", description: "English Scripture Reading · ':' = 'verse'", url: "__bible_en__" },
+                    { name: "Sainte Bible · Français", description: "Lecture de la Bible en Français · ':' = 'verset'", url: "__bible_fr__" }
+                ] },
+            prayer: { name: "Christian Prayer", genre: "24/7 Voice-Over Prayer + Daily Meditation", icon: "🙏",
+                streams: [
+                    { name: "Prayer · English", description: "English Prayer + Full Meditation", url: "__prayer_en__" },
+                    { name: "Prière · Français", description: "Prières Chrétiennes + Méditation", url: "__prayer_fr__" }
+                ] },
+            debate: { name: "Debate Channel", genre: "Political Debate", icon: "🗣️", streams: [] },
+            mix: { name: "Continuous Feed", genre: "Music + News Bulletins", icon: "🎧", streams: [] },
+            sportflash: { name: "Sport Flash", genre: "Sports Updates", icon: "🏈", streams: [] }
+        };
+
+        // ============================================
+        // BIBLE LIBRARY — EN / FR (HT content retained but unreachable)
+        // ============================================
+        const bibleContent = {
+            en: [
+                { ref: "Genesis 1:1", text: "In the beginning God created the heaven and the earth." },
+                { ref: "John 3:16", text: "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life." },
+                { ref: "Psalm 23:1", text: "The Lord is my shepherd; I shall not want." },
+                { ref: "Psalm 23:4", text: "Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me." },
+                { ref: "Romans 8:28", text: "And we know that all things work together for good to them that love God, to them who are the called according to his purpose." },
+                { ref: "Philippians 4:13", text: "I can do all things through Christ which strengtheneth me." },
+                { ref: "Isaiah 40:31", text: "But they that wait upon the Lord shall renew their strength; they shall mount up with wings as eagles; they shall run, and not be weary; and they shall walk, and not faint." },
+                { ref: "Jeremiah 29:11", text: "For I know the thoughts that I think toward you, saith the Lord, thoughts of peace, and not of evil, to give you an expected end." },
+                { ref: "Proverbs 3:5-6", text: "Trust in the Lord with all thine heart; and lean not unto thine own understanding. In all thy ways acknowledge him, and he shall direct thy paths." },
+                { ref: "Matthew 11:28", text: "Come unto me, all ye that labour and are heavy laden, and I will give you rest." },
+                { ref: "Psalm 46:1", text: "God is our refuge and strength, a very present help in trouble." },
+                { ref: "Joshua 1:9", text: "Have not I commanded thee? Be strong and of a good courage; be not afraid, neither be thou dismayed: for the Lord thy God is with thee whithersoever thou goest." },
+                { ref: "2 Timothy 1:7", text: "For God hath not given us the spirit of fear; but of power, and of love, and of a sound mind." },
+                { ref: "1 Peter 5:7", text: "Casting all your care upon him; for he careth for you." },
+                { ref: "Psalm 91:1-2", text: "He that dwelleth in the secret place of the most High shall abide under the shadow of the Almighty. I will say of the Lord, He is my refuge and my fortress: my God; in him will I trust." }
+            ],
+            fr: [
+                { ref: "Genèse 1:1", text: "Au commencement, Dieu créa les cieux et la terre." },
+                { ref: "Jean 3:16", text: "Car Dieu a tant aimé le monde qu'il a donné son Fils unique, afin que quiconque croit en lui ne périsse point, mais qu'il ait la vie éternelle." },
+                { ref: "Psaume 23:1", text: "L'Éternel est mon berger: je ne manquerai de rien." },
+                { ref: "Psaume 23:4", text: "Quand je marche dans la vallée de l'ombre de la mort, Je ne crains aucun mal, car tu es avec moi: Ta houlette et ton bâton me rassurent." },
+                { ref: "Romains 8:28", text: "Nous savons, du reste, que toutes choses concourent au bien de ceux qui aiment Dieu, de ceux qui sont appelés selon son dessein." },
+                { ref: "Philippiens 4:13", text: "Je puis tout par celui qui me fortifie." },
+                { ref: "Ésaïe 40:31", text: "Mais ceux qui se confient en l'Éternel renouvellent leur force. Ils prennent le vol comme les aigles; Ils courent, et ne se fatiguent point, Ils marchent, et ne se lassent point." },
+                { ref: "Jérémie 29:11", text: "Car je connais les projets que j'ai formés sur vous, dit l'Éternel, projets de paix et non de malheur, afin de vous donner un avenir et de l'espérance." },
+                { ref: "Proverbes 3:5-6", text: "Confie-toi en l'Éternel de tout ton coeur, Et ne t'appuie pas sur ta sagesse; Reconnais-le dans toutes tes voies, Et il aplanira tes sentiers." },
+                { ref: "Matthieu 11:28", text: "Venez à moi, vous tous qui êtes fatigués et chargés, et je vous donnerai du repos." },
+                { ref: "Psaume 46:1", text: "Dieu est pour nous un refuge et un appui, Un secours qui ne manque jamais dans la détresse." },
+                { ref: "Josué 1:9", text: "Ne t'ai-je pas donné cet ordre: Fortifie-toi et prends courage? Ne t'effraie point et ne t'épouvante point, car l'Éternel, ton Dieu, est avec toi dans tout ce que tu entreprendras." },
+                { ref: "2 Timothée 1:7", text: "Car ce n'est pas un esprit de timidité que Dieu nous a donné, mais un esprit de force, d'amour et de sagesse." },
+                { ref: "1 Pierre 5:7", text: "et déchargez-vous sur lui de tous vos soucis, car lui-même prend soin de vous." },
+                { ref: "Psaume 91:1-2", text: "Celui qui demeure sous l'abri du Très-Haut Repose à l'ombre du Tout-Puissant. Je dis à l'Éternel: Mon refuge et ma forteresse, Mon Dieu en qui je me confie!" }
+            ],
+            ht: [
+                { ref: "Jenèz 1:1", text: "Nan kòmansman, Bondye kreye syèl la ak latè a." },
+                { ref: "Jan 3:16", text: "Paske, Bondye sitèlman renmen lèzòm, li bay sèl Pitit li a, pou tout moun ki kwè nan li pa pèdi, men pou yo gen lavi etènèl." },
+                { ref: "Sòm 23:1", text: "Seyè a se gadò mwen, mwen p ap manke anyen." },
+                { ref: "Sòm 23:4", text: "Menm si mwen pase nan yon fon fè nwa kote lanmò a ye, mwen p ap pè anyen, paske ou la avèk mwen. Gòch ou ak baton ou, se yo ki fè mwen gen kouraj." },
+                { ref: "Womèn 8:28", text: "Nou konnen tout bagay travay ansanm pou byen tout moun ki renmen Bondye, pou moun li rele dapre plan li." },
+                { ref: "Filipyen 4:13", text: "Mwen kapab fè tout bagay gremesi Kris ki ban mwen fòs." },
+                { ref: "Ezayi 40:31", text: "Men, moun ki gen konfyans nan Seyè a ap jwenn fòs ankò. Y ap vole tankou malfini. Y ap kouri, y ap pa fatige; y ap mache, y ap pa bouke." },
+                { ref: "Jeremi 29:11", text: "Paske, mwen konnen plan mwen genyen pou nou, se Seyè a ki di sa. Se plan pou byen nou, pa pou malè nou. Mwen gen pou m ba nou yon avni ak espwa." },
+                { ref: "Pwovèb 3:5-6", text: "Mete tout konfyans ou nan Seyè a. Pa gade sou sa ou konnen pou kont ou. Chonje Seyè a nan tou sa w ap fè, li menm l ap moutre ou chemen an." },
+                { ref: "Matye 11:28", text: "Vin jwenn mwen, nou tout ki bouke, ki chaje anba chay, mwen menm m ap ba nou repo." },
+                { ref: "Sòm 46:1", text: "Bondye se yon pwoteksyon ak yon fòs pou nou, li toujou pare lè nou nan tray." },
+                { ref: "Jozye 1:9", text: "Se mwen menm ki bay ou lòd sa a: pran fòs, gen kouraj! Pa pè, pa dekouraje! Paske, Seyè a, Bondye ou la, va avèk ou tout kote w ap ale." },
+                { ref: "2 Timote 1:7", text: "Paske, Bondye pa ban nou yon lespri lachte. Li ban nou yon lespri ki gen fòs, yon lespri ki gen lanmou, yon lespri ki gen bon konprann." },
+                { ref: "1 Pyè 5:7", text: "Lage tout tèt chaje nou sou li, paske li menm li pran swen nou." },
+                { ref: "Sòm 91:1-2", text: "Moun ki rete anba pwoteksyon Bondye a, moun ki rete nan lonbraj Bondye ki gen pouvwa a, li ka di: Seyè a, se li menm ki pwoteksyon mwen ak fòs mwen, se Bondye mwen, mwen mete konfyans mwen nan li." }
+            ]
+        };
+
+        // ============================================
+        // PRAYER LIBRARY — EN / FR (HT content retained but unreachable)
+        // ============================================
+        const prayerLibrary = {
+            en: [
+                {
+                    title: "The Lord's Prayer",
+                    prayer: "Our Father, which art in heaven, hallowed be thy name. Thy kingdom come, thy will be done, in earth as it is in heaven. Give us this day our daily bread. And forgive us our trespasses, as we forgive those who trespass against us. And lead us not into temptation, but deliver us from evil. For thine is the kingdom, and the power, and the glory, for ever and ever. Amen.",
+                    meditation: "This prayer is the model Jesus Himself gave us. When we call God 'Our Father', we acknowledge that we are not alone — we belong to a family that spans every nation and generation. When we pray 'hallowed be thy name', we recognize that God's name is holy, and we are called to honor it with our lives. 'Thy kingdom come' is a plea for God's reign of love, justice, and peace to take root in our hearts and in our world. 'Give us this day our daily bread' reminds us that we depend on God for everything — not just food, but every breath we take. When we forgive others, we open the door for God's forgiveness to flow through us. And when we ask to be delivered from evil, we acknowledge that we cannot walk this road alone. Pray this prayer slowly. Let every word sink into your heart. Let it become the pattern of your entire life. Amen."
+                },
+                {
+                    title: "Prayer for Peace",
+                    prayer: "Lord, we pray for peace in our hearts, in our homes, in our cities, and in our world. Calm the storms around us and within us. Let your peace that passes all understanding guard our hearts and minds. Amen.",
+                    meditation: "Peace is not the absence of conflict. It is the presence of God. When we pray for peace, we are not asking for a world without problems — we are inviting God to be the center of every situation. The peace that God gives is not like the peace the world offers. It is a deep, unshakable calm that remains even when everything around us is shaking. This peace begins in the individual heart. Before we can bring peace to our homes and our communities, we must first allow God to quiet our own inner storms. As you pray this prayer, invite the Holy Spirit to search your heart. Are there fears, anxieties, or resentments that need to be surrendered? Let them go. Let the peace of Christ rule in your heart, and it will overflow into everything you touch. Amen."
+                },
+                {
+                    title: "Prayer for Healing",
+                    prayer: "Heavenly Father, we lift up all who are sick, hurting, or in pain. Place your healing hand upon them. Restore their strength, renew their hope, and bring comfort to their families. In Jesus' name, amen.",
+                    meditation: "Healing is more than physical restoration. It is the gentle touch of God reaching into every broken place of our lives. When we pray for healing, we acknowledge that we are not self-sufficient. We need God. We need His grace. We need His mercy. Some healing comes instantly. Some comes slowly. Some comes in ways we do not expect — through a word of encouragement, a friend's presence, or a deeper trust in God's plan. True healing is always tied to faith. Jesus often said, 'Your faith has made you well.' Faith is not the absence of questions. It is the choice to trust God even when we do not have all the answers. Pray this prayer with an open heart. Trust that God hears you, and trust that He is working — even in the waiting. Amen."
+                },
+                {
+                    title: "Morning Prayer",
+                    prayer: "Lord, thank you for this new day. Guide my steps, my words, and my thoughts. Help me to be a light to those around me. Let everything I do bring honor to your name. Amen.",
+                    meditation: "Every morning is a gift from God. The fact that you opened your eyes, that you can breathe, that you can move — these are mercies we too often take for granted. A morning prayer sets the tone for the entire day. It turns your first thoughts toward God and invites His guidance before any other voice can speak into your life. When you begin the day with prayer, you are saying to God, 'I need You today.' You are acknowledging that you cannot walk this day alone. The psalmist wrote, 'In the morning, Lord, You hear my voice.' God listens. He cares about the small details of your day. As you pray this prayer, imagine God walking beside you into the day ahead. He is not far away. He is closer than your own breath. Amen."
+                },
+                {
+                    title: "Evening Prayer",
+                    prayer: "Father, as this day comes to a close, we thank you for your protection and provision. Forgive us for the ways we have fallen short. Watch over us through the night, and grant us rest. Amen.",
+                    meditation: "The evening is a sacred time. It is the moment when the noise of the day fades and we come before God with open hands. An evening prayer is an act of surrender. It says, 'Lord, I did not get everything right today, but I am giving it to You.' This is the moment to review the day with God — not to beat ourselves up, but to learn, to grow, and to rest. When we ask God to watch over us through the night, we are trusting that His protection never sleeps. The psalmist wrote, 'He who watches over Israel will neither slumber nor sleep.' As you lie down, remember that God is still on His throne. You can rest because He does not. Give Him your burdens, and let His peace wash over you. Amen."
+                },
+                {
+                    title: "Prayer of Thanksgiving",
+                    prayer: "Lord, we thank you for your goodness, your mercy, and your faithfulness. Thank you for the gift of life, for family, and for friends. Let our hearts overflow with gratitude. Amen.",
+                    meditation: "Thanksgiving is the heartbeat of a healthy spiritual life. When we thank God, we are not doing Him a favor — we are doing ourselves one. Gratitude rewires the soul. It shifts our attention away from what we lack and toward what we have. It turns comparison into contentment and envy into joy. When we thank God, we recognize that every good gift comes from His hand. Your family. Your friends. Your breath. Your salvation. All of it is grace. Gratitude also protects us from spiritual blindness. When we stop thanking God, we start to take Him for granted — and that is the beginning of spiritual decline. As you pray this prayer, name three specific things you are grateful for today. Let gratitude rise like incense before the throne of God. Amen."
+                },
+                {
+                    title: "Prayer for Protection",
+                    prayer: "Almighty God, we ask for your protection over us, our families, and our loved ones. Surround us with your angels. Guard our going out and our coming in. Be our shield and our strong tower. Amen.",
+                    meditation: "We live in a world that is full of danger and uncertainty. But we serve a God who is our refuge and our fortress. When we pray for protection, we are not asking for a life without difficulty. We are asking God to be with us in the midst of it. The psalms describe God as our shield, our strong tower, our hiding place. He surrounds His people with angels. He guards our going out and our coming in. He never leaves us nor forsakes us. As you pray this prayer, think of the areas of your life where you feel most vulnerable. Give them to God. Trust Him with your family, your finances, your health, your future. He is faithful. He is watching. He is protecting. You are not alone. Amen."
+                },
+                {
+                    title: "Prayer for Wisdom",
+                    prayer: "Lord, grant us wisdom beyond our years and understanding beyond our knowledge. Guide our decisions, direct our paths, and let us walk in your truth all the days of our lives. Amen.",
+                    meditation: "Wisdom is different from knowledge. Knowledge tells you what to do. Wisdom tells you when to do it, how to do it, and whether to do it at all. The fear of the Lord is the beginning of wisdom. When we pray for wisdom, we are asking God to give us His perspective on our lives. We are asking Him to help us see as He sees — not with limited human understanding but with eternal vision. James tells us that if we lack wisdom, we should ask God, and He will give generously to all without finding fault. So ask. Ask boldly. Ask persistently. Wisdom is not reserved for a select few. It is available to every child of God who humbly seeks it. As you pray this prayer, open your heart to what God wants to reveal to you. Amen."
+                },
+                {
+                    title: "Prayer for Family",
+                    prayer: "Father, we lift up our families to you. Bless every marriage, every child, every home. Heal broken relationships, strengthen bonds of love, and let our homes be places of peace. Amen.",
+                    meditation: "Family is one of God's greatest gifts. It is the first place where we learn to love, to forgive, to sacrifice. But family can also be the place of our deepest wounds. When we pray for our families, we bring our pain and our hope to the One who created the family. God's design for family is one of love, safety, and spiritual nurture. A home where God is honored becomes a light to the whole neighborhood. The psalmist said, 'Unless the Lord builds the house, the builders labor in vain.' We cannot build healthy families on our own strength. We need God at the center. As you pray this prayer, lift up each member of your family by name. Ask God to bless them, to protect them, and to draw them closer to Himself. Amen."
+                },
+                {
+                    title: "Prayer for the World",
+                    prayer: "Lord, we pray for the nations. Bring comfort to the suffering, hope to the hopeless, and light to those in darkness. Raise up leaders of integrity, and let your kingdom come on earth as it is in heaven. Amen.",
+                    meditation: "The world is bigger than our own immediate circle. When we pray for the world, we are joining our hearts with the heart of God, who loves every nation, every tribe, every tongue. God is not a God of one country or one culture. He is the God of all peoples. When we pray for the world, we intercede for those who are suffering — the hungry, the displaced, the persecuted, the forgotten. We pray for leaders, that they would govern with integrity and justice. We pray for peace in regions torn by conflict. We pray for revival in nations that have turned away from God. And we remember that we ourselves are part of the world that God so loved that He gave His only Son. As you pray this prayer, let your heart expand. Ask God to break your heart for what breaks His. Amen."
+                }
+            ],
+            fr: [
+                {
+                    title: "Notre Père",
+                    prayer: "Notre Père qui es aux cieux, que ton nom soit sanctifié, que ton règne vienne, que ta volonté soit faite sur la terre comme au ciel. Donne-nous aujourd'hui notre pain quotidien. Pardonne-nous nos offenses, comme nous pardonnons aussi à ceux qui nous ont offensés. Et ne nous soumets pas à la tentation, mais délivre-nous du mal. Car c'est à toi qu'appartiennent le règne, la puissance et la gloire, aux siècles des siècles. Amen.",
+                    meditation: "Cette prière est le modèle que Jésus Lui-même nous a donné. Quand nous appelons Dieu 'Notre Père', nous reconnaissons que nous ne sommes pas seuls — nous appartenons à une famille qui s'étend à toutes les nations et à toutes les générations. Quand nous prions 'que ton nom soit sanctifié', nous reconnaissons que le nom de Dieu est saint et que nous sommes appelés à l'honorer par notre vie. 'Que ton règne vienne' est un appel pour que le règne d'amour, de justice et de paix de Dieu prenne racine dans nos coeurs et dans notre monde. 'Donne-nous aujourd'hui notre pain quotidien' nous rappelle que nous dépendons de Dieu pour tout. Quand nous pardonnons aux autres, nous ouvrons la porte à ce que le pardon de Dieu coule à travers nous. Et quand nous demandons d'être délivrés du mal, nous reconnaissons que nous ne pouvons pas marcher seuls sur ce chemin. Priez cette prière lentement. Laissez chaque mot pénétrer votre coeur. Laissez-la devenir le modèle de toute votre vie. Amen."
+                },
+                {
+                    title: "Prière pour la Paix",
+                    prayer: "Seigneur, nous prions pour la paix dans nos coeurs, dans nos maisons, dans nos villes et dans notre monde. Calme les tempêtes autour de nous et en nous. Que ta paix qui surpasse toute intelligence garde nos coeurs et nos pensées. Amen.",
+                    meditation: "La paix n'est pas l'absence de conflit. C'est la présence de Dieu. Quand nous prions pour la paix, nous ne demandons pas un monde sans problèmes — nous invitons Dieu à être au centre de chaque situation. La paix que Dieu donne n'est pas comme celle que le monde offre. C'est un calme profond et inébranlable qui demeure même quand tout autour de nous tremble. Cette paix commence dans le coeur individuel. Avant d'apporter la paix dans nos maisons et nos communautés, nous devons d'abord permettre à Dieu d'apaiser nos propres tempêtes intérieures. En priant cette prière, invitez le Saint-Esprit à sonder votre coeur. Y a-t-il des peurs, des angoisses ou des ressentiments qui doivent être abandonnés? Laissez-les aller. Laissez la paix du Christ régner dans votre coeur, et elle débordera sur tout ce que vous touchez. Amen."
+                },
+                {
+                    title: "Prière pour la Guérison",
+                    prayer: "Père céleste, nous te présentons tous ceux qui sont malades, blessés ou souffrants. Pose ta main guérissante sur eux. Restaure leur force, renouvelle leur espérance, et apporte le réconfort à leurs familles. Au nom de Jésus, amen.",
+                    meditation: "La guérison est plus qu'une restauration physique. C'est le toucher doux de Dieu atteignant chaque endroit brisé de notre vie. Quand nous prions pour la guérison, nous reconnaissons que nous ne sommes pas autosuffisants. Nous avons besoin de Dieu. Nous avons besoin de Sa grâce. Nous avons besoin de Sa miséricorde. Certaines guérisons viennent instantanément. D'autres viennent lentement. D'autres viennent de manière inattendue — par un mot d'encouragement, la présence d'un ami, ou une confiance plus profonde dans le plan de Dieu. La vraie guérison est toujours liée à la foi. Jésus disait souvent: 'Ta foi t'a guéri.' La foi n'est pas l'absence de questions. C'est le choix de faire confiance à Dieu même quand nous n'avons pas toutes les réponses. Priez cette prière avec un coeur ouvert. Croyez que Dieu vous entend et qu'Il agit — même dans l'attente. Amen."
+                },
+                {
+                    title: "Prière du Matin",
+                    prayer: "Seigneur, merci pour ce nouveau jour. Guide mes pas, mes paroles et mes pensées. Aide-moi à être une lumière pour ceux qui m'entourent. Que tout ce que je fais honore ton nom. Amen.",
+                    meditation: "Chaque matin est un cadeau de Dieu. Le fait que vous ayez ouvert les yeux, que vous puissiez respirer, que vous puissiez bouger — ce sont des miséricordes que nous prenons trop souvent pour acquises. Une prière du matin donne le ton pour toute la journée. Elle tourne vos premières pensées vers Dieu et invite Sa direction avant qu'aucune autre voix ne puisse parler dans votre vie. Quand vous commencez la journée par la prière, vous dites à Dieu: 'J'ai besoin de Toi aujourd'hui.' Vous reconnaissez que vous ne pouvez pas marcher seul ce jour. Le psalmiste a écrit: 'Le matin, Seigneur, Tu entends ma voix.' Dieu écoute. Il se soucie des petits détails de votre journée. En priant cette prière, imaginez Dieu marchant à vos côtés dans la journée à venir. Il n'est pas loin. Il est plus proche que votre propre souffle. Amen."
+                },
+                {
+                    title: "Prière du Soir",
+                    prayer: "Père, alors que ce jour se termine, nous te remercions pour ta protection et ta provision. Pardonne-nous nos manquements. Veille sur nous pendant la nuit, et accorde-nous le repos. Amen.",
+                    meditation: "Le soir est un moment sacré. C'est le moment où le bruit de la journée s'estompe et où nous venons devant Dieu les mains ouvertes. Une prière du soir est un acte d'abandon. Elle dit: 'Seigneur, je n'ai pas tout bien fait aujourd'hui, mais je Te le donne.' C'est le moment de revoir la journée avec Dieu — non pas pour nous flageller, mais pour apprendre, grandir et nous reposer. Quand nous demandons à Dieu de veiller sur nous pendant la nuit, nous faisons confiance que Sa protection ne dort jamais. Le psalmiste a écrit: 'Celui qui garde Israël ne sommeille ni ne dort.' En vous couchant, rappelez-vous que Dieu est toujours sur Son trône. Vous pouvez vous reposer parce qu'Il ne le fait pas. Donnez-Lui vos fardeaux, et laissez Sa paix vous laver. Amen."
+                },
+                {
+                    title: "Prière de Remerciement",
+                    prayer: "Seigneur, nous te remercions pour ta bonté, ta miséricorde et ta fidélité. Merci pour le don de la vie, pour la famille et pour les amis. Que nos coeurs débordent de reconnaissance. Amen.",
+                    meditation: "L'action de grâce est le battement de coeur d'une vie spirituelle saine. Quand nous remercions Dieu, nous ne Lui rendons pas service — nous nous en rendons un. La gratitude remodèle l'âme. Elle détourne notre attention de ce qui nous manque vers ce que nous avons. Elle transforme la comparaison en contentement et l'envie en joie. Quand nous remercions Dieu, nous reconnaissons que tout bon don vient de Sa main. Votre famille. Vos amis. Votre souffle. Votre salut. Tout est grâce. La gratitude nous protège aussi de la cécité spirituelle. Quand nous cessons de remercier Dieu, nous commençons à Le tenir pour acquis — et c'est le début du déclin spirituel. En priant cette prière, nommez trois choses spécifiques pour lesquelles vous êtes reconnaissant aujourd'hui. Laissez la gratitude s'élever comme un encens devant le trône de Dieu. Amen."
+                },
+                {
+                    title: "Prière de Protection",
+                    prayer: "Dieu tout-puissant, nous te demandons ta protection sur nous, nos familles et nos proches. Entoure-nous de tes anges. Garde nos allées et venues. Sois notre bouclier et notre haute retraite. Amen.",
+                    meditation: "Nous vivons dans un monde plein de danger et d'incertitude. Mais nous servons un Dieu qui est notre refuge et notre forteresse. Quand nous prions pour la protection, nous ne demandons pas une vie sans difficulté. Nous demandons à Dieu d'être avec nous au milieu d'elle. Les psaumes décrivent Dieu comme notre bouclier, notre haute retraite, notre lieu de refuge. Il entoure Son peuple d'anges. Il garde nos allées et venues. Il ne nous abandonne jamais et ne nous délaisse jamais. En priant cette prière, pensez aux domaines de votre vie où vous vous sentez le plus vulnérable. Donnez-les à Dieu. Confiez-Lui votre famille, vos finances, votre santé, votre avenir. Il est fidèle. Il veille. Il protège. Vous n'êtes pas seul. Amen."
+                },
+                {
+                    title: "Prière pour la Sagesse",
+                    prayer: "Seigneur, accorde-nous une sagesse au-delà de nos années et une intelligence au-delà de nos connaissances. Guide nos décisions, dirige nos sentiers, et fais-nous marcher dans ta vérité tous les jours de notre vie. Amen.",
+                    meditation: "La sagesse est différente de la connaissance. La connaissance vous dit quoi faire. La sagesse vous dit quand le faire, comment le faire, et si oui ou non il faut le faire. La crainte du Seigneur est le commencement de la sagesse. Quand nous prions pour la sagesse, nous demandons à Dieu de nous donner Sa perspective sur nos vies. Nous Lui demandons de nous aider à voir comme Il voit — non pas avec une compréhension humaine limitée mais avec une vision éternelle. Jacques nous dit que si nous manquons de sagesse, nous devons demander à Dieu, et Il donnera généreusement à tous sans faire de reproche. Alors demandez. Demandez avec audace. Demandez avec persévérance. La sagesse n'est pas réservée à quelques élus. Elle est disponible pour chaque enfant de Dieu qui la cherche humblement. En priant cette prière, ouvrez votre coeur à ce que Dieu veut vous révéler. Amen."
+                },
+                {
+                    title: "Prière pour la Famille",
+                    prayer: "Père, nous te présentons nos familles. Bénis chaque mariage, chaque enfant, chaque foyer. Guéris les relations brisées, renforce les liens d'amour, et fais de nos maisons des lieux de paix. Amen.",
+                    meditation: "La famille est l'un des plus grands dons de Dieu. C'est le premier endroit où nous apprenons à aimer, à pardonner, à nous sacrifier. Mais la famille peut aussi être le lieu de nos blessures les plus profondes. Quand nous prions pour nos familles, nous apportons notre douleur et notre espérance à Celui qui a créé la famille. Le dessein de Dieu pour la famille est un dessein d'amour, de sécurité et de nourriture spirituelle. Une maison où Dieu est honoré devient une lumière pour tout le quartier. Le psalmiste a dit: 'Si l'Éternel ne bâtit la maison, ceux qui la bâtissent travaillent en vain.' Nous ne pouvons pas bâtir des familles saines par nos propres forces. Nous avons besoin de Dieu au centre. En priant cette prière, élevez chaque membre de votre famille par son nom. Demandez à Dieu de les bénir, de les protéger et de les attirer plus près de Lui. Amen."
+                },
+                {
+                    title: "Prière pour le Monde",
+                    prayer: "Seigneur, nous prions pour les nations. Apporte la consolation aux souffrants, l'espérance aux désespérés, et la lumière à ceux qui sont dans les ténèbres. Suscite des dirigeants intègres, et que ton règne vienne sur la terre comme au ciel. Amen.",
+                    meditation: "Le monde est plus grand que notre cercle immédiat. Quand nous prions pour le monde, nous unissons nos coeurs au coeur de Dieu, qui aime chaque nation, chaque tribu, chaque langue. Dieu n'est pas le Dieu d'un seul pays ou d'une seule culture. Il est le Dieu de tous les peuples. Quand nous prions pour le monde, nous intercédons pour ceux qui souffrent — les affamés, les déplacés, les persécutés, les oubliés. Nous prions pour les dirigeants, qu'ils gouvernent avec intégrité et justice. Nous prions pour la paix dans les régions déchirées par le conflit. Nous prions pour un réveil dans les nations qui se sont détournées de Dieu. Et nous nous rappelons que nous sommes nous-mêmes une partie du monde que Dieu a tant aimé qu'Il a donné Son Fils unique. En priant cette prière, laissez votre coeur s'élargir. Demandez à Dieu de briser votre coeur pour ce qui brise le Sien. Amen."
+                }
+            ],
+            ht: [
+                {
+                    title: "Papa Nou",
+                    prayer: "Papa nou ki nan syèl la, non ou sen. Peyi ou vini, volonte ou fèt sou tè a menm jan li fèt nan syèl la. Ban nou jodi a pen nou bezwen an. Padone nou sa nou fè ki mal, menm jan nou padone moun ki fè nou mal. Pa kite nou tonbe nan tantasyon, men delivre nou anba sa ki mal la. Paske, se ou menm ki gen pouvwa a, wayòm nan ak glwa a, pou tout tan. Amèn.",
+                    meditation: "Lapriyè sa a se modèl Jezi menm te ban nou. Lè nou rele Bondye Papa nou, nou rekonèt nou pa poukont nou — nou fè pati yon fanmi ki rive nan tout nasyon ak tout jenerasyon. Lè nou lapriyè non ou sen, nou rekonèt non Bondye a sen, epi nou rele pou nou onore li ak lavi nou. Peyi ou vini se yon lapriyè pou wayòm lanmou, jistis ak lapè Bondye a pran rasin nan kè nou ak nan monn nou. Ban nou jodi a pen nou bezwen an fè nou sonje nou depann de Bondye pou tout bagay. Lè nou padone lòt moun, nou louvri pòt la pou padon Bondye koule nan nou. Epi lè nou mande pou yo delivre nou anba sa ki mal la, nou rekonèt nou pa ka mache chemen sa a poukont nou. Lapriyè lapriyè sa a dousman. Kite chak mo desann nan kè ou. Kite l tounen modèl tout lavi ou. Amèn."
+                },
+                {
+                    title: "Lapriyè pou Lapè",
+                    prayer: "Senye, nou lapriyè pou lapè nan kè nou, nan kay nou, nan vil nou ak nan monn nou. Kalme tanpèt bò kote nou ak anndan nou. Se pou lapè ou ki depase tout sa nou ka konprann pwoteje kè nou ak panse nou. Amèn.",
+                    meditation: "Lapè se pa absans konfli. Se prezans Bondye. Lè nou lapriyè pou lapè, nou pa mande yon monn san pwoblèm — nou envite Bondye pou l nan sant chak sitiyasyon. Lapè Bondye bay la pa tankou lapè monn nan ofri. Se yon kalm pwofon ki rete menm lè tout bagay bò kote nou ap tranble. Lapè sa a kòmanse nan kè chak moun. Anvan nou pote lapè nan kay nou ak kominote nou, nou dwe kite Bondye apeze tanpèt anndan nou. Pandan w ap lapriyè lapriyè sa a, envite Sentespri a sondaj kè ou. Èske gen laperèz, enkyetid oswa resantiman ki bezwen abandone? Kite yo ale. Kite lapè Kris la gouvènen nan kè ou, epi l ap debòde nan tout sa ou manyen. Amèn."
+                },
+                {
+                    title: "Lapriyè pou Gerizon",
+                    prayer: "Papa nan syèl la, nou prezante ou tout moun ki malad, ki blese oswa ki soufri. Mete men ou ki geri sou yo. Retabli fòs yo, renouvle espwa yo, epi pote konsolasyon pou fanmi yo. Nan non Jezi, amèn.",
+                    meditation: "Gerizon se plis pase restorasyon fizik. Se touche dou Bondye ki rive nan chak kote kase nan lavi nou. Lè nou lapriyè pou gerizon, nou rekonèt nou pa endepandan. Nou bezwen Bondye. Nou bezwen gras Li. Nou bezwen mizèrikòd Li. Gen gerizon ki vini touswit. Gen lòt ki vini dousman. Gen lòt ki vini nan fason nou pa atann — atravè yon mo ankourajman, prezans yon zanmi, oswa yon konfyans pi pwofon nan plan Bondye. Vre gerizon toujou mare ak lafwa. Jezi te di souvan: Lafwa ou geri ou. Lafwa se pa absans kesyon. Se chwa pou fè konfyans Bondye menm lè nou pa gen tout repons yo. Lapriyè lapriyè sa a ak yon kè ouvè. Kwè Bondye tande ou, epi kwè Li ap travay — menm nan tann lan. Amèn."
+                },
+                {
+                    title: "Lapriyè Maten",
+                    prayer: "Senye, mèsi pou jou sa a. Gide pa mwen, pawòl mwen ak panse mwen. Ede mwen pou mwen ka yon limyè pou moun ki bò kote m. Se pou tout sa m fè bay non ou glwa. Amèn.",
+                    meditation: "Chak maten se yon kado Bondye. Lefèt ou louvri zye ou, ou ka respire, ou ka deplase — sa yo se mizèrikòd nou pran twò souvan pou akò. Yon lapriyè maten bay ton pou tout jounen an. Li vire premye panse ou nan direksyon Bondye epi envite gidans Li anvan nenpòt lòt vwa ka pale nan lavi ou. Lè ou kòmanse jounen an ak lapriyè, w ap di Bondye: Mwen bezwen Ou jodi a. W ap rekonèt ou pa ka mache jounen sa a poukont ou. Psalmis la te ekri: Nan maten, Senye, Ou tande vwa mwen. Bondye koute. Li gen sousi pou ti detay jounen ou. Pandan w ap lapriyè lapriyè sa a, imajine Bondye ap mache bò kote ou nan jounen k ap vini an. Li pa lwen. Li pi pre pase souf ou menm. Amèn."
+                },
+                {
+                    title: "Lapriyè Aswè",
+                    prayer: "Papa, pandan jounen sa a ap fini, nou remèsye ou pou pwoteksyon ou ak pwovizyon ou. Padone nou pou fèblès nou. Veye sou nou pandan lannwit lan, epi ba nou repo. Amèn.",
+                    meditation: "Aswe se yon moman sakre. Se moman lè bri jounen an disparèt epi nou vini devan Bondye ak men ouvè. Yon lapriyè aswè se yon zak abandon. Li di: Senye, mwen pa fè tout bagay byen jodi a, men m ap ba Ou li. Sa a se moman pou revize jounen an ak Bondye — pa pou nou bat tèt nou, men pou aprann, grandi ak repoze. Lè nou mande Bondye veye sou nou pandan lannwit lan, nou fè konfyans pwoteksyon Li pa janm dòmi. Psalmis la te ekri: Moun ki veye sou pèp Izrayèl la pa dòmi, li pa pran sòm. Lè w kouche, sonje Bondye toujou sou twòn Li. Ou ka repoze paske Li pa fè sa. Ba Li chay ou yo, epi kite lapè Li lave ou. Amèn."
+                },
+                {
+                    title: "Lapriyè Remèsiman",
+                    prayer: "Senye, nou remèsye ou pou bonte ou, mizèrikòd ou ak fidèlite ou. Mèsi pou kado lavi a, pou fanmi ak pou zanmi. Se pou kè nou debòde ak rekonesans. Amèn.",
+                    meditation: "Remèsiman se batman kè yon lavi espirityèl ki an sante. Lè nou remèsye Bondye, nou pa rann Li yon sèvis — nou rann tèt nou youn. Rekonesans rejenere nanm lan. Li vire atansyon nou soti nan sa nou manke a pou rive nan sa nou genyen an. Li chanje konparezon an kontantman ak jalouzi an lajwa. Lè nou remèsye Bondye, nou rekonèt chak bon kado soti nan men Li. Fanmi ou. Zanmi ou. Souf ou. Sali ou. Tout se gras. Rekonesans pwoteje nou tou kont avèg espirityèl. Lè nou sispann remèsye Bondye, nou kòmanse pran Li pou akò — epi sa se kòmansman dekadans espirityèl. Pandan w ap lapriyè lapriyè sa a, nonmen twa bagay espesifik ou rekonesan pou yo jodi a. Kite rekonesans monte tankou lansan devan twòn Bondye. Amèn."
+                },
+                {
+                    title: "Lapriyè Pwoteksyon",
+                    prayer: "Bondye ki gen tout pouvwa, nou mande pwoteksyon ou sou nou, fanmi nou ak moun nou renmen. Antoure nou ak zanj ou yo. Gade soti ak antre nou. Se pou ou yon gwo defans ak yon fò gwo kay pou nou. Amèn.",
+                    meditation: "Nou viv nan yon monn ki plen danje ak ensètitid. Men nou sèvi yon Bondye ki se refij nou ak fòtrès nou. Lè nou lapriyè pou pwoteksyon, nou pa mande yon lavi san difikilte. Nou mande Bondye pou l avèk nou nan mitan li. Sòm yo dekri Bondye kòm plak pwotèj nou, gwo fò won nou, kote kache nou. Li antoure pèp Li ak zanj. Li gade soti ak antre nou. Li pa janm kite nou ni abandone nou. Pandan w ap lapriyè lapriyè sa a, panse ak zòn nan lavi ou kote ou santi w pi vilnerab. Ba Bondye yo. Fè Li konfyans ak fanmi ou, finans ou, sante ou, avni ou. Li fidèl. Li ap veye. Li ap pwoteje. Ou pa poukont ou. Amèn."
+                },
+                {
+                    title: "Lapriyè pou Sajès",
+                    prayer: "Senye, ban nou yon sajès ki pi gran pase ane nou ak yon konpreyansyon ki pi gran pase konesans nou. Gide desizyon nou, dirije chemen nou, epi fè nou mache nan verite ou tout jou lavi nou. Amèn.",
+                    meditation: "Sajès diferan de konesans. Konesans di ou kisa pou fè. Sajès di ou kilè pou fè l, kijan pou fè l, ak si wi ou non pou fè l ditou. Krentif pou Senye a se kòmansman sajès. Lè nou lapriyè pou sajès, nou mande Bondye pou l ban nou pèspektiv Li sou lavi nou. Nou mande Li pou l ede nou wè jan Li wè — pa ak yon konpreyansyon imen limite men ak yon vizyon etènèl. Jak di nou si nou manke sajès, nou dwe mande Bondye, epi Li ap bay ak jenerozite pou tout moun san jwenn fòt. Kidonk mande. Mande avèk odas. Mande avèk pèseverans. Sajès pa rezève pou kèk chwazi. Li disponib pou chak pitit Bondye ki chèche l avèk imilite. Pandan w ap lapriyè lapriyè sa a, louvri kè ou a sa Bondye vle revele ou. Amèn."
+                },
+                {
+                    title: "Lapriyè pou Fanmi",
+                    prayer: "Papa, nou leve fanmi nou devan ou. Beni chak maryaj, chak timoun, chak kay. Geri relasyon ki kase yo, ranfòse lyen lanmou yo, epi fè kay nou tounen kote ki gen lapè. Amèn.",
+                    meditation: "Fanmi se youn nan pi gwo kado Bondye. Se premye kote nou aprann renmen, padone, sakrifye. Men fanmi kapab tou kote blesi pi pwofon nou. Lè nou lapriyè pou fanmi nou, nou pote doulè nou ak espwa nou bay Moun ki kreye fanmi an. Plan Bondye pou fanmi se yon plan lanmou, sekirite ak nitrisyon espirityèl. Yon kay kote Bondye onore vin yon limyè pou tout katye a. Psalmis la te di: Si Seyè a pa bati kay la, moun k ap bati yo travay pou anyen. Nou pa ka bati fanmi ki an sante ak fòs pa nou. Nou bezwen Bondye nan sant la. Pandan w ap lapriyè lapriyè sa a, leve chak manm fanmi ou pa non yo. Mande Bondye beni yo, pwoteje yo, epi rale yo pi pre Li. Amèn."
+                },
+                {
+                    title: "Lapriyè pou Monn",
+                    prayer: "Senye, nou lapriyè pou tout nasyon yo. Pote konsolasyon pou moun k ap soufri yo, espwa pou moun ki san espwa, ak limyè pou moun ki nan fènwa. Leve lidè ki gen entegrite, epi se pou wayòm ou vini sou tè a menm jan li nan syèl la. Amèn.",
+                    meditation: "Monn nan pi gran pase sèk imedya nou. Lè nou lapriyè pou monn nan, nou mete kè nou ansanm ak kè Bondye, ki renmen chak nasyon, chak tribi, chak lang. Bondye se pa Bondye yon sèl peyi oswa yon sèl kilti. Li se Bondye tout pèp. Lè nou lapriyè pou monn nan, nou entèside pou moun k ap soufri yo — moun ki grangou, moun ki deplase, moun ki pèsekite, moun yo bliye. Nou lapriyè pou lidè yo, pou yo gouvènen ak entegrite ak jistis. Nou lapriyè pou lapè nan rejyon ki dechire pa konfli. Nou lapriyè pou reveye nan nasyon ki vire do bay Bondye. Epi nou sonje nou menm se yon pati nan monn nan Bondye te sitèlman renmen li bay sèl Pitit Li a. Pandan w ap lapriyè lapriyè sa a, kite kè ou elaji. Mande Bondye kase kè ou pou sa ki kase kè Li. Amèn."
+                }
+            ]
+        };
+
+        // ============================================
+        // WORLD NEWS FEEDS
+        // ============================================
+        const worldFeeds = [
+            'https://feeds.bbci.co.uk/news/world/rss.xml',
+            'https://feeds.bbci.co.uk/news/world/asia/rss.xml',
+            'https://feeds.bbci.co.uk/news/world/europe/rss.xml',
+            'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml',
+            'https://feeds.bbci.co.uk/news/world/africa/rss.xml',
+            'https://feeds.bbci.co.uk/news/world/latin_america/rss.xml',
+            'https://feeds.npr.org/1014/rss.xml',
+            'https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml'
+        ];
+        const backupWorldNews = [
+            "UN Security Council holds emergency session",
+            "European Union announces new climate accord",
+            "Asian markets surge amid trade agreement",
+            "Middle East peace talks progress",
+            "Latin American countries sign historic treaty"
+        ];
+        const sportsFeeds = [
+            'https://feeds.bbci.co.uk/sport/rss.xml',
+            'https://www.espn.com/espn/rss/news',
+            'https://rss.nytimes.com/services/xml/rss/nyt/Sports.xml'
+        ];
+        const backupSportsNews = [
+            "Lakers defeat Warriors in overtime",
+            "Patriots win against Jets",
+            "Red Sox beat Yankees",
+            "Champions League final set"
+        ];
+        const upcomingGamesData = [
+            { home: "Lakers", away: "Warriors", date: "Tomorrow", time: "7:30 PM" },
+            { home: "Patriots", away: "Jets", date: "Sunday", time: "1:00 PM" },
+            { home: "Red Sox", away: "Yankees", date: "Saturday", time: "4:05 PM" },
+            { home: "Manchester City", away: "Liverpool", date: "Next Wednesday", time: "3:00 PM" }
+        ];
+
+        // ============================================
+        // SPEECH ENGINE
+        // ============================================
+        function setupVoices() {
+            if (!speechSynth) return;
+            let voices = speechSynth.getVoices();
+            if (voices.length === 0) { speechSynth.onvoiceschanged = () => { setupVoices(); }; return; }
+
+            maleVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Microsoft David') || v.name.includes('Daniel')) ||
+                        voices.find(v => v.lang === 'en-US' && v.name.toLowerCase().includes('male')) || voices[0];
+            femaleVoice = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Microsoft Zira') || v.name.includes('Samantha') || v.name.includes('Victoria')) ||
+                          voices.find(v => v.lang === 'en-US' && v.name.toLowerCase().includes('female')) || voices[voices.length - 1];
+
+            haitianVoice = voices.find(v => {
+                const lang = (v.lang || '').toLowerCase();
+                const name = (v.name || '').toLowerCase();
+                return lang.startsWith('ht') || lang.includes('ht-ht') ||
+                       name.includes('haitian') || name.includes('creole') ||
+                       name.includes('kreyòl') || name.includes('kreyol');
+            }) || null;
+
+            frenchVoice = voices.find(v => v.lang === 'fr-FR') ||
+                          voices.find(v => v.lang === 'fr-CA') ||
+                          voices.find(v => (v.lang || '').toLowerCase().startsWith('fr')) ||
+                          voices.find(v => (v.name || '').toLowerCase().includes('french')) ||
+                          voices.find(v => (v.name || '').toLowerCase().includes('français')) ||
+                          null;
+        }
+
+        function getVoiceForLanguage(langCode, isFemale) {
+            if (langCode === 'ht') return haitianVoice || frenchVoice || (isFemale ? femaleVoice : maleVoice);
+            if (langCode === 'fr') return frenchVoice || (isFemale ? femaleVoice : maleVoice);
+            return isFemale ? femaleVoice : maleVoice;
+        }
+
+        function speakSingle(text, options = {}) {
+            if (!speechSynth) return null;
+            const {
+                isFemale = false,
+                rate = 0.95,
+                pitch = null,
+                langCode = 'en',
+                onEndCallback = null
+            } = options;
+
+            const kind = pickVoiceKind(langCode);
+            let ttsText = text;
+            if (langCode === 'ht') {
+                ttsText = applyHaitianVoiceMasterPrompt(text, kind);
+            }
+
+            let ttsLangTag = 'en-US';
+            if (langCode === 'fr') ttsLangTag = 'fr-FR';
+            else if (langCode === 'ht') ttsLangTag = kind === 'native' ? 'ht-HT' : 'fr-FR';
+
+            let effectiveRate = rate;
+            let effectivePitch = pitch !== null ? pitch : (isFemale ? 1.15 : 0.95);
+            if (langCode === 'ht') {
+                effectiveRate = HAITIAN_VOICE_MASTER_PROMPT.delivery.rate;
+                effectivePitch = HAITIAN_VOICE_MASTER_PROMPT.delivery.pitch;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(ttsText);
+            utterance.rate = effectiveRate;
+            utterance.pitch = effectivePitch;
+            utterance.volume = isMuted ? 0 : volume;
+            utterance.lang = ttsLangTag;
+
+            const chosenVoice = getVoiceForLanguage(langCode, isFemale);
+            if (chosenVoice) utterance.voice = chosenVoice;
+
+            if (onEndCallback) utterance.onend = onEndCallback;
+            speechSynth.speak(utterance);
+            return utterance;
+        }
+
+        function speakLongText(text, isFemale = false, onComplete = null, langCode = 'en') {
+            stopSpeech();
+            speechQueue = [];
+            const chunks = splitTextIntoChunks(text, 220);
+            chunks.forEach(chunk => { speechQueue.push({ text: chunk, isFemale, langCode }); });
+            if (onComplete) window.speechQueueComplete = onComplete;
+            processSpeechQueue();
+        }
+
+        function splitTextIntoChunks(text, maxLength) {
+            const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+            const chunks = [];
+            let currentChunk = '';
+            for (let sentence of sentences) {
+                if ((currentChunk + sentence).length > maxLength) {
+                    if (currentChunk) chunks.push(currentChunk.trim());
+                    currentChunk = sentence;
+                } else { currentChunk += ' ' + sentence; }
+            }
+            if (currentChunk) chunks.push(currentChunk.trim());
+            return chunks;
+        }
+
+        function processSpeechQueue() {
+            if (speechQueue.length === 0) {
+                isSpeaking = false;
+                if (window.speechQueueComplete) {
+                    const cb = window.speechQueueComplete;
+                    window.speechQueueComplete = null;
+                    cb();
+                }
+                return;
+            }
+            isSpeaking = true;
+            const item = speechQueue.shift();
+            const delay = item.langCode === 'ht'
+                ? HAITIAN_VOICE_MASTER_PROMPT.delivery.pauseBetweenChunks
+                : 300;
+            speakSingle(item.text, {
+                isFemale: item.isFemale,
+                langCode: item.langCode,
+                onEndCallback: () => { setTimeout(processSpeechQueue, delay); }
+            });
+        }
+
+        function stopSpeech() {
+            if (speechSynth) speechSynth.cancel();
+            speechQueue = [];
+            isSpeaking = false;
+            window.speechQueueComplete = null;
+            if (adInProgress) {
+                if (audioElement && !isMuted && musicChannels.includes(currentChannel)) audioElement.volume = volume;
+                adInProgress = false;
+            }
+        }
+
+        // ============================================
+        // WORLD NEWS FETCHING
+        // ============================================
+        async function fetchWorldNews() {
+            try {
+                let allItems = [];
+                for (const feedUrl of worldFeeds) {
+                    try {
+                        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
+                        const response = await fetch(proxyUrl);
+                        const data = await response.json();
+                        const parser = new DOMParser();
+                        const xml = parser.parseFromString(data.contents, 'text/xml');
+                        const items = xml.querySelectorAll('item');
+                        items.forEach(item => {
+                            const title = item.querySelector('title')?.textContent || '';
+                            const description = item.querySelector('description')?.textContent || '';
+                            const pubDate = item.querySelector('pubDate')?.textContent || '';
+                            if (title) allItems.push({ title, description: description.replace(/<[^>]*>/g, ''), pubDate });
+                        });
+                    } catch(e) { /* skip */ }
+                }
+                if (allItems.length > 0) newsPool = allItems.sort(() => Math.random() - 0.5).slice(0, 100);
+                else newsPool = backupWorldNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+                newsIndex = 0; anchorNewsIndex = 0;
+                displayNextNews();
+                document.getElementById('dataStatus').textContent = `✅ World news updated`;
+            } catch(e) {
+                newsPool = backupWorldNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+                displayNextNews();
+            }
+        }
+
+        async function fetchSportsNews() {
+            try {
+                let allItems = [];
+                for (const feedUrl of sportsFeeds) {
+                    try {
+                        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
+                        const response = await fetch(proxyUrl);
+                        const data = await response.json();
+                        const parser = new DOMParser();
+                        const xml = parser.parseFromString(data.contents, 'text/xml');
+                        const items = xml.querySelectorAll('item');
+                        items.forEach(item => {
+                            const title = item.querySelector('title')?.textContent || '';
+                            const description = item.querySelector('description')?.textContent || '';
+                            const pubDate = item.querySelector('pubDate')?.textContent || '';
+                            if (title) allItems.push({ title, description: description.replace(/<[^>]*>/g, ''), pubDate });
+                        });
+                    } catch(e) { /* skip */ }
+                }
+                if (allItems.length > 0) sportNewsPool = allItems.sort(() => Math.random() - 0.5).slice(0, 50);
+                else sportNewsPool = backupSportsNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+                sportNewsIndex = 0;
+            } catch(e) {
+                sportNewsPool = backupSportsNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+            }
+            upcomingGames = upcomingGamesData;
+        }
+
+        function displayNextNews() {
+            if (newsPool.length === 0) return;
+            const item = newsPool[newsIndex % newsPool.length];
+            const timeStr = item.pubDate ? new Date(item.pubDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'Now';
+            const desc = item.description ? ` — ${item.description}` : '';
+            document.getElementById('newsTicker').textContent = `${item.title}${desc} (${timeStr})`;
+            newsIndex++;
+        }
+
+        function refreshWorldNews() { fetchWorldNews(); }
+
+        // ============================================
+        // DAILY ROTATION HELPERS
+        // ============================================
+        function getDayOfYear() {
+            const now = new Date();
+            const start = new Date(now.getFullYear(), 0, 0);
+            const diff = now - start;
+            return Math.floor(diff / (1000 * 60 * 60 * 24));
+        }
+
+        function getLanguageCodeForStream(stream) {
+            if (stream.name.includes('English')) return 'en';
+            if (stream.name.includes('Français')) return 'fr';
+            return 'ht';
+        }
+
+        function getDisplayLanguage(langCode) {
+            if (langCode === 'en') return 'English';
+            if (langCode === 'fr') return 'Français';
+            return 'Kreyòl Ayisyen';
+        }
+
+        // ============================================
+        // BIBLE READING LOOP — EN / FR
+        // ============================================
+        function stopReadingLoop() {
+            if (readingLoopTimeoutId) { clearTimeout(readingLoopTimeoutId); readingLoopTimeoutId = null; }
+            stopSpeech();
+        }
+
+        function startBibleReading() {
+            stopReadingLoop();
+            const stream = radioStations.bible.streams[currentStationIndex];
+            const langCode = getLanguageCodeForStream(stream);
+            const displayLang = getDisplayLanguage(langCode);
+
+            document.getElementById('anchorContainer').classList.add('active');
+            document.getElementById('now-playing').style.display = 'none';
+            document.getElementById('anchorName').textContent = 'Bible Reading · 24/7';
+            document.getElementById('anchorAvatar').textContent = '📖';
+            document.getElementById('anchorStatus').textContent = `Voice-Over Scripture · ${displayLang}`;
+            const roleEl = document.getElementById('currentSpeakerRole');
+            roleEl.className = 'debate-role mod';
+            roleEl.textContent = `📖 ${displayLang}`;
+
+            document.getElementById('trackTitle').textContent = 'Holy Bible Reading';
+            document.getElementById('trackArtist').textContent = `Bible Reading · ${displayLang}`;
+            document.getElementById('trackGenre').textContent = stream.description;
+            document.getElementById('audioStatus').textContent = `📖 Bible Reading · ${displayLang}`;
+
+            const pool = bibleContent[langCode];
+            const dailyOffset = getDayOfYear() % pool.length;
+            readingIndex = dailyOffset;
+
+            function readNext() {
+                if (currentChannel !== 'bible') return;
+                const verse = pool[readingIndex % pool.length];
+                readingIndex++;
+
+                const displayText = `${verse.ref}. ${verse.text}`;
+                const speechText = `${formatReferenceForSpeech(verse.ref, langCode)}. ${verse.text}`;
+
+                document.getElementById('anchorNewsText').textContent = displayText;
+                speakSingle(speechText, {
+                    langCode: langCode,
+                    isFemale: false,
+                    onEndCallback: () => {
+                        if (currentChannel !== 'bible') return;
+                        readingLoopTimeoutId = setTimeout(readNext, 2500);
+                    }
+                });
+            }
+            readNext();
+        }
+
+        // ============================================
+        // PRAYER READING LOOP — EN / FR
+        // ============================================
+        function startPrayerReading() {
+            stopReadingLoop();
+            const stream = radioStations.prayer.streams[currentStationIndex];
+            const langCode = getLanguageCodeForStream(stream);
+            const displayLang = getDisplayLanguage(langCode);
+
+            document.getElementById('anchorContainer').classList.add('active');
+            document.getElementById('now-playing').style.display = 'none';
+            document.getElementById('anchorName').textContent = 'Christian Prayer · 24/7';
+            document.getElementById('anchorAvatar').textContent = '🙏';
+            document.getElementById('anchorStatus').textContent = `Prayer + Daily Meditation · ${displayLang}`;
+            const roleEl = document.getElementById('currentSpeakerRole');
+            roleEl.className = 'debate-role mod';
+            roleEl.textContent = `🙏 ${displayLang}`;
+
+            document.getElementById('trackTitle').textContent = 'Christian Prayer + Meditation';
+            document.getElementById('trackArtist').textContent = `Prayer Channel · ${displayLang}`;
+            document.getElementById('trackGenre').textContent = stream.description;
+            document.getElementById('audioStatus').textContent = `🙏 Prayer + Meditation · ${displayLang}`;
+
+            const pool = prayerLibrary[langCode];
+            const dailyOffset = getDayOfYear() % pool.length;
+            readingIndex = dailyOffset;
+            readingPhase = 'prayer';
+
+            function readNext() {
+                if (currentChannel !== 'prayer') return;
+                const entry = pool[readingIndex % pool.length];
+
+                if (readingPhase === 'prayer') {
+                    const introText = `Prayer: ${entry.title}. ${entry.prayer}`;
+                    document.getElementById('anchorNewsText').textContent = introText;
+                    readingPhase = 'meditation';
+                    speakSingle(introText, {
+                        langCode: langCode,
+                        isFemale: false,
+                        onEndCallback: () => {
+                            if (currentChannel !== 'prayer') return;
+                            readingLoopTimeoutId = setTimeout(readNext, 2200);
+                        }
+                    });
+                } else {
+                    const medHeader = langCode === 'en' ? `Meditation on ${entry.title}.`
+                                    : `Méditation sur ${entry.title}.`;
+                    const fullText = `${medHeader} ${entry.meditation}`;
+                    document.getElementById('anchorNewsText').textContent = fullText;
+                    readingPhase = 'prayer';
+                    readingIndex++;
+                    speakSingle(fullText, {
+                        langCode: langCode,
+                        isFemale: false,
+                        onEndCallback: () => {
+                            if (currentChannel !== 'prayer') return;
+                            readingLoopTimeoutId = setTimeout(readNext, 3500);
+                        }
+                    });
+                }
+            }
+            readNext();
+        }
+
+        // ============================================
+        // DEBATE ENGINE (TOPIC-MATCHED)
+        // ============================================
+        const debatePlaybook = {
+            election: {
+                aff: { opening: (t) => `The affirmative stands firmly on this issue: "${t}". Free and fair elections are the bedrock of our democracy.`,
+                    args: [(t) => `First, on "${t}" — expanding access to the ballot is a constitutional promise.`, (t) => `Second, modernizing election infrastructure protects every vote.`, (t) => `Third, we must remove barriers like long lines and restrictive ID laws.`],
+                    cross: (t) => `We reject the premise that security and access are in conflict.`,
+                    closing: (t) => `In closing, the affirmative believes "${t}" strengthens democracy. We urge a yes.` },
+                neg: { opening: (t) => `The opposition takes a cautious view of "${t}". Rushed changes can undermine confidence.`,
+                    args: [(t) => `First, on "${t}", we cannot ignore the risk of fraud and error.`, (t) => `Second, one-size-fits-all mandates ignore local diversity.`, (t) => `Third, the cost of poorly designed reforms falls on taxpayers.`],
+                    cross: (t) => `We are not against reform — we are against reckless reform.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}" until safeguards are guaranteed.` }
+            },
+            tax: {
+                aff: { opening: (t) => `The affirmative is clear on "${t}": our tax code is too complex and punishes hard work.`,
+                    args: [(t) => `First, on "${t}" — lowering rates stimulates growth.`, (t) => `Second, we can cut waste and close loopholes.`, (t) => `Third, tax relief is a stimulus that creates jobs.`],
+                    cross: (t) => `On "${t}", pro-growth tax policy benefits everyone.`,
+                    closing: (t) => `In closing, the affirmative believes "${t}" is the path to prosperity.` },
+                neg: { opening: (t) => `The opposition sees "${t}" differently. Tax cuts must be paid for.`,
+                    args: [(t) => `First, on "${t}" — cuts for the wealthy increase inequality.`, (t) => `Second, we need revenue for infrastructure and education.`, (t) => `Third, targeted credits are more effective.`],
+                    cross: (t) => `On "${t}", fairness matters.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}" until it is fair.` }
+            },
+            health: {
+                aff: { opening: (t) => `The affirmative believes "${t}" is a moral test. Healthcare is a right.`,
+                    args: [(t) => `First, on "${t}" — expanding coverage saves lives.`, (t) => `Second, no one should be denied care because of pre-existing conditions.`, (t) => `Third, a healthier population is more productive.`],
+                    cross: (t) => `On "${t}", quality and access can coexist.`,
+                    closing: (t) => `In closing, the affirmative urges a yes on "${t}".` },
+                neg: { opening: (t) => `The opposition approaches "${t}" with realism.`,
+                    args: [(t) => `First, on "${t}" — we must preserve patient choice.`, (t) => `Second, cost controls must come before expansion.`, (t) => `Third, innovation depends on a competitive market.`],
+                    cross: (t) => `On "${t}", the opposition stands for choice and responsibility.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}" until costs are controlled.` }
+            },
+            immigration: {
+                aff: { opening: (t) => `The affirmative welcomes debate on "${t}". Immigrants strengthen our nation.`,
+                    args: [(t) => `First, on "${t}" — immigrants fill labor shortages.`, (t) => `Second, a pathway to citizenship is fair and practical.`, (t) => `Third, comprehensive reform is the only lasting solution.`],
+                    cross: (t) => `On "${t}", the affirmative stands for dignity and due process.`,
+                    closing: (t) => `In closing, the affirmative urges a yes on "${t}".` },
+                neg: { opening: (t) => `The opposition insists on order on "${t}".`,
+                    args: [(t) => `First, on "${t}" — border security comes first.`, (t) => `Second, immigration levels must be sustainable.`, (t) => `Third, local communities should have a say.`],
+                    cross: (t) => `On "${t}", the opposition stands for law and sovereignty.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}" until the border is secure.` }
+            },
+            climate: {
+                aff: { opening: (t) => `The affirmative treats "${t}" as an emergency.`,
+                    args: [(t) => `First, on "${t}" — renewable energy creates jobs.`, (t) => `Second, we owe future generations a livable planet.`, (t) => `Third, clean air and water are public health imperatives.`],
+                    cross: (t) => `On "${t}", we refuse to trade the planet for profit.`,
+                    closing: (t) => `In closing, the affirmative urges a yes on "${t}".` },
+                neg: { opening: (t) => `The opposition is against "${t}" as written.`,
+                    args: [(t) => `First, on "${t}" — the transition must be gradual.`, (t) => `Second, we should focus on adaptation and innovation.`, (t) => `Third, international cooperation is necessary.`],
+                    cross: (t) => `On "${t}", the opposition stands for balance and competitiveness.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}" until it is fair.` }
+            },
+            gun: {
+                aff: { opening: (t) => `The affirmative confronts "${t}" with urgency.`,
+                    args: [(t) => `First, on "${t}" — universal background checks save lives.`, (t) => `Second, banning assault weapons reduces mass casualties.`, (t) => `Third, safe-storage laws protect children.`],
+                    cross: (t) => `On "${t}", reform and the Second Amendment can coexist.`,
+                    closing: (t) => `In closing, the affirmative urges a yes on "${t}".` },
+                neg: { opening: (t) => `The opposition defends the Second Amendment on "${t}".`,
+                    args: [(t) => `First, on "${t}" — enforcement of existing laws works.`, (t) => `Second, law-abiding citizens have a right to self-defense.`, (t) => `Third, mental health and school security are the real solutions.`],
+                    cross: (t) => `On "${t}", the opposition stands for liberty and constitutional rights.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}".` }
+            },
+            education: {
+                aff: { opening: (t) => `The affirmative champions "${t}".`,
+                    args: [(t) => `First, on "${t}" — funding public schools closes achievement gaps.`, (t) => `Second, affordable higher education opens doors.`, (t) => `Third, early childhood education pays dividends.`],
+                    cross: (t) => `On "${t}", education is the great equalizer.`,
+                    closing: (t) => `In closing, the affirmative urges a yes on "${t}".` },
+                neg: { opening: (t) => `The opposition insists on accountability on "${t}".`,
+                    args: [(t) => `First, on "${t}" — parental choice drives improvement.`, (t) => `Second, focus on basics — reading, writing, math.`, (t) => `Third, local control is what works.`],
+                    cross: (t) => `On "${t}", the opposition stands for parents and results.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}" until accountability is guaranteed.` }
+            },
+            default: {
+                aff: { opening: (t) => `The affirmative takes a clear position on "${t}".`,
+                    args: [(t) => `First, on "${t}" — acting now is better than waiting.`, (t) => `Second, fairness and effectiveness are not opposites.`, (t) => `Third, future generations will thank us.`],
+                    cross: (t) => `On "${t}", the affirmative stands for progress.`,
+                    closing: (t) => `In closing, the affirmative urges a yes on "${t}".` },
+                neg: { opening: (t) => `The opposition urges caution on "${t}".`,
+                    args: [(t) => `First, on "${t}" — unintended consequences can be severe.`, (t) => `Second, there are better alternatives.`, (t) => `Third, the burden of proof is on those who want change.`],
+                    cross: (t) => `On "${t}", the opposition stands for prudence.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}".` }
+            }
+        };
+
+        function detectDebateCategory(topicText) {
+            const t = topicText.toLowerCase();
+            const map = [
+                { key: 'election', words: ['election','vote','voting','ballot','senate','congress','parliament','primary','poll'] },
+                { key: 'tax', words: ['tax','taxes','irs','revenue','budget','deficit','tariff'] },
+                { key: 'health', words: ['health','healthcare','medicare','medicaid','hospital','insurance','drug','pharma','vaccine'] },
+                { key: 'immigration', words: ['immigration','immigrant','border','migrant','asylum','visa','deport'] },
+                { key: 'climate', words: ['climate','energy','green','carbon','emission','renewable','oil','gas','environment'] },
+                { key: 'gun', words: ['gun','firearm','shooting','weapon','second amendment','nra'] },
+                { key: 'education', words: ['education','school','student','teacher','university','college','curriculum'] }
+            ];
+            for (const entry of map) {
+                if (entry.words.some(w => t.includes(w))) return entry.key;
+            }
+            return 'default';
+        }
+
+        function startDebateLoop() {
+            if (debateLoopActive) return;
+            debateLoopActive = true;
+            pickAndStartDebate();
+        }
+
+        function pickAndStartDebate() {
+            if (!debateLoopActive) return;
+            if (newsPool.length === 0) {
+                newsPool = backupWorldNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+            }
+            const politicalKeywords = ['election','president','government','senate','congress','policy','law','vote','minister','prime minister','political','parliament','bill','tax','health','immigration','climate','energy','defense','education','trade','gun','border','budget'];
+            const politicalItems = newsPool.filter(item =>
+                politicalKeywords.some(keyword => (item.title + ' ' + item.description).toLowerCase().includes(keyword))
+            );
+            const topic = politicalItems.length > 0 ? politicalItems[0] : newsPool[0];
+            if (!topic) return;
+            topic.debated = true;
+            if (newsPool.every(item => item.debated)) newsPool.forEach(item => item.debated = false);
+            runProfessionalDebate(topic, 1800000);
+        }
+
+        function runProfessionalDebate(topic, duration) {
+            isDebating = true;
+            debateTransitionPending = false;
+            stopSpeech();
+            document.getElementById('anchorContainer').classList.add('active');
+            document.getElementById('now-playing').style.display = 'none';
+            document.getElementById('anchorName').textContent = 'The Political Debate';
+            document.getElementById('anchorAvatar').textContent = '🗣️';
+            document.getElementById('anchorStatus').textContent = 'Moderated by JP';
+
+            const topicTitle = topic.title;
+            const topicDesc = topic.description || '';
+            const categoryKey = detectDebateCategory((topicTitle + ' ' + topicDesc).toLowerCase());
+            const playbook = debatePlaybook[categoryKey] || debatePlaybook.default;
+
+            const statements = [
+                { role: 'mod', text: `Good evening, I'm JP, and welcome to The Political Debate. Our topic tonight: "${topicTitle}". ${topicDesc ? topicDesc + '. ' : ''}We have two guests: the affirmative, who supports action, and the opposition, who urges caution. Let's begin with opening statements.`, isFemale: false },
+                { role: 'aff', text: `Thank you, JP. The affirmative's position on "${topicTitle}" is clear. ${playbook.aff.opening(topicTitle)}`, isFemale: false },
+                { role: 'neg', text: `Thank you, JP. The opposition sees "${topicTitle}" differently. ${playbook.neg.opening(topicTitle)}`, isFemale: true },
+                { role: 'mod', text: `Thank you both. Let's move to the arguments.`, isFemale: false },
+                { role: 'aff', text: playbook.aff.args[0](topicTitle), isFemale: false },
+                { role: 'neg', text: playbook.neg.args[0](topicTitle), isFemale: true },
+                { role: 'aff', text: playbook.aff.args[1](topicTitle), isFemale: false },
+                { role: 'neg', text: playbook.neg.args[1](topicTitle), isFemale: true },
+                { role: 'mod', text: `Now let's move to rebuttals.`, isFemale: false },
+                { role: 'aff', text: playbook.aff.args[2](topicTitle), isFemale: false },
+                { role: 'neg', text: playbook.neg.args[2](topicTitle), isFemale: true },
+                { role: 'mod', text: `Cross-talk now.`, isFemale: false },
+                { role: 'aff', text: playbook.aff.cross(topicTitle), isFemale: false },
+                { role: 'neg', text: playbook.neg.cross(topicTitle), isFemale: true },
+                { role: 'mod', text: `Closing statements.`, isFemale: false },
+                { role: 'aff', text: playbook.aff.closing(topicTitle), isFemale: false },
+                { role: 'neg', text: playbook.neg.closing(topicTitle), isFemale: true },
+                { role: 'mod', text: `That concludes our debate on "${topicTitle}". Thank you to both guests and to our audience. We would love to hear your thoughts — please send your opinions and feedback to jpierre722@yahoo.com. We now return you to our R&B and Soul channel. Enjoy the music.`, isFemale: false }
+            ];
+
+            let step = 0;
+            const roleEl = document.getElementById('currentSpeakerRole');
+
+            function updateRoleBadge(role) {
+                if (!roleEl) return;
+                roleEl.className = 'debate-role ' + (role === 'aff' ? 'aff' : role === 'neg' ? 'neg' : 'mod');
+                roleEl.textContent = role === 'aff' ? '🟢 Affirmative Guest' : role === 'neg' ? '🔴 Opposition Guest' : '🎙️ Moderator';
+            }
+
+            function nextStep() {
+                if (!isDebating) return;
+                if (step >= statements.length) { endDebate(); return; }
+                const s = statements[step];
+                updateRoleBadge(s.role);
+                document.getElementById('anchorNewsText').textContent = s.text;
+                speakSingle(s.text, { isFemale: s.isFemale, langCode: 'en', onEndCallback: () => { step++; setTimeout(nextStep, 500); } });
+            }
+            nextStep();
+
+            const safetyTimer = setTimeout(() => { if (isDebating) endDebate(); }, duration + 5000);
+            debateTimers.push(safetyTimer);
+
+            function endDebate() {
+                if (!isDebating && debateTransitionPending) return;
+                isDebating = false;
+                debateTransitionPending = true;
+
+                document.getElementById('anchorContainer').classList.remove('active');
+                document.getElementById('now-playing').style.display = 'block';
+                document.getElementById('anchorName').textContent = 'The Political Debate';
+                document.getElementById('anchorAvatar').textContent = '🗣️';
+                document.getElementById('anchorStatus').textContent = 'Moderated by JP';
+                updateRoleBadge('mod');
+
+                setTimeout(() => {
+                    debateTransitionPending = false;
+                    currentChannel = 'rnb';
+                    currentStationIndex = 0;
+                    document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
+                    const map = ['rnb','rock','classical','electronic','french','haitian','aimusic','aireligious','bible','prayer','debate','mix','sportflash'];
+                    const idx = map.indexOf('rnb');
+                    const btns = document.querySelectorAll('.channel-btn');
+                    if (btns[idx]) btns[idx].classList.add('active');
+                    playStream();
+                    document.getElementById('audioStatus').textContent = '🎵 Now playing: R&B / Soul';
+                }, 2500);
+
+                if (debateLoopActive) {
+                    const now = new Date();
+                    const nextHour = new Date(now);
+                    nextHour.setHours(now.getHours() + 1, 0, 0, 0);
+                    debateTimeoutId = setTimeout(() => { pickAndStartDebate(); }, nextHour - now);
+                }
+            }
+        }
+
+        function stopDebateLoop() {
+            debateLoopActive = false;
+            isDebating = false;
+            debateTimers.forEach(t => clearTimeout(t));
+            debateTimers = [];
+            if (debateTimeoutId) clearTimeout(debateTimeoutId);
+            document.getElementById('anchorContainer').classList.remove('active');
+            document.getElementById('now-playing').style.display = 'block';
+        }
+
+        // ============================================
+        // ADS
+        // ============================================
+        const adScripts = [
+            "This is JP AI Radio. Geico can save you 15% or more on car insurance. Visit Geico.com today.",
+            "This is JP AI Radio. Liberty Mutual customizes your car insurance so you only pay for what you need."
+        ];
+        function playAd(callback) {
+            if (!musicChannels.includes(currentChannel) || isMuted || isDebating || adInProgress) { if (callback) callback(); return; }
+            adInProgress = true;
+            const adText = adScripts[adIndex % adScripts.length];
+            adIndex++;
+            const isInitialAd = !audioElement || audioElement.paused;
+            if (!isInitialAd) audioElement.volume = 0.15;
+            document.getElementById('anchorNewsText').textContent = adText;
+            speakLongText(adText, false, () => {
+                adInProgress = false;
+                if (!isInitialAd && audioElement && !isMuted) audioElement.volume = volume;
+                if (callback) callback();
+            }, 'en');
+        }
+        function startAdScheduler() {
+            if (adIntervalId) clearInterval(adIntervalId);
+            adIntervalId = setInterval(() => { if (musicChannels.includes(currentChannel)) playAd(); }, 1800000);
+        }
+        function clearAdScheduler() {
+            if (adIntervalId) { clearInterval(adIntervalId); adIntervalId = null; }
+        }
+
+        // ============================================
+        // CHANNEL MANAGEMENT
+        // ============================================
+        function playStream() {
+            if (!audioElement) createAudioElement();
+
+            if (continuousMixInterval) { clearInterval(continuousMixInterval); continuousMixInterval = null; }
+            if (mixBulletinTimeoutId) { clearTimeout(mixBulletinTimeoutId); mixBulletinTimeoutId = null; }
+            if (sportFlashInterval) { clearInterval(sportFlashInterval); sportFlashInterval = null; }
+            if (sportFlashTimeoutId) { clearTimeout(sportFlashTimeoutId); sportFlashTimeoutId = null; }
+            if (sportMusicInterval) { clearInterval(sportMusicInterval); sportMusicInterval = null; }
+            clearAdScheduler();
+            stopReadingLoop();
+
+            if (currentChannel === 'bible') {
+                if (audioElement) audioElement.pause();
+                stopSpeech();
+                if (debateLoopActive) stopDebateLoop();
+                startBibleReading();
+                return;
+            }
+
+            if (currentChannel === 'prayer') {
+                if (audioElement) audioElement.pause();
+                stopSpeech();
+                if (debateLoopActive) stopDebateLoop();
+                startPrayerReading();
+                return;
+            }
+
+            if (currentChannel === 'debate') {
+                document.getElementById('anchorContainer').classList.add('active');
+                document.getElementById('now-playing').style.display = 'none';
+                document.getElementById('audioStatus').textContent = '🗣️ Debate Mode';
+                if (audioElement) audioElement.pause();
+                stopSpeech();
+                debateTimers.forEach(t => clearTimeout(t));
+                debateTimers = [];
+                if (debateTimeoutId) clearTimeout(debateTimeoutId);
+                debateLoopActive = false;
+                isDebating = false;
+                startDebateLoop();
+                return;
+            }
+
+            if (currentChannel === 'mix') {
+                document.getElementById('anchorContainer').classList.remove('active');
+                document.getElementById('now-playing').style.display = 'block';
+                document.getElementById('audioStatus').textContent = '🎧 Continuous Feed Active';
+                document.getElementById('trackTitle').textContent = 'Continuous Feed';
+                document.getElementById('trackArtist').textContent = 'Music + News Mix';
+                document.getElementById('trackGenre').textContent = 'Auto Mix';
+                const randomChannel = musicChannels[Math.floor(Math.random() * musicChannels.length)];
+                const randomStreams = radioStations[randomChannel].streams;
+                const randomStream = randomStreams[Math.floor(Math.random() * randomStreams.length)];
+                audioElement.src = randomStream.url;
+                audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; });
+                const performBulletin = () => {
+                    if (currentChannel !== 'mix' || isDebating || isMuted) return;
+                    audioElement.pause();
+                    if (newsPool.length === 0) { fetchWorldNews().then(() => { speakMixBulletin(); }); } else { speakMixBulletin(); }
+                };
+                mixBulletinTimeoutId = setTimeout(() => { performBulletin(); continuousMixInterval = setInterval(performBulletin, 900000); }, 10000);
+                return;
+            }
+
+            if (currentChannel === 'sportflash') {
+                document.getElementById('anchorContainer').classList.remove('active');
+                document.getElementById('now-playing').style.display = 'block';
+                document.getElementById('audioStatus').textContent = '🏈 Sport Flash Active';
+                document.getElementById('trackTitle').textContent = 'Sport Flash';
+                document.getElementById('trackArtist').textContent = 'Music + Sports Updates';
+                document.getElementById('trackGenre').textContent = 'Every 15 Minutes';
+                const randomChannel = musicChannels[Math.floor(Math.random() * musicChannels.length)];
+                const randomStreams = radioStations[randomChannel].streams;
+                const randomStream = randomStreams[Math.floor(Math.random() * randomStreams.length)];
+                audioElement.src = randomStream.url;
+                audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; });
+                if (sportNewsPool.length === 0) {
+                    fetchSportsNews().then(() => { sportFlashTimeoutId = setTimeout(() => { performSportsFlash(); sportFlashInterval = setInterval(performSportsFlash, 900000); }, 10000); });
+                } else {
+                    sportFlashTimeoutId = setTimeout(() => { performSportsFlash(); sportFlashInterval = setInterval(performSportsFlash, 900000); }, 10000);
+                }
+                function performSportsFlash() {
+                    if (currentChannel !== 'sportflash' || isDebating || isMuted) return;
+                    audioElement.pause();
+                    speakSportsFlash(() => { if (audioElement && !isMuted) { audioElement.volume = volume; audioElement.play().catch(() => {}); } });
+                }
+                return;
+            }
+
+            document.getElementById('anchorContainer').classList.remove('active');
+            document.getElementById('now-playing').style.display = 'block';
+            document.getElementById('audioStatus').textContent = '📡 Connecting...';
+            stopSpeech();
+            if (debateLoopActive) stopDebateLoop();
+            const stream = radioStations[currentChannel].streams[currentStationIndex];
+            document.getElementById('trackTitle').textContent = stream.name;
+            document.getElementById('trackArtist').textContent = radioStations[currentChannel].name;
+            document.getElementById('trackGenre').textContent = stream.description;
+            audioElement.src = stream.url;
+            if (audioElement) audioElement.pause();
+            playAd(() => {
+                if (audioElement && !isMuted) { audioElement.volume = volume; audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; }); }
+                startAdScheduler();
+            });
+        }
+
+        function speakMixBulletin() {
+            if (newsPool.length === 0) return;
+            let bulletinText = "This is JP AI Radio News flash. ";
+            for (let i = 0; i < 4; i++) {
+                const item = newsPool[(anchorNewsIndex + i) % newsPool.length];
+                bulletinText += `${item.title}. ${item.description} `;
+            }
+            anchorNewsIndex = (anchorNewsIndex + 4) % newsPool.length;
+            bulletinText += "That's your news flash for now.";
+            document.getElementById('anchorNewsText').textContent = bulletinText;
+            speakLongText(bulletinText, false, () => {
+                if (currentChannel === 'mix') {
+                    if (audioElement && !isMuted) { audioElement.volume = volume; audioElement.play().catch(() => {}); }
+                    const nextAnnouncement = `Next news flash will be in 15 minutes.`;
+                    speakLongText(nextAnnouncement, false, () => {}, 'en');
+                }
+            }, 'en');
+        }
+
+        function speakSportsFlash(onComplete = null) {
+            if (sportNewsPool.length === 0) {
+                sportNewsPool = backupSportsNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+            }
+            let flashText = "This is JP AI Radio Sports Flash. Scores: ";
+            for (let i = 0; i < 3; i++) {
+                const item = sportNewsPool[(sportNewsIndex + i) % sportNewsPool.length];
+                flashText += `${item.title}. `;
+            }
+            sportNewsIndex = (sportNewsIndex + 3) % sportNewsPool.length;
+            flashText += "Upcoming games: ";
+            upcomingGames.forEach(game => {
+                flashText += `${game.away} at ${game.home} on ${game.date} at ${game.time}. `;
+            });
+            flashText += "That's your sports update for now.";
+            document.getElementById('anchorNewsText').textContent = flashText;
+            speakLongText(flashText, false, onComplete, 'en');
+        }
+
+        function switchChannel(channel) {
+            currentChannel = channel;
+            currentStationIndex = 0;
+            readingIndex = 0;
+            readingPhase = 'prayer';
+            document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
+            const map = ['rnb','rock','classical','electronic','french','haitian','aimusic','aireligious','bible','prayer','debate','mix','sportflash'];
+            const idx = map.indexOf(channel);
+            const btns = document.querySelectorAll('.channel-btn');
+            if (btns[idx]) btns[idx].classList.add('active');
+            playStream();
+            if (channel === 'mix' || channel === 'debate') { if (newsPool.length === 0) fetchWorldNews(); }
+            if (channel === 'sportflash') { if (sportNewsPool.length === 0) fetchSportsNews(); }
+        }
+
+        function togglePlay() {
+            if (currentChannel === 'debate') return;
+            if (voiceChannels.includes(currentChannel)) {
+                if (speechSynth) {
+                    if (speechSynth.paused) speechSynth.resume();
+                    else speechSynth.pause();
+                }
+                return;
+            }
+            if (!audioElement) { createAudioElement(); playStream(); return; }
+            if (isPlaying) audioElement.pause(); else audioElement.play();
+        }
+        function toggleMute() {
+            isMuted = !isMuted;
+            if (audioElement) {
+                if (isMuted) audioElement.volume = 0;
+                else if (adInProgress || (currentChannel === 'mix' && isSpeaking) || (currentChannel === 'sportflash' && isSpeaking)) audioElement.volume = 0.15;
+                else audioElement.volume = volume;
+            }
+            if (speechSynth) { if (isMuted) speechSynth.cancel(); }
+            document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🔊';
+        }
+        function adjustVolume(value) {
+            volume = value/100;
+            const slider = document.getElementById('volumeSlider');
+            if (slider) {
+                slider.style.background = `linear-gradient(90deg, var(--gold) 0%, var(--gold) ${value}%, rgba(255,255,255,0.08) ${value}%)`;
+            }
+            if (audioElement && !isMuted) {
+                if (adInProgress || (currentChannel === 'mix' && isSpeaking) || (currentChannel === 'sportflash' && isSpeaking)) audioElement.volume = 0.15;
+                else audioElement.volume = volume;
+            }
+        }
+        function nextStation() {
+            if (currentChannel === 'mix' || currentChannel === 'debate' || currentChannel === 'sportflash') return;
+            const streams = radioStations[currentChannel].streams;
+            currentStationIndex = (currentStationIndex + 1) % streams.length;
+            readingIndex = 0;
+            readingPhase = 'prayer';
+            playStream();
+        }
+        function previousStation() {
+            if (currentChannel === 'mix' || currentChannel === 'debate' || currentChannel === 'sportflash') return;
+            const streams = radioStations[currentChannel].streams;
+            currentStationIndex = (currentStationIndex - 1 + streams.length) % streams.length;
+            readingIndex = 0;
+            readingPhase = 'prayer';
+            playStream();
+        }
+
+        // ============================================
+        // WEATHER & SPORTS SCORES
+        // ============================================
+        async function fetchWeather() {
+            try {
+                if (!userLocation) userLocation = BOSTON_LOCATION;
+                const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${userLocation.lat}&longitude=${userLocation.lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&timezone=America%2FNew_York`);
+                const d = await r.json();
+                if (d.current) {
+                    const tempF = Math.round(d.current.temperature_2m * 9/5 + 32);
+                    const humidity = Math.round(d.current.relative_humidity_2m);
+                    const wind = Math.round(d.current.wind_speed_10m);
+                    const code = d.current.weather_code;
+                    const wmap = {0:{icon:'☀️',desc:'Clear Sky'},1:{icon:'🌤️',desc:'Mostly Clear'},2:{icon:'⛅',desc:'Partly Cloudy'},3:{icon:'☁️',desc:'Overcast'},45:{icon:'🌫️',desc:'Foggy'},61:{icon:'🌧️',desc:'Light Rain'},63:{icon:'🌧️',desc:'Rain'},65:{icon:'🌧️',desc:'Heavy Rain'},71:{icon:'🌨️',desc:'Light Snow'},95:{icon:'⛈️',desc:'Thunderstorm'}};
+                    const w = wmap[code] || {icon:'🌤️',desc:'Unknown'};
+                    document.getElementById('weatherIcon').textContent = w.icon;
+                    document.getElementById('weatherTemp').textContent = `${tempF}°F`;
+                    document.getElementById('weatherLocation').textContent = `📍 ${userLocation.city}, ${userLocation.region}`;
+                    document.getElementById('weatherDescription').textContent = w.desc;
+                    document.getElementById('weatherWind').textContent = `${wind} km/h`;
+                    document.getElementById('weatherHumidity').textContent = `${humidity}%`;
+                }
+            } catch(e) {}
+        }
+        async function fetchSportsScores() {
+            try {
+                const r = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard');
+                const d = await r.json();
+                if (d.events && d.events.length > 0) displaySportsScores(d.events);
+            } catch(e) {}
+        }
+        function displaySportsScores(events) {
+            const c = document.getElementById('sportsScores');
+            c.innerHTML = '';
+            events.slice(0,3).forEach(ev => {
+                const comp = ev.competitions[0];
+                const home = comp.competitors.find(x => x.homeAway === 'home');
+                const away = comp.competitors.find(x => x.homeAway === 'away');
+                if (home && away) {
+                    const div = document.createElement('div');
+                    div.className = 'sports-score';
+                    div.innerHTML = `<strong>${away.team.displayName}</strong> ${away.score||'0'} &nbsp;—&nbsp; ${home.score||'0'} <strong>${home.team.displayName}</strong><br><small>${comp.status.type.detail||'Upcoming'}</small>`;
+                    c.appendChild(div);
+                }
+            });
+        }
+
+        function setCustomCity() {
+            const input = document.getElementById('cityInput').value.trim();
+            if (!input) return;
+            userLocation = { ...BOSTON_LOCATION, city: input, region: '', source: 'Custom' };
+            fetchWeather();
+            document.getElementById('dataStatus').textContent = `📍 Weather city set to ${input}`;
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        function createVisualizer() {
+            const viz = document.getElementById('visualizer');
+            viz.innerHTML = '';
+            for (let i=0; i<40; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'visualizer-bar';
+                bar.style.animationDelay = `${i*0.05}s`;
+                bar.style.animationDuration = `${0.45+Math.random()*0.9}s`;
+                viz.appendChild(bar);
+            }
+        }
+        function createAudioElement() {
+            if (audioElement) { audioElement.pause(); audioElement.remove(); }
+            audioElement = new Audio();
+            audioElement.crossOrigin = "anonymous";
+            audioElement.volume = isMuted ? 0 : volume;
+            audioElement.addEventListener('play', () => { isPlaying = true; document.getElementById('playBtn').textContent='⏸'; document.getElementById('audioStatus').textContent='🔊 Streaming Live'; });
+            audioElement.addEventListener('pause', () => { isPlaying = false; document.getElementById('playBtn').textContent='▶'; document.getElementById('audioStatus').textContent='⏸ Paused'; });
+            audioElement.addEventListener('playing', () => { document.getElementById('audioStatus').textContent='✅ Playing'; });
+            audioElement.addEventListener('error', () => { document.getElementById('audioStatus').textContent='⚠️ Stream error'; });
+        }
+        function updateClock() {
+            document.getElementById('currentTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        }
+        function updateListeners() {
+            listeners += Math.floor(Math.random()*20)-5;
+            listeners = Math.max(1500, Math.min(5000, listeners));
+            document.getElementById('listeners').textContent = listeners.toLocaleString();
+        }
+        function updateScheduleHighlight() {
+            const hour = new Date().getHours();
+            const items = document.querySelectorAll('.schedule-item');
+            items.forEach(i => { i.style.background='transparent'; i.style.boxShadow='none'; });
+            let idx = hour<6?0:hour<10?1:hour<14?2:hour<18?3:hour<22?4:5;
+            if (items[idx]) {
+                items[idx].style.background='rgba(201, 169, 97, 0.08)';
+                items[idx].style.boxShadow='inset 2px 0 0 var(--gold)';
+            }
+        }
+
+        function startRadio() {
+            document.getElementById('startScreen').style.display = 'none';
+            createAudioElement();
+            setupVoices();
+            if (speechSynth) {
+                speechSynth.onvoiceschanged = setupVoices;
+                setTimeout(setupVoices, 500);
+                setTimeout(setupVoices, 1500);
+            }
+            playStream();
+            fetchWorldNews();
+            fetchSportsNews();
+            fetchWeather();
+            fetchSportsScores();
+            updateClock();
+            adjustVolume(document.getElementById('volumeSlider').value);
+            setInterval(updateClock, 1000);
+            setInterval(fetchWorldNews, 3600000);
+            setInterval(fetchSportsNews, 3600000);
+            setInterval(fetchWeather, 600000);
+            setInterval(fetchSportsScores, 60000);
+            setInterval(displayNextNews, 10000);
+            updateListeners();
+            setInterval(updateListeners, 15000);
+            updateScheduleHighlight();
+            setInterval(updateScheduleHighlight, 60000);
+        }
+
+        window.refreshWorldNews = fetchWorldNews;
+
+        createVisualizer();
+        updateScheduleHighlight();
+        document.getElementById('cityInput').value = 'Boston, MA';
+        console.log('%c📖 JP AI Radio · v7 · Bible Reading (EN + FR) · Prayer (EN + FR) · ":" reads as "verse" / "verset"', 'color:#c9a961;font-weight:bold;');
+    </script>
+</body>
+</html>
