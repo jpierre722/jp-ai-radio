@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
     <style>
         :root {
             --obsidian: #0a0a0d;
@@ -244,7 +245,7 @@
             text-transform: uppercase; color: var(--gold); font-weight: 600;
         }
         .section-label::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--hairline-strong), transparent); }
-        .channels { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 28px; }
+        .channels { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-bottom: 28px; }
         .channel-btn {
             background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.005));
             border: 1px solid rgba(255, 255, 255, 0.06);
@@ -292,7 +293,7 @@
         .ticker-label { display: inline-block; background: transparent; color: var(--gold); font-size: 9px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; white-space: nowrap; padding-right: 16px; border-right: 1px solid var(--hairline); }
         .ticker-content { display: inline; font-size: 12.5px; color: var(--mist); line-height: 1.5; letter-spacing: 0.01em; }
         .contact-section { background: rgba(201, 169, 97, 0.03); border: 1px solid var(--hairline); border-radius: 2px; padding: 16px 0; margin-bottom: 20px; overflow: hidden; position: relative; }
-        .contact-marquee { display: inline-block; white-space: nowrap; padding-left: 100%; animation: marquee 55s linear infinite; font-size: 12.5px; color: var(--mist); letter-spacing: 0.02em; }
+        .contact-marquee { display: inline-block; white-space: nowrap; padding-left: 100%; animation: marquee 60s linear infinite; font-size: 12.5px; color: var(--mist); letter-spacing: 0.02em; }
         .contact-marquee:hover { animation-play-state: paused; }
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
         .contact-marquee a { color: var(--gold); text-decoration: none; font-weight: 500; border-bottom: 1px solid transparent; transition: all 0.3s; }
@@ -383,7 +384,7 @@
         <div class="start-info">
             R&amp;B · Classic Rock · Classical · Electronic · French · Haitian<br>
             AI Music · AI Religious · Bible Reading · Prayer · Debate<br>
-            Sports Flash · Continuous Feed · World News Ticker · Boston, MA
+            News TV (EN) · News TV (FR) · Business TV (EN) · BFM Business (FR)
         </div>
     </div>
 
@@ -425,6 +426,11 @@
                 <div class="visualizer" id="visualizer"></div>
             </div>
 
+            <!-- Video Player (for News/Business channels) -->
+            <div id="videoContainer" style="display:none; margin-bottom:24px; border-radius:3px; overflow:hidden; border:1px solid var(--hairline-strong); background:#000;">
+                <video id="newsVideo" controls playsinline style="width:100%; display:block; max-height:480px; background:#000;"></video>
+            </div>
+
             <!-- Anchor / Reading / Debate Container -->
             <div class="anchor-container" id="anchorContainer">
                 <div class="anchor-header">
@@ -461,8 +467,12 @@
                 <button class="channel-btn" onclick="switchChannel('aireligious')"><span class="channel-icon">✝️</span>AI Religious</button>
                 <button class="channel-btn" onclick="switchChannel('bible')"><span class="channel-icon">📖</span>Bible Reading</button>
                 <button class="channel-btn" onclick="switchChannel('prayer')"><span class="channel-icon">🙏</span>Prayer</button>
+                <button class="channel-btn" onclick="switchChannel('ainews_en')"><span class="channel-icon">📺</span>News TV (EN)</button>
+                <button class="channel-btn" onclick="switchChannel('ainews_fr')"><span class="channel-icon">📺</span>News TV (FR)</button>
+                <button class="channel-btn" onclick="switchChannel('businesstv_en')"><span class="channel-icon">💼</span>Business TV (EN)</button>
+                <button class="channel-btn" onclick="switchChannel('businesstv_fr')"><span class="channel-icon">💼</span>BFM Business (FR)</button>
                 <button class="channel-btn" onclick="switchChannel('debate')"><span class="channel-icon">🗣️</span>Debate</button>
-                <button class="channel-btn" onclick="switchChannel('mix')"><span class="channel-icon">🎧</span>Continuous</button>
+                <button class="channel-btn" onclick="switchChannel('mix')"><span class="channel-icon">⚡</span>Flash News</button>
                 <button class="channel-btn" onclick="switchChannel('sportflash')"><span class="channel-icon">🏈</span>Sport Flash</button>
             </div>
 
@@ -499,11 +509,17 @@
                     <span class="marquee-divider">◆</span>
                     ⏭ <span class="marquee-em">Tip:</span> Click the forward (⏭) button to listen to a different station within the same category channel
                     <span class="marquee-divider">◆</span>
+                    📺 <span class="marquee-em">News TV:</span> Live world news — English &amp; French (France 24, DW, Al Jazeera, Euronews, CGTN)
+                    <span class="marquee-divider">◆</span>
+                    💼 <span class="marquee-em">Business TV:</span> Live business &amp; markets — Bloomberg (EN) · BFM Business (FR)
+                    <span class="marquee-divider">◆</span>
+                    ⚡ <span class="marquee-em">Flash News:</span> Music + periodic news bulletins throughout the hour
+                    <span class="marquee-divider">◆</span>
+                    🗣️ <span class="marquee-em">Debate Channel:</span> Three distinct voices — Moderator, Affirmative guest, Opposition guest
+                    <span class="marquee-divider">◆</span>
                     📖 <span class="marquee-em">Bible Reading:</span> English · Français — ":" reads as "verse" (EN) and "verset" (FR)
                     <span class="marquee-divider">◆</span>
                     🙏 <span class="marquee-em">Prayer Channel:</span> English · Français — each prayer includes a full meditation (homily)
-                    <span class="marquee-divider">◆</span>
-                    🌅 <span class="marquee-em">Daily Rotation:</span> Verses, prayers &amp; meditations change each day — come back tomorrow
                     <span class="marquee-divider">◆</span>
                     🗣️ <span class="marquee-em">Debate Channel:</span> Send your opinions to jpierre722@yahoo.com — we want to hear from you!
                     <span class="marquee-divider">◆</span>
@@ -559,109 +575,115 @@
 
     <script>
         // ============================================
-        // JP AI RADIO — PREMIUM EDITION v7
-        // Bible Reading: English + Français only
-        // Prayer Channel: English + Français only
-        // ":" reads as "verse" (EN) / "verset" (FR)
+        // JP AI RADIO — PREMIUM EDITION v14
+        // - Business TV (EN): single video stream (Bloomberg)
+        // - BFM Business (FR): single video stream (video-only)
         // ============================================
 
-        // ============================================================
-        // 🌴 NATURAL HAITIAN VOICE — MASTER PROMPT (retained for reference) 🌴
-        // Built from the How-To Creole pronunciation guides:
-        //  - howtocreole.com/p/haitian-creole-pronunciation.html
-        //  - howtocreole.com/2025/09/haitian-creole-alphabet-sounds.html
-        //  - howtocreole.com/2016/06/correct-pronunciation-haitian-creole.html
-        // ============================================================
         const HAITIAN_VOICE_MASTER_PROMPT = {
             enabled: true,
             tone: 'dous, cho, natif natal',
             pronunciation: 'kreyòl ayisyen klè',
             nasalRule: 'an, en, on, oun byen make — n pa yon konsòn separe',
-            substitutions: {
-                'ou': 'oo',
-                'è':  'eh',
-                'ò':  'aw',
-                'ay': 'eye',
-                'im': 'eem'
-            },
-            constraints: [
-                'pa tradui',
-                'pa chanje mo yo',
-                'li egzak jan li ekri',
-                'ritm natirèl yon Ayisyen'
-            ],
-            delivery: {
-                rate: 0.72,
-                pitch: 0.92,
-                volume: 1.0,
-                pauseBetweenSentences: 900,
-                pauseBetweenChunks: 1400
-            }
+            substitutions: { 'ou': 'oo', 'è': 'eh', 'ò': 'aw', 'ay': 'eye', 'im': 'eem' },
+            constraints: ['pa tradui', 'pa chanje mo yo', 'li egzak jan li ekri', 'ritm natirèl yon Ayisyen'],
+            delivery: { rate: 0.72, pitch: 0.92, volume: 1.0, pauseBetweenSentences: 900, pauseBetweenChunks: 1400 }
         };
 
         function applyHaitianVoiceMasterPrompt(text, voiceKind) {
             if (!HAITIAN_VOICE_MASTER_PROMPT.enabled) return text;
             if (!text) return text;
             if (voiceKind === 'native') return text;
-
             let t = text;
-
             if (voiceKind === 'french') {
                 t = t.replace(/ò/g, 'aw').replace(/Ò/g, 'Aw');
                 t = t.replace(/en/gi, 'in');
             } else {
                 t = t
-                    .replace(/oun/gi, 'oong')
-                    .replace(/ann/gi, 'un')
-                    .replace(/enn/gi, 'en')
-                    .replace(/onn/gi, 'on')
-                    .replace(/tch/gi, 'ch')
-                    .replace(/ay/gi,  'eye')
-                    .replace(/im/gi,  'eem')
-                    .replace(/dj/gi,  'j')
-                    .replace(/ui/gi,  'yoowee')
-                    .replace(/an/gi,  'ung')
-                    .replace(/en/gi,  'eng')
-                    .replace(/on/gi,  'ong')
-                    .replace(/in/gi,  'eeng')
-                    .replace(/ou/gi,  'oo')
-                    .replace(/ch/gi,  'sh')
-                    .replace(/è/g, 'eh').replace(/È/g, 'Eh')
-                    .replace(/ò/g, 'aw').replace(/Ò/g, 'Aw')
-                    .replace(/é/g, 'ay').replace(/É/g, 'Ay')
-                    .replace(/j/g, 'zh').replace(/J/g, 'Zh');
+                    .replace(/oun/gi, 'oong').replace(/ann/gi, 'un').replace(/enn/gi, 'en').replace(/onn/gi, 'on')
+                    .replace(/tch/gi, 'ch').replace(/ay/gi, 'eye').replace(/im/gi, 'eem').replace(/dj/gi, 'j')
+                    .replace(/ui/gi, 'yoowee').replace(/an/gi, 'ung').replace(/en/gi, 'eng').replace(/on/gi, 'ong')
+                    .replace(/in/gi, 'eeng').replace(/ou/gi, 'oo').replace(/ch/gi, 'sh')
+                    .replace(/è/g, 'eh').replace(/È/g, 'Eh').replace(/ò/g, 'aw').replace(/Ò/g, 'Aw')
+                    .replace(/é/g, 'ay').replace(/É/g, 'Ay').replace(/j/g, 'zh').replace(/J/g, 'Zh');
             }
-
             return t;
         }
 
         function pickVoiceKind(langCode) {
-            if (langCode === 'ht') {
-                if (haitianVoice) return 'native';
-                if (frenchVoice) return 'french';
-                return 'english';
-            }
+            if (langCode === 'ht') { if (haitianVoice) return 'native'; if (frenchVoice) return 'french'; return 'english'; }
             if (langCode === 'fr') return frenchVoice ? 'french' : 'english';
             return 'english';
         }
 
-        // ============================================================
-        // BIBLE REFERENCE PRONUNCIATION
-        // ":" reads as "verse" (EN) / "verset" (FR)
-        // Examples:
-        //   Psalm 23:4   →  "Psalm 23 verse 4"
-        //   Psaume 23:4  →  "Psaume 23 verset 4"
-        // ============================================================
         function formatReferenceForSpeech(ref, langCode) {
             if (!ref) return ref;
             if (langCode === 'fr') return ref.replace(/:/g, ' verset ');
             return ref.replace(/:/g, ' verse ');
         }
 
+        // ============================================================
+        // 🎙️ THREE FULLY DISTINCT DEBATE VOICES
+        // ============================================================
+        let moderatorVoice = null;
+        let affirmativeVoice = null;
+        let negativeVoice = null;
+
+        const DEBATE_VOICE_PROFILES = {
+            moderator:   { pitch: 0.65, rate: 0.88, label: '🎙️ Moderator' },
+            affirmative: { pitch: 1.25, rate: 1.02, label: '🟢 Affirmative Guest' },
+            negative:    { pitch: 1.55, rate: 0.94, label: '🔴 Opposition Guest' }
+        };
+
+        const DEBATE_VOICE_PREFERENCES = {
+            moderator:   ['Google UK English Male', 'Microsoft David', 'Daniel', 'Alex', 'Microsoft Mark', 'Fred'],
+            affirmative: ['Google US English', 'Microsoft Mark', 'Alex', 'Microsoft David', 'Aaron', 'Tom'],
+            negative:    ['Google UK English Female', 'Microsoft Zira', 'Samantha', 'Victoria', 'Karen', 'Moira', 'Tessa', 'Fiona']
+        };
+
+        function pickDebateVoices() {
+            if (!speechSynth) return;
+            const voices = speechSynth.getVoices();
+            if (voices.length === 0) return;
+
+            const enVoices = voices.filter(v => (v.lang || '').toLowerCase().startsWith('en'));
+            if (enVoices.length === 0) return;
+
+            const used = new Set();
+
+            function findPreferred(prefList) {
+                for (const name of prefList) {
+                    const v = enVoices.find(x => x.name.includes(name) && !used.has(x.name));
+                    if (v) { used.add(v.name); return v; }
+                }
+                return null;
+            }
+
+            moderatorVoice = findPreferred(DEBATE_VOICE_PREFERENCES.moderator);
+            affirmativeVoice = findPreferred(DEBATE_VOICE_PREFERENCES.affirmative);
+            negativeVoice = findPreferred(DEBATE_VOICE_PREFERENCES.negative);
+
+            const remaining = enVoices.filter(v => !used.has(v.name));
+            if (!moderatorVoice && remaining.length > 0) { moderatorVoice = remaining.shift(); used.add(moderatorVoice.name); }
+            if (!affirmativeVoice && remaining.length > 0) { affirmativeVoice = remaining.shift(); used.add(affirmativeVoice.name); }
+            if (!negativeVoice && remaining.length > 0) { negativeVoice = remaining.shift(); used.add(negativeVoice.name); }
+
+            if (!moderatorVoice) moderatorVoice = maleVoice || enVoices[0];
+            if (!affirmativeVoice) affirmativeVoice = maleVoice || enVoices[0];
+            if (!negativeVoice) negativeVoice = femaleVoice || enVoices[enVoices.length - 1];
+
+            console.log('[Debate Voices]',
+                'Moderator:', moderatorVoice ? moderatorVoice.name : 'none',
+                '| Affirmative:', affirmativeVoice ? affirmativeVoice.name : 'none',
+                '| Opposition:', negativeVoice ? negativeVoice.name : 'none');
+        }
+
         // ============================================
         // STATE
         // ============================================
         let audioElement = null;
+        let videoElement = null;
+        let hlsInstance = null;
         let isPlaying = false;
         let isMuted = false;
         let volume = 0.7;
@@ -701,6 +723,9 @@
 
         const musicChannels = ['rnb', 'rock', 'classical', 'electronic', 'french', 'haitian', 'aimusic', 'aireligious'];
         const voiceChannels = ['bible', 'prayer'];
+        // Video channels — Business TV (EN) and BFM Business (FR) are video-only, single stream
+        const videoChannels = ['ainews_en', 'ainews_fr', 'businesstv_en', 'businesstv_fr'];
+        const singleStreamVideoChannels = ['businesstv_en', 'businesstv_fr'];
         const BOSTON_LOCATION = { lat: 42.3601, lon: -71.0589, city: 'Boston', region: 'Massachusetts', country: 'US', source: 'Default' };
 
         // ============================================
@@ -739,9 +764,9 @@
                 ] },
             haitian: { name: "Haitian Music", genre: "Konpa / Kompa / Zouk", icon: "🇭🇹",
                 streams: [
-                    { name: "Konpa Hits", description: "Haitian Kompa & Zouk", url: "https://s47.myradiostream.com:15388/;?icy=https" },
-                    { name: "Konpa Mix", description: "Haitian Music & Culture", url: "https://das-edge12-live365-dal02.cdnstream.com/a15951" },
-                    { name: "Kompa 509", description: "Haitian Kompa Classics", url: "https://stream.zeno.fm/nhty0mcnzxquv" }
+                    { name: "Super Star", description: "Haitian Konpa & Zouk", url: "http://s6.voscast.com:10368" },
+                    { name: "Konpa Hits", description: "Haitian Music & Culture", url: "https://stream.zeno.fm/huv" },
+                    { name: "Konpa 509", description: "Haitian Konpa Classics", url: "https://stream.zeno.fm/nuv" }
                 ] },
             aimusic: { name: "AI Music", genre: "AI-Generated Music / Electronic / Ambient", icon: "🤖",
                 streams: [
@@ -765,13 +790,35 @@
                     { name: "Prayer · English", description: "English Prayer + Full Meditation", url: "__prayer_en__" },
                     { name: "Prière · Français", description: "Prières Chrétiennes + Méditation", url: "__prayer_fr__" }
                 ] },
+            ainews_en: { name: "News TV · English", genre: "24/7 Live World News (English)", icon: "📺",
+                streams: [
+                    { name: "France 24 English", description: "Live international news · France 24", url: "https://live.france24.com/hls/live/2037218/F24_EN_HI_HLS/master_5000.m3u8" },
+                    { name: "DW English", description: "Live international news · Deutsche Welle", url: "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8" },
+                    { name: "Al Jazeera English", description: "Live international news · Al Jazeera", url: "https://live-hls-apps-aje-fa.getaj.net/AJE/index.m3u8" }
+                ] },
+            ainews_fr: { name: "News TV · Français", genre: "24/7 Live World News (French)", icon: "📺",
+                streams: [
+                    { name: "France 24 Français", description: "Actualités internationales en direct · France 24", url: "https://live.france24.com/hls/live/2037179/F24_FR_HI_HLS/master_5000.m3u8" },
+                    { name: "Euronews Français", description: "Actualités internationales en direct · Euronews", url: "https://euronews-euronews-french-3-us.plex.wurl.tv/playlist.m3u8" },
+                    { name: "CGTN Français", description: "Actualités internationales en direct · CGTN", url: "https://news.cgtn.com/resource/live/french/cgtn-f.m3u8" }
+                ] },
+            // ── Single-stream video-only channel ──
+            businesstv_en: { name: "Business TV · English", genre: "24/7 Live Business & Markets (English)", icon: "💼",
+                streams: [
+                    { name: "Bloomberg TV", description: "Live global business news · Bloomberg", url: "https://bloomberg-bloomberg-1-eu.rakuten.wurl.tv/playlist.m3u8" }
+                ] },
+            // ── Single-stream video-only channel ──
+            businesstv_fr: { name: "BFM Business · Français", genre: "24/7 Live Business & Markets (French)", icon: "💼",
+                streams: [
+                    { name: "BFM Business", description: "L'actualité économique en direct · BFM Business", url: "https://live-cdn-stream-euw1.bfmb.bct.nextradiotv.com/master.m3u8" }
+                ] },
             debate: { name: "Debate Channel", genre: "Political Debate", icon: "🗣️", streams: [] },
-            mix: { name: "Continuous Feed", genre: "Music + News Bulletins", icon: "🎧", streams: [] },
+            mix: { name: "Flash News", genre: "Music + News Bulletins", icon: "⚡", streams: [] },
             sportflash: { name: "Sport Flash", genre: "Sports Updates", icon: "🏈", streams: [] }
         };
 
         // ============================================
-        // BIBLE LIBRARY — EN / FR (HT content retained but unreachable)
+        // BIBLE LIBRARY — EN / FR
         // ============================================
         const bibleContent = {
             en: [
@@ -807,185 +854,36 @@
                 { ref: "2 Timothée 1:7", text: "Car ce n'est pas un esprit de timidité que Dieu nous a donné, mais un esprit de force, d'amour et de sagesse." },
                 { ref: "1 Pierre 5:7", text: "et déchargez-vous sur lui de tous vos soucis, car lui-même prend soin de vous." },
                 { ref: "Psaume 91:1-2", text: "Celui qui demeure sous l'abri du Très-Haut Repose à l'ombre du Tout-Puissant. Je dis à l'Éternel: Mon refuge et ma forteresse, Mon Dieu en qui je me confie!" }
-            ],
-            ht: [
-                { ref: "Jenèz 1:1", text: "Nan kòmansman, Bondye kreye syèl la ak latè a." },
-                { ref: "Jan 3:16", text: "Paske, Bondye sitèlman renmen lèzòm, li bay sèl Pitit li a, pou tout moun ki kwè nan li pa pèdi, men pou yo gen lavi etènèl." },
-                { ref: "Sòm 23:1", text: "Seyè a se gadò mwen, mwen p ap manke anyen." },
-                { ref: "Sòm 23:4", text: "Menm si mwen pase nan yon fon fè nwa kote lanmò a ye, mwen p ap pè anyen, paske ou la avèk mwen. Gòch ou ak baton ou, se yo ki fè mwen gen kouraj." },
-                { ref: "Womèn 8:28", text: "Nou konnen tout bagay travay ansanm pou byen tout moun ki renmen Bondye, pou moun li rele dapre plan li." },
-                { ref: "Filipyen 4:13", text: "Mwen kapab fè tout bagay gremesi Kris ki ban mwen fòs." },
-                { ref: "Ezayi 40:31", text: "Men, moun ki gen konfyans nan Seyè a ap jwenn fòs ankò. Y ap vole tankou malfini. Y ap kouri, y ap pa fatige; y ap mache, y ap pa bouke." },
-                { ref: "Jeremi 29:11", text: "Paske, mwen konnen plan mwen genyen pou nou, se Seyè a ki di sa. Se plan pou byen nou, pa pou malè nou. Mwen gen pou m ba nou yon avni ak espwa." },
-                { ref: "Pwovèb 3:5-6", text: "Mete tout konfyans ou nan Seyè a. Pa gade sou sa ou konnen pou kont ou. Chonje Seyè a nan tou sa w ap fè, li menm l ap moutre ou chemen an." },
-                { ref: "Matye 11:28", text: "Vin jwenn mwen, nou tout ki bouke, ki chaje anba chay, mwen menm m ap ba nou repo." },
-                { ref: "Sòm 46:1", text: "Bondye se yon pwoteksyon ak yon fòs pou nou, li toujou pare lè nou nan tray." },
-                { ref: "Jozye 1:9", text: "Se mwen menm ki bay ou lòd sa a: pran fòs, gen kouraj! Pa pè, pa dekouraje! Paske, Seyè a, Bondye ou la, va avèk ou tout kote w ap ale." },
-                { ref: "2 Timote 1:7", text: "Paske, Bondye pa ban nou yon lespri lachte. Li ban nou yon lespri ki gen fòs, yon lespri ki gen lanmou, yon lespri ki gen bon konprann." },
-                { ref: "1 Pyè 5:7", text: "Lage tout tèt chaje nou sou li, paske li menm li pran swen nou." },
-                { ref: "Sòm 91:1-2", text: "Moun ki rete anba pwoteksyon Bondye a, moun ki rete nan lonbraj Bondye ki gen pouvwa a, li ka di: Seyè a, se li menm ki pwoteksyon mwen ak fòs mwen, se Bondye mwen, mwen mete konfyans mwen nan li." }
             ]
         };
 
         // ============================================
-        // PRAYER LIBRARY — EN / FR (HT content retained but unreachable)
+        // PRAYER LIBRARY — EN / FR
         // ============================================
         const prayerLibrary = {
             en: [
-                {
-                    title: "The Lord's Prayer",
-                    prayer: "Our Father, which art in heaven, hallowed be thy name. Thy kingdom come, thy will be done, in earth as it is in heaven. Give us this day our daily bread. And forgive us our trespasses, as we forgive those who trespass against us. And lead us not into temptation, but deliver us from evil. For thine is the kingdom, and the power, and the glory, for ever and ever. Amen.",
-                    meditation: "This prayer is the model Jesus Himself gave us. When we call God 'Our Father', we acknowledge that we are not alone — we belong to a family that spans every nation and generation. When we pray 'hallowed be thy name', we recognize that God's name is holy, and we are called to honor it with our lives. 'Thy kingdom come' is a plea for God's reign of love, justice, and peace to take root in our hearts and in our world. 'Give us this day our daily bread' reminds us that we depend on God for everything — not just food, but every breath we take. When we forgive others, we open the door for God's forgiveness to flow through us. And when we ask to be delivered from evil, we acknowledge that we cannot walk this road alone. Pray this prayer slowly. Let every word sink into your heart. Let it become the pattern of your entire life. Amen."
-                },
-                {
-                    title: "Prayer for Peace",
-                    prayer: "Lord, we pray for peace in our hearts, in our homes, in our cities, and in our world. Calm the storms around us and within us. Let your peace that passes all understanding guard our hearts and minds. Amen.",
-                    meditation: "Peace is not the absence of conflict. It is the presence of God. When we pray for peace, we are not asking for a world without problems — we are inviting God to be the center of every situation. The peace that God gives is not like the peace the world offers. It is a deep, unshakable calm that remains even when everything around us is shaking. This peace begins in the individual heart. Before we can bring peace to our homes and our communities, we must first allow God to quiet our own inner storms. As you pray this prayer, invite the Holy Spirit to search your heart. Are there fears, anxieties, or resentments that need to be surrendered? Let them go. Let the peace of Christ rule in your heart, and it will overflow into everything you touch. Amen."
-                },
-                {
-                    title: "Prayer for Healing",
-                    prayer: "Heavenly Father, we lift up all who are sick, hurting, or in pain. Place your healing hand upon them. Restore their strength, renew their hope, and bring comfort to their families. In Jesus' name, amen.",
-                    meditation: "Healing is more than physical restoration. It is the gentle touch of God reaching into every broken place of our lives. When we pray for healing, we acknowledge that we are not self-sufficient. We need God. We need His grace. We need His mercy. Some healing comes instantly. Some comes slowly. Some comes in ways we do not expect — through a word of encouragement, a friend's presence, or a deeper trust in God's plan. True healing is always tied to faith. Jesus often said, 'Your faith has made you well.' Faith is not the absence of questions. It is the choice to trust God even when we do not have all the answers. Pray this prayer with an open heart. Trust that God hears you, and trust that He is working — even in the waiting. Amen."
-                },
-                {
-                    title: "Morning Prayer",
-                    prayer: "Lord, thank you for this new day. Guide my steps, my words, and my thoughts. Help me to be a light to those around me. Let everything I do bring honor to your name. Amen.",
-                    meditation: "Every morning is a gift from God. The fact that you opened your eyes, that you can breathe, that you can move — these are mercies we too often take for granted. A morning prayer sets the tone for the entire day. It turns your first thoughts toward God and invites His guidance before any other voice can speak into your life. When you begin the day with prayer, you are saying to God, 'I need You today.' You are acknowledging that you cannot walk this day alone. The psalmist wrote, 'In the morning, Lord, You hear my voice.' God listens. He cares about the small details of your day. As you pray this prayer, imagine God walking beside you into the day ahead. He is not far away. He is closer than your own breath. Amen."
-                },
-                {
-                    title: "Evening Prayer",
-                    prayer: "Father, as this day comes to a close, we thank you for your protection and provision. Forgive us for the ways we have fallen short. Watch over us through the night, and grant us rest. Amen.",
-                    meditation: "The evening is a sacred time. It is the moment when the noise of the day fades and we come before God with open hands. An evening prayer is an act of surrender. It says, 'Lord, I did not get everything right today, but I am giving it to You.' This is the moment to review the day with God — not to beat ourselves up, but to learn, to grow, and to rest. When we ask God to watch over us through the night, we are trusting that His protection never sleeps. The psalmist wrote, 'He who watches over Israel will neither slumber nor sleep.' As you lie down, remember that God is still on His throne. You can rest because He does not. Give Him your burdens, and let His peace wash over you. Amen."
-                },
-                {
-                    title: "Prayer of Thanksgiving",
-                    prayer: "Lord, we thank you for your goodness, your mercy, and your faithfulness. Thank you for the gift of life, for family, and for friends. Let our hearts overflow with gratitude. Amen.",
-                    meditation: "Thanksgiving is the heartbeat of a healthy spiritual life. When we thank God, we are not doing Him a favor — we are doing ourselves one. Gratitude rewires the soul. It shifts our attention away from what we lack and toward what we have. It turns comparison into contentment and envy into joy. When we thank God, we recognize that every good gift comes from His hand. Your family. Your friends. Your breath. Your salvation. All of it is grace. Gratitude also protects us from spiritual blindness. When we stop thanking God, we start to take Him for granted — and that is the beginning of spiritual decline. As you pray this prayer, name three specific things you are grateful for today. Let gratitude rise like incense before the throne of God. Amen."
-                },
-                {
-                    title: "Prayer for Protection",
-                    prayer: "Almighty God, we ask for your protection over us, our families, and our loved ones. Surround us with your angels. Guard our going out and our coming in. Be our shield and our strong tower. Amen.",
-                    meditation: "We live in a world that is full of danger and uncertainty. But we serve a God who is our refuge and our fortress. When we pray for protection, we are not asking for a life without difficulty. We are asking God to be with us in the midst of it. The psalms describe God as our shield, our strong tower, our hiding place. He surrounds His people with angels. He guards our going out and our coming in. He never leaves us nor forsakes us. As you pray this prayer, think of the areas of your life where you feel most vulnerable. Give them to God. Trust Him with your family, your finances, your health, your future. He is faithful. He is watching. He is protecting. You are not alone. Amen."
-                },
-                {
-                    title: "Prayer for Wisdom",
-                    prayer: "Lord, grant us wisdom beyond our years and understanding beyond our knowledge. Guide our decisions, direct our paths, and let us walk in your truth all the days of our lives. Amen.",
-                    meditation: "Wisdom is different from knowledge. Knowledge tells you what to do. Wisdom tells you when to do it, how to do it, and whether to do it at all. The fear of the Lord is the beginning of wisdom. When we pray for wisdom, we are asking God to give us His perspective on our lives. We are asking Him to help us see as He sees — not with limited human understanding but with eternal vision. James tells us that if we lack wisdom, we should ask God, and He will give generously to all without finding fault. So ask. Ask boldly. Ask persistently. Wisdom is not reserved for a select few. It is available to every child of God who humbly seeks it. As you pray this prayer, open your heart to what God wants to reveal to you. Amen."
-                },
-                {
-                    title: "Prayer for Family",
-                    prayer: "Father, we lift up our families to you. Bless every marriage, every child, every home. Heal broken relationships, strengthen bonds of love, and let our homes be places of peace. Amen.",
-                    meditation: "Family is one of God's greatest gifts. It is the first place where we learn to love, to forgive, to sacrifice. But family can also be the place of our deepest wounds. When we pray for our families, we bring our pain and our hope to the One who created the family. God's design for family is one of love, safety, and spiritual nurture. A home where God is honored becomes a light to the whole neighborhood. The psalmist said, 'Unless the Lord builds the house, the builders labor in vain.' We cannot build healthy families on our own strength. We need God at the center. As you pray this prayer, lift up each member of your family by name. Ask God to bless them, to protect them, and to draw them closer to Himself. Amen."
-                },
-                {
-                    title: "Prayer for the World",
-                    prayer: "Lord, we pray for the nations. Bring comfort to the suffering, hope to the hopeless, and light to those in darkness. Raise up leaders of integrity, and let your kingdom come on earth as it is in heaven. Amen.",
-                    meditation: "The world is bigger than our own immediate circle. When we pray for the world, we are joining our hearts with the heart of God, who loves every nation, every tribe, every tongue. God is not a God of one country or one culture. He is the God of all peoples. When we pray for the world, we intercede for those who are suffering — the hungry, the displaced, the persecuted, the forgotten. We pray for leaders, that they would govern with integrity and justice. We pray for peace in regions torn by conflict. We pray for revival in nations that have turned away from God. And we remember that we ourselves are part of the world that God so loved that He gave His only Son. As you pray this prayer, let your heart expand. Ask God to break your heart for what breaks His. Amen."
-                }
+                { title: "The Lord's Prayer", prayer: "Our Father, which art in heaven, hallowed be thy name. Thy kingdom come, thy will be done, in earth as it is in heaven. Give us this day our daily bread. And forgive us our trespasses, as we forgive those who trespass against us. And lead us not into temptation, but deliver us from evil. For thine is the kingdom, and the power, and the glory, for ever and ever. Amen.", meditation: "This prayer is the model Jesus Himself gave us. When we call God 'Our Father', we acknowledge that we are not alone — we belong to a family that spans every nation and generation. When we pray 'hallowed be thy name', we recognize that God's name is holy, and we are called to honor it with our lives. 'Thy kingdom come' is a plea for God's reign of love, justice, and peace to take root in our hearts and in our world. 'Give us this day our daily bread' reminds us that we depend on God for everything — not just food, but every breath we take. When we forgive others, we open the door for God's forgiveness to flow through us. And when we ask to be delivered from evil, we acknowledge that we cannot walk this road alone. Pray this prayer slowly. Let every word sink into your heart. Let it become the pattern of your entire life. Amen." },
+                { title: "Prayer for Peace", prayer: "Lord, we pray for peace in our hearts, in our homes, in our cities, and in our world. Calm the storms around us and within us. Let your peace that passes all understanding guard our hearts and minds. Amen.", meditation: "Peace is not the absence of conflict. It is the presence of God. When we pray for peace, we are not asking for a world without problems — we are inviting God to be the center of every situation. The peace that God gives is not like the peace the world offers. It is a deep, unshakable calm that remains even when everything around us is shaking. This peace begins in the individual heart. Before we can bring peace to our homes and our communities, we must first allow God to quiet our own inner storms. As you pray this prayer, invite the Holy Spirit to search your heart. Are there fears, anxieties, or resentments that need to be surrendered? Let them go. Let the peace of Christ rule in your heart, and it will overflow into everything you touch. Amen." },
+                { title: "Prayer for Healing", prayer: "Heavenly Father, we lift up all who are sick, hurting, or in pain. Place your healing hand upon them. Restore their strength, renew their hope, and bring comfort to their families. In Jesus' name, amen.", meditation: "Healing is more than physical restoration. It is the gentle touch of God reaching into every broken place of our lives. When we pray for healing, we acknowledge that we are not self-sufficient. We need God. We need His grace. We need His mercy. Some healing comes instantly. Some comes slowly. Some comes in ways we do not expect — through a word of encouragement, a friend's presence, or a deeper trust in God's plan. True healing is always tied to faith. Jesus often said, 'Your faith has made you well.' Faith is not the absence of questions. It is the choice to trust God even when we do not have all the answers. Pray this prayer with an open heart. Trust that God hears you, and trust that He is working — even in the waiting. Amen." },
+                { title: "Morning Prayer", prayer: "Lord, thank you for this new day. Guide my steps, my words, and my thoughts. Help me to be a light to those around me. Let everything I do bring honor to your name. Amen.", meditation: "Every morning is a gift from God. The fact that you opened your eyes, that you can breathe, that you can move — these are mercies we too often take for granted. A morning prayer sets the tone for the entire day. It turns your first thoughts toward God and invites His guidance before any other voice can speak into your life. When you begin the day with prayer, you are saying to God, 'I need You today.' You are acknowledging that you cannot walk this day alone. The psalmist wrote, 'In the morning, Lord, You hear my voice.' God listens. He cares about the small details of your day. As you pray this prayer, imagine God walking beside you into the day ahead. He is not far away. He is closer than your own breath. Amen." },
+                { title: "Evening Prayer", prayer: "Father, as this day comes to a close, we thank you for your protection and provision. Forgive us for the ways we have fallen short. Watch over us through the night, and grant us rest. Amen.", meditation: "The evening is a sacred time. It is the moment when the noise of the day fades and we come before God with open hands. An evening prayer is an act of surrender. It says, 'Lord, I did not get everything right today, but I am giving it to You.' This is the moment to review the day with God — not to beat ourselves up, but to learn, to grow, and to rest. When we ask God to watch over us through the night, we are trusting that His protection never sleeps. The psalmist wrote, 'He who watches over Israel will neither slumber nor sleep.' As you lie down, remember that God is still on His throne. You can rest because He does not. Give Him your burdens, and let His peace wash over you. Amen." },
+                { title: "Prayer of Thanksgiving", prayer: "Lord, we thank you for your goodness, your mercy, and your faithfulness. Thank you for the gift of life, for family, and for friends. Let our hearts overflow with gratitude. Amen.", meditation: "Thanksgiving is the heartbeat of a healthy spiritual life. When we thank God, we are not doing Him a favor — we are doing ourselves one. Gratitude rewires the soul. It shifts our attention away from what we lack and toward what we have. It turns comparison into contentment and envy into joy. When we thank God, we recognize that every good gift comes from His hand. Your family. Your friends. Your breath. Your salvation. All of it is grace. Gratitude also protects us from spiritual blindness. When we stop thanking God, we start to take Him for granted — and that is the beginning of spiritual decline. As you pray this prayer, name three specific things you are grateful for today. Let gratitude rise like incense before the throne of God. Amen." },
+                { title: "Prayer for Protection", prayer: "Almighty God, we ask for your protection over us, our families, and our loved ones. Surround us with your angels. Guard our going out and our coming in. Be our shield and our strong tower. Amen.", meditation: "We live in a world that is full of danger and uncertainty. But we serve a God who is our refuge and our fortress. When we pray for protection, we are not asking for a life without difficulty. We are asking God to be with us in the midst of it. The psalms describe God as our shield, our strong tower, our hiding place. He surrounds His people with angels. He guards our going out and our coming in. He never leaves us nor forsakes us. As you pray this prayer, think of the areas of your life where you feel most vulnerable. Give them to God. Trust Him with your family, your finances, your health, your future. He is faithful. He is watching. He is protecting. You are not alone. Amen." },
+                { title: "Prayer for Wisdom", prayer: "Lord, grant us wisdom beyond our years and understanding beyond our knowledge. Guide our decisions, direct our paths, and let us walk in your truth all the days of our lives. Amen.", meditation: "Wisdom is different from knowledge. Knowledge tells you what to do. Wisdom tells you when to do it, how to do it, and whether to do it at all. The fear of the Lord is the beginning of wisdom. When we pray for wisdom, we are asking God to give us His perspective on our lives. We are asking Him to help us see as He sees — not with limited human understanding but with eternal vision. James tells us that if we lack wisdom, we should ask God, and He will give generously to all without finding fault. So ask. Ask boldly. Ask persistently. Wisdom is not reserved for a select few. It is available to every child of God who humbly seeks it. As you pray this prayer, open your heart to what God wants to reveal to you. Amen." },
+                { title: "Prayer for Family", prayer: "Father, we lift up our families to you. Bless every marriage, every child, every home. Heal broken relationships, strengthen bonds of love, and let our homes be places of peace. Amen.", meditation: "Family is one of God's greatest gifts. It is the first place where we learn to love, to forgive, to sacrifice. But family can also be the place of our deepest wounds. When we pray for our families, we bring our pain and our hope to the One who created the family. God's design for family is one of love, safety, and spiritual nurture. A home where God is honored becomes a light to the whole neighborhood. The psalmist said, 'Unless the Lord builds the house, the builders labor in vain.' We cannot build healthy families on our own strength. We need God at the center. As you pray this prayer, lift up each member of your family by name. Ask God to bless them, to protect them, and to draw them closer to Himself. Amen." },
+                { title: "Prayer for the World", prayer: "Lord, we pray for the nations. Bring comfort to the suffering, hope to the hopeless, and light to those in darkness. Raise up leaders of integrity, and let your kingdom come on earth as it is in heaven. Amen.", meditation: "The world is bigger than our own immediate circle. When we pray for the world, we are joining our hearts with the heart of God, who loves every nation, every tribe, every tongue. God is not a God of one country or one culture. He is the God of all peoples. When we pray for the world, we intercede for those who are suffering — the hungry, the displaced, the persecuted, the forgotten. We pray for leaders, that they would govern with integrity and justice. We pray for peace in regions torn by conflict. We pray for revival in nations that have turned away from God. And we remember that we ourselves are part of the world that God so loved that He gave His only Son. As you pray this prayer, let your heart expand. Ask God to break your heart for what breaks His. Amen." }
             ],
             fr: [
-                {
-                    title: "Notre Père",
-                    prayer: "Notre Père qui es aux cieux, que ton nom soit sanctifié, que ton règne vienne, que ta volonté soit faite sur la terre comme au ciel. Donne-nous aujourd'hui notre pain quotidien. Pardonne-nous nos offenses, comme nous pardonnons aussi à ceux qui nous ont offensés. Et ne nous soumets pas à la tentation, mais délivre-nous du mal. Car c'est à toi qu'appartiennent le règne, la puissance et la gloire, aux siècles des siècles. Amen.",
-                    meditation: "Cette prière est le modèle que Jésus Lui-même nous a donné. Quand nous appelons Dieu 'Notre Père', nous reconnaissons que nous ne sommes pas seuls — nous appartenons à une famille qui s'étend à toutes les nations et à toutes les générations. Quand nous prions 'que ton nom soit sanctifié', nous reconnaissons que le nom de Dieu est saint et que nous sommes appelés à l'honorer par notre vie. 'Que ton règne vienne' est un appel pour que le règne d'amour, de justice et de paix de Dieu prenne racine dans nos coeurs et dans notre monde. 'Donne-nous aujourd'hui notre pain quotidien' nous rappelle que nous dépendons de Dieu pour tout. Quand nous pardonnons aux autres, nous ouvrons la porte à ce que le pardon de Dieu coule à travers nous. Et quand nous demandons d'être délivrés du mal, nous reconnaissons que nous ne pouvons pas marcher seuls sur ce chemin. Priez cette prière lentement. Laissez chaque mot pénétrer votre coeur. Laissez-la devenir le modèle de toute votre vie. Amen."
-                },
-                {
-                    title: "Prière pour la Paix",
-                    prayer: "Seigneur, nous prions pour la paix dans nos coeurs, dans nos maisons, dans nos villes et dans notre monde. Calme les tempêtes autour de nous et en nous. Que ta paix qui surpasse toute intelligence garde nos coeurs et nos pensées. Amen.",
-                    meditation: "La paix n'est pas l'absence de conflit. C'est la présence de Dieu. Quand nous prions pour la paix, nous ne demandons pas un monde sans problèmes — nous invitons Dieu à être au centre de chaque situation. La paix que Dieu donne n'est pas comme celle que le monde offre. C'est un calme profond et inébranlable qui demeure même quand tout autour de nous tremble. Cette paix commence dans le coeur individuel. Avant d'apporter la paix dans nos maisons et nos communautés, nous devons d'abord permettre à Dieu d'apaiser nos propres tempêtes intérieures. En priant cette prière, invitez le Saint-Esprit à sonder votre coeur. Y a-t-il des peurs, des angoisses ou des ressentiments qui doivent être abandonnés? Laissez-les aller. Laissez la paix du Christ régner dans votre coeur, et elle débordera sur tout ce que vous touchez. Amen."
-                },
-                {
-                    title: "Prière pour la Guérison",
-                    prayer: "Père céleste, nous te présentons tous ceux qui sont malades, blessés ou souffrants. Pose ta main guérissante sur eux. Restaure leur force, renouvelle leur espérance, et apporte le réconfort à leurs familles. Au nom de Jésus, amen.",
-                    meditation: "La guérison est plus qu'une restauration physique. C'est le toucher doux de Dieu atteignant chaque endroit brisé de notre vie. Quand nous prions pour la guérison, nous reconnaissons que nous ne sommes pas autosuffisants. Nous avons besoin de Dieu. Nous avons besoin de Sa grâce. Nous avons besoin de Sa miséricorde. Certaines guérisons viennent instantanément. D'autres viennent lentement. D'autres viennent de manière inattendue — par un mot d'encouragement, la présence d'un ami, ou une confiance plus profonde dans le plan de Dieu. La vraie guérison est toujours liée à la foi. Jésus disait souvent: 'Ta foi t'a guéri.' La foi n'est pas l'absence de questions. C'est le choix de faire confiance à Dieu même quand nous n'avons pas toutes les réponses. Priez cette prière avec un coeur ouvert. Croyez que Dieu vous entend et qu'Il agit — même dans l'attente. Amen."
-                },
-                {
-                    title: "Prière du Matin",
-                    prayer: "Seigneur, merci pour ce nouveau jour. Guide mes pas, mes paroles et mes pensées. Aide-moi à être une lumière pour ceux qui m'entourent. Que tout ce que je fais honore ton nom. Amen.",
-                    meditation: "Chaque matin est un cadeau de Dieu. Le fait que vous ayez ouvert les yeux, que vous puissiez respirer, que vous puissiez bouger — ce sont des miséricordes que nous prenons trop souvent pour acquises. Une prière du matin donne le ton pour toute la journée. Elle tourne vos premières pensées vers Dieu et invite Sa direction avant qu'aucune autre voix ne puisse parler dans votre vie. Quand vous commencez la journée par la prière, vous dites à Dieu: 'J'ai besoin de Toi aujourd'hui.' Vous reconnaissez que vous ne pouvez pas marcher seul ce jour. Le psalmiste a écrit: 'Le matin, Seigneur, Tu entends ma voix.' Dieu écoute. Il se soucie des petits détails de votre journée. En priant cette prière, imaginez Dieu marchant à vos côtés dans la journée à venir. Il n'est pas loin. Il est plus proche que votre propre souffle. Amen."
-                },
-                {
-                    title: "Prière du Soir",
-                    prayer: "Père, alors que ce jour se termine, nous te remercions pour ta protection et ta provision. Pardonne-nous nos manquements. Veille sur nous pendant la nuit, et accorde-nous le repos. Amen.",
-                    meditation: "Le soir est un moment sacré. C'est le moment où le bruit de la journée s'estompe et où nous venons devant Dieu les mains ouvertes. Une prière du soir est un acte d'abandon. Elle dit: 'Seigneur, je n'ai pas tout bien fait aujourd'hui, mais je Te le donne.' C'est le moment de revoir la journée avec Dieu — non pas pour nous flageller, mais pour apprendre, grandir et nous reposer. Quand nous demandons à Dieu de veiller sur nous pendant la nuit, nous faisons confiance que Sa protection ne dort jamais. Le psalmiste a écrit: 'Celui qui garde Israël ne sommeille ni ne dort.' En vous couchant, rappelez-vous que Dieu est toujours sur Son trône. Vous pouvez vous reposer parce qu'Il ne le fait pas. Donnez-Lui vos fardeaux, et laissez Sa paix vous laver. Amen."
-                },
-                {
-                    title: "Prière de Remerciement",
-                    prayer: "Seigneur, nous te remercions pour ta bonté, ta miséricorde et ta fidélité. Merci pour le don de la vie, pour la famille et pour les amis. Que nos coeurs débordent de reconnaissance. Amen.",
-                    meditation: "L'action de grâce est le battement de coeur d'une vie spirituelle saine. Quand nous remercions Dieu, nous ne Lui rendons pas service — nous nous en rendons un. La gratitude remodèle l'âme. Elle détourne notre attention de ce qui nous manque vers ce que nous avons. Elle transforme la comparaison en contentement et l'envie en joie. Quand nous remercions Dieu, nous reconnaissons que tout bon don vient de Sa main. Votre famille. Vos amis. Votre souffle. Votre salut. Tout est grâce. La gratitude nous protège aussi de la cécité spirituelle. Quand nous cessons de remercier Dieu, nous commençons à Le tenir pour acquis — et c'est le début du déclin spirituel. En priant cette prière, nommez trois choses spécifiques pour lesquelles vous êtes reconnaissant aujourd'hui. Laissez la gratitude s'élever comme un encens devant le trône de Dieu. Amen."
-                },
-                {
-                    title: "Prière de Protection",
-                    prayer: "Dieu tout-puissant, nous te demandons ta protection sur nous, nos familles et nos proches. Entoure-nous de tes anges. Garde nos allées et venues. Sois notre bouclier et notre haute retraite. Amen.",
-                    meditation: "Nous vivons dans un monde plein de danger et d'incertitude. Mais nous servons un Dieu qui est notre refuge et notre forteresse. Quand nous prions pour la protection, nous ne demandons pas une vie sans difficulté. Nous demandons à Dieu d'être avec nous au milieu d'elle. Les psaumes décrivent Dieu comme notre bouclier, notre haute retraite, notre lieu de refuge. Il entoure Son peuple d'anges. Il garde nos allées et venues. Il ne nous abandonne jamais et ne nous délaisse jamais. En priant cette prière, pensez aux domaines de votre vie où vous vous sentez le plus vulnérable. Donnez-les à Dieu. Confiez-Lui votre famille, vos finances, votre santé, votre avenir. Il est fidèle. Il veille. Il protège. Vous n'êtes pas seul. Amen."
-                },
-                {
-                    title: "Prière pour la Sagesse",
-                    prayer: "Seigneur, accorde-nous une sagesse au-delà de nos années et une intelligence au-delà de nos connaissances. Guide nos décisions, dirige nos sentiers, et fais-nous marcher dans ta vérité tous les jours de notre vie. Amen.",
-                    meditation: "La sagesse est différente de la connaissance. La connaissance vous dit quoi faire. La sagesse vous dit quand le faire, comment le faire, et si oui ou non il faut le faire. La crainte du Seigneur est le commencement de la sagesse. Quand nous prions pour la sagesse, nous demandons à Dieu de nous donner Sa perspective sur nos vies. Nous Lui demandons de nous aider à voir comme Il voit — non pas avec une compréhension humaine limitée mais avec une vision éternelle. Jacques nous dit que si nous manquons de sagesse, nous devons demander à Dieu, et Il donnera généreusement à tous sans faire de reproche. Alors demandez. Demandez avec audace. Demandez avec persévérance. La sagesse n'est pas réservée à quelques élus. Elle est disponible pour chaque enfant de Dieu qui la cherche humblement. En priant cette prière, ouvrez votre coeur à ce que Dieu veut vous révéler. Amen."
-                },
-                {
-                    title: "Prière pour la Famille",
-                    prayer: "Père, nous te présentons nos familles. Bénis chaque mariage, chaque enfant, chaque foyer. Guéris les relations brisées, renforce les liens d'amour, et fais de nos maisons des lieux de paix. Amen.",
-                    meditation: "La famille est l'un des plus grands dons de Dieu. C'est le premier endroit où nous apprenons à aimer, à pardonner, à nous sacrifier. Mais la famille peut aussi être le lieu de nos blessures les plus profondes. Quand nous prions pour nos familles, nous apportons notre douleur et notre espérance à Celui qui a créé la famille. Le dessein de Dieu pour la famille est un dessein d'amour, de sécurité et de nourriture spirituelle. Une maison où Dieu est honoré devient une lumière pour tout le quartier. Le psalmiste a dit: 'Si l'Éternel ne bâtit la maison, ceux qui la bâtissent travaillent en vain.' Nous ne pouvons pas bâtir des familles saines par nos propres forces. Nous avons besoin de Dieu au centre. En priant cette prière, élevez chaque membre de votre famille par son nom. Demandez à Dieu de les bénir, de les protéger et de les attirer plus près de Lui. Amen."
-                },
-                {
-                    title: "Prière pour le Monde",
-                    prayer: "Seigneur, nous prions pour les nations. Apporte la consolation aux souffrants, l'espérance aux désespérés, et la lumière à ceux qui sont dans les ténèbres. Suscite des dirigeants intègres, et que ton règne vienne sur la terre comme au ciel. Amen.",
-                    meditation: "Le monde est plus grand que notre cercle immédiat. Quand nous prions pour le monde, nous unissons nos coeurs au coeur de Dieu, qui aime chaque nation, chaque tribu, chaque langue. Dieu n'est pas le Dieu d'un seul pays ou d'une seule culture. Il est le Dieu de tous les peuples. Quand nous prions pour le monde, nous intercédons pour ceux qui souffrent — les affamés, les déplacés, les persécutés, les oubliés. Nous prions pour les dirigeants, qu'ils gouvernent avec intégrité et justice. Nous prions pour la paix dans les régions déchirées par le conflit. Nous prions pour un réveil dans les nations qui se sont détournées de Dieu. Et nous nous rappelons que nous sommes nous-mêmes une partie du monde que Dieu a tant aimé qu'Il a donné Son Fils unique. En priant cette prière, laissez votre coeur s'élargir. Demandez à Dieu de briser votre coeur pour ce qui brise le Sien. Amen."
-                }
-            ],
-            ht: [
-                {
-                    title: "Papa Nou",
-                    prayer: "Papa nou ki nan syèl la, non ou sen. Peyi ou vini, volonte ou fèt sou tè a menm jan li fèt nan syèl la. Ban nou jodi a pen nou bezwen an. Padone nou sa nou fè ki mal, menm jan nou padone moun ki fè nou mal. Pa kite nou tonbe nan tantasyon, men delivre nou anba sa ki mal la. Paske, se ou menm ki gen pouvwa a, wayòm nan ak glwa a, pou tout tan. Amèn.",
-                    meditation: "Lapriyè sa a se modèl Jezi menm te ban nou. Lè nou rele Bondye Papa nou, nou rekonèt nou pa poukont nou — nou fè pati yon fanmi ki rive nan tout nasyon ak tout jenerasyon. Lè nou lapriyè non ou sen, nou rekonèt non Bondye a sen, epi nou rele pou nou onore li ak lavi nou. Peyi ou vini se yon lapriyè pou wayòm lanmou, jistis ak lapè Bondye a pran rasin nan kè nou ak nan monn nou. Ban nou jodi a pen nou bezwen an fè nou sonje nou depann de Bondye pou tout bagay. Lè nou padone lòt moun, nou louvri pòt la pou padon Bondye koule nan nou. Epi lè nou mande pou yo delivre nou anba sa ki mal la, nou rekonèt nou pa ka mache chemen sa a poukont nou. Lapriyè lapriyè sa a dousman. Kite chak mo desann nan kè ou. Kite l tounen modèl tout lavi ou. Amèn."
-                },
-                {
-                    title: "Lapriyè pou Lapè",
-                    prayer: "Senye, nou lapriyè pou lapè nan kè nou, nan kay nou, nan vil nou ak nan monn nou. Kalme tanpèt bò kote nou ak anndan nou. Se pou lapè ou ki depase tout sa nou ka konprann pwoteje kè nou ak panse nou. Amèn.",
-                    meditation: "Lapè se pa absans konfli. Se prezans Bondye. Lè nou lapriyè pou lapè, nou pa mande yon monn san pwoblèm — nou envite Bondye pou l nan sant chak sitiyasyon. Lapè Bondye bay la pa tankou lapè monn nan ofri. Se yon kalm pwofon ki rete menm lè tout bagay bò kote nou ap tranble. Lapè sa a kòmanse nan kè chak moun. Anvan nou pote lapè nan kay nou ak kominote nou, nou dwe kite Bondye apeze tanpèt anndan nou. Pandan w ap lapriyè lapriyè sa a, envite Sentespri a sondaj kè ou. Èske gen laperèz, enkyetid oswa resantiman ki bezwen abandone? Kite yo ale. Kite lapè Kris la gouvènen nan kè ou, epi l ap debòde nan tout sa ou manyen. Amèn."
-                },
-                {
-                    title: "Lapriyè pou Gerizon",
-                    prayer: "Papa nan syèl la, nou prezante ou tout moun ki malad, ki blese oswa ki soufri. Mete men ou ki geri sou yo. Retabli fòs yo, renouvle espwa yo, epi pote konsolasyon pou fanmi yo. Nan non Jezi, amèn.",
-                    meditation: "Gerizon se plis pase restorasyon fizik. Se touche dou Bondye ki rive nan chak kote kase nan lavi nou. Lè nou lapriyè pou gerizon, nou rekonèt nou pa endepandan. Nou bezwen Bondye. Nou bezwen gras Li. Nou bezwen mizèrikòd Li. Gen gerizon ki vini touswit. Gen lòt ki vini dousman. Gen lòt ki vini nan fason nou pa atann — atravè yon mo ankourajman, prezans yon zanmi, oswa yon konfyans pi pwofon nan plan Bondye. Vre gerizon toujou mare ak lafwa. Jezi te di souvan: Lafwa ou geri ou. Lafwa se pa absans kesyon. Se chwa pou fè konfyans Bondye menm lè nou pa gen tout repons yo. Lapriyè lapriyè sa a ak yon kè ouvè. Kwè Bondye tande ou, epi kwè Li ap travay — menm nan tann lan. Amèn."
-                },
-                {
-                    title: "Lapriyè Maten",
-                    prayer: "Senye, mèsi pou jou sa a. Gide pa mwen, pawòl mwen ak panse mwen. Ede mwen pou mwen ka yon limyè pou moun ki bò kote m. Se pou tout sa m fè bay non ou glwa. Amèn.",
-                    meditation: "Chak maten se yon kado Bondye. Lefèt ou louvri zye ou, ou ka respire, ou ka deplase — sa yo se mizèrikòd nou pran twò souvan pou akò. Yon lapriyè maten bay ton pou tout jounen an. Li vire premye panse ou nan direksyon Bondye epi envite gidans Li anvan nenpòt lòt vwa ka pale nan lavi ou. Lè ou kòmanse jounen an ak lapriyè, w ap di Bondye: Mwen bezwen Ou jodi a. W ap rekonèt ou pa ka mache jounen sa a poukont ou. Psalmis la te ekri: Nan maten, Senye, Ou tande vwa mwen. Bondye koute. Li gen sousi pou ti detay jounen ou. Pandan w ap lapriyè lapriyè sa a, imajine Bondye ap mache bò kote ou nan jounen k ap vini an. Li pa lwen. Li pi pre pase souf ou menm. Amèn."
-                },
-                {
-                    title: "Lapriyè Aswè",
-                    prayer: "Papa, pandan jounen sa a ap fini, nou remèsye ou pou pwoteksyon ou ak pwovizyon ou. Padone nou pou fèblès nou. Veye sou nou pandan lannwit lan, epi ba nou repo. Amèn.",
-                    meditation: "Aswe se yon moman sakre. Se moman lè bri jounen an disparèt epi nou vini devan Bondye ak men ouvè. Yon lapriyè aswè se yon zak abandon. Li di: Senye, mwen pa fè tout bagay byen jodi a, men m ap ba Ou li. Sa a se moman pou revize jounen an ak Bondye — pa pou nou bat tèt nou, men pou aprann, grandi ak repoze. Lè nou mande Bondye veye sou nou pandan lannwit lan, nou fè konfyans pwoteksyon Li pa janm dòmi. Psalmis la te ekri: Moun ki veye sou pèp Izrayèl la pa dòmi, li pa pran sòm. Lè w kouche, sonje Bondye toujou sou twòn Li. Ou ka repoze paske Li pa fè sa. Ba Li chay ou yo, epi kite lapè Li lave ou. Amèn."
-                },
-                {
-                    title: "Lapriyè Remèsiman",
-                    prayer: "Senye, nou remèsye ou pou bonte ou, mizèrikòd ou ak fidèlite ou. Mèsi pou kado lavi a, pou fanmi ak pou zanmi. Se pou kè nou debòde ak rekonesans. Amèn.",
-                    meditation: "Remèsiman se batman kè yon lavi espirityèl ki an sante. Lè nou remèsye Bondye, nou pa rann Li yon sèvis — nou rann tèt nou youn. Rekonesans rejenere nanm lan. Li vire atansyon nou soti nan sa nou manke a pou rive nan sa nou genyen an. Li chanje konparezon an kontantman ak jalouzi an lajwa. Lè nou remèsye Bondye, nou rekonèt chak bon kado soti nan men Li. Fanmi ou. Zanmi ou. Souf ou. Sali ou. Tout se gras. Rekonesans pwoteje nou tou kont avèg espirityèl. Lè nou sispann remèsye Bondye, nou kòmanse pran Li pou akò — epi sa se kòmansman dekadans espirityèl. Pandan w ap lapriyè lapriyè sa a, nonmen twa bagay espesifik ou rekonesan pou yo jodi a. Kite rekonesans monte tankou lansan devan twòn Bondye. Amèn."
-                },
-                {
-                    title: "Lapriyè Pwoteksyon",
-                    prayer: "Bondye ki gen tout pouvwa, nou mande pwoteksyon ou sou nou, fanmi nou ak moun nou renmen. Antoure nou ak zanj ou yo. Gade soti ak antre nou. Se pou ou yon gwo defans ak yon fò gwo kay pou nou. Amèn.",
-                    meditation: "Nou viv nan yon monn ki plen danje ak ensètitid. Men nou sèvi yon Bondye ki se refij nou ak fòtrès nou. Lè nou lapriyè pou pwoteksyon, nou pa mande yon lavi san difikilte. Nou mande Bondye pou l avèk nou nan mitan li. Sòm yo dekri Bondye kòm plak pwotèj nou, gwo fò won nou, kote kache nou. Li antoure pèp Li ak zanj. Li gade soti ak antre nou. Li pa janm kite nou ni abandone nou. Pandan w ap lapriyè lapriyè sa a, panse ak zòn nan lavi ou kote ou santi w pi vilnerab. Ba Bondye yo. Fè Li konfyans ak fanmi ou, finans ou, sante ou, avni ou. Li fidèl. Li ap veye. Li ap pwoteje. Ou pa poukont ou. Amèn."
-                },
-                {
-                    title: "Lapriyè pou Sajès",
-                    prayer: "Senye, ban nou yon sajès ki pi gran pase ane nou ak yon konpreyansyon ki pi gran pase konesans nou. Gide desizyon nou, dirije chemen nou, epi fè nou mache nan verite ou tout jou lavi nou. Amèn.",
-                    meditation: "Sajès diferan de konesans. Konesans di ou kisa pou fè. Sajès di ou kilè pou fè l, kijan pou fè l, ak si wi ou non pou fè l ditou. Krentif pou Senye a se kòmansman sajès. Lè nou lapriyè pou sajès, nou mande Bondye pou l ban nou pèspektiv Li sou lavi nou. Nou mande Li pou l ede nou wè jan Li wè — pa ak yon konpreyansyon imen limite men ak yon vizyon etènèl. Jak di nou si nou manke sajès, nou dwe mande Bondye, epi Li ap bay ak jenerozite pou tout moun san jwenn fòt. Kidonk mande. Mande avèk odas. Mande avèk pèseverans. Sajès pa rezève pou kèk chwazi. Li disponib pou chak pitit Bondye ki chèche l avèk imilite. Pandan w ap lapriyè lapriyè sa a, louvri kè ou a sa Bondye vle revele ou. Amèn."
-                },
-                {
-                    title: "Lapriyè pou Fanmi",
-                    prayer: "Papa, nou leve fanmi nou devan ou. Beni chak maryaj, chak timoun, chak kay. Geri relasyon ki kase yo, ranfòse lyen lanmou yo, epi fè kay nou tounen kote ki gen lapè. Amèn.",
-                    meditation: "Fanmi se youn nan pi gwo kado Bondye. Se premye kote nou aprann renmen, padone, sakrifye. Men fanmi kapab tou kote blesi pi pwofon nou. Lè nou lapriyè pou fanmi nou, nou pote doulè nou ak espwa nou bay Moun ki kreye fanmi an. Plan Bondye pou fanmi se yon plan lanmou, sekirite ak nitrisyon espirityèl. Yon kay kote Bondye onore vin yon limyè pou tout katye a. Psalmis la te di: Si Seyè a pa bati kay la, moun k ap bati yo travay pou anyen. Nou pa ka bati fanmi ki an sante ak fòs pa nou. Nou bezwen Bondye nan sant la. Pandan w ap lapriyè lapriyè sa a, leve chak manm fanmi ou pa non yo. Mande Bondye beni yo, pwoteje yo, epi rale yo pi pre Li. Amèn."
-                },
-                {
-                    title: "Lapriyè pou Monn",
-                    prayer: "Senye, nou lapriyè pou tout nasyon yo. Pote konsolasyon pou moun k ap soufri yo, espwa pou moun ki san espwa, ak limyè pou moun ki nan fènwa. Leve lidè ki gen entegrite, epi se pou wayòm ou vini sou tè a menm jan li nan syèl la. Amèn.",
-                    meditation: "Monn nan pi gran pase sèk imedya nou. Lè nou lapriyè pou monn nan, nou mete kè nou ansanm ak kè Bondye, ki renmen chak nasyon, chak tribi, chak lang. Bondye se pa Bondye yon sèl peyi oswa yon sèl kilti. Li se Bondye tout pèp. Lè nou lapriyè pou monn nan, nou entèside pou moun k ap soufri yo — moun ki grangou, moun ki deplase, moun ki pèsekite, moun yo bliye. Nou lapriyè pou lidè yo, pou yo gouvènen ak entegrite ak jistis. Nou lapriyè pou lapè nan rejyon ki dechire pa konfli. Nou lapriyè pou reveye nan nasyon ki vire do bay Bondye. Epi nou sonje nou menm se yon pati nan monn nan Bondye te sitèlman renmen li bay sèl Pitit Li a. Pandan w ap lapriyè lapriyè sa a, kite kè ou elaji. Mande Bondye kase kè ou pou sa ki kase kè Li. Amèn."
-                }
+                { title: "Notre Père", prayer: "Notre Père qui es aux cieux, que ton nom soit sanctifié, que ton règne vienne, que ta volonté soit faite sur la terre comme au ciel. Donne-nous aujourd'hui notre pain quotidien. Pardonne-nous nos offenses, comme nous pardonnons aussi à ceux qui nous ont offensés. Et ne nous soumets pas à la tentation, mais délivre-nous du mal. Car c'est à toi qu'appartiennent le règne, la puissance et la gloire, aux siècles des siècles. Amen.", meditation: "Cette prière est le modèle que Jésus Lui-même nous a donné. Quand nous appelons Dieu 'Notre Père', nous reconnaissons que nous ne sommes pas seuls — nous appartenons à une famille qui s'étend à toutes les nations et à toutes les générations. Quand nous prions 'que ton nom soit sanctifié', nous reconnaissons que le nom de Dieu est saint et que nous sommes appelés à l'honorer par notre vie. 'Que ton règne vienne' est un appel pour que le règne d'amour, de justice et de paix de Dieu prenne racine dans nos coeurs et dans notre monde. 'Donne-nous aujourd'hui notre pain quotidien' nous rappelle que nous dépendons de Dieu pour tout. Quand nous pardonnons aux autres, nous ouvrons la porte à ce que le pardon de Dieu coule à travers nous. Et quand nous demandons d'être délivrés du mal, nous reconnaissons que nous ne pouvons pas marcher seuls sur ce chemin. Priez cette prière lentement. Laissez chaque mot pénétrer votre coeur. Laissez-la devenir le modèle de toute votre vie. Amen." },
+                { title: "Prière pour la Paix", prayer: "Seigneur, nous prions pour la paix dans nos coeurs, dans nos maisons, dans nos villes et dans notre monde. Calme les tempêtes autour de nous et en nous. Que ta paix qui surpasse toute intelligence garde nos coeurs et nos pensées. Amen.", meditation: "La paix n'est pas l'absence de conflit. C'est la présence de Dieu. Quand nous prions pour la paix, nous ne demandons pas un monde sans problèmes — nous invitons Dieu à être au centre de chaque situation. La paix que Dieu donne n'est pas comme celle que le monde offre. C'est un calme profond et inébranlable qui demeure même quand tout autour de nous tremble. Cette paix commence dans le coeur individuel. Avant d'apporter la paix dans nos maisons et nos communautés, nous devons d'abord permettre à Dieu d'apaiser nos propres tempêtes intérieures. En priant cette prière, invitez le Saint-Esprit à sonder votre coeur. Y a-t-il des peurs, des angoisses ou des ressentiments qui doivent être abandonnés? Laissez-les aller. Laissez la paix du Christ régner dans votre coeur, et elle débordera sur tout ce que vous touchez. Amen." },
+                { title: "Prière pour la Guérison", prayer: "Père céleste, nous te présentons tous ceux qui sont malades, blessés ou souffrants. Pose ta main guérissante sur eux. Restaure leur force, renouvelle leur espérance, et apporte le réconfort à leurs familles. Au nom de Jésus, amen.", meditation: "La guérison est plus qu'une restauration physique. C'est le toucher doux de Dieu atteignant chaque endroit brisé de notre vie. Quand nous prions pour la guérison, nous reconnaissons que nous ne sommes pas autosuffisants. Nous avons besoin de Dieu. Nous avons besoin de Sa grâce. Nous avons besoin de Sa miséricorde. Certaines guérisons viennent instantanément. D'autres viennent lentement. D'autres viennent de manière inattendue — par un mot d'encouragement, la présence d'un ami, ou une confiance plus profonde dans le plan de Dieu. La vraie guérison est toujours liée à la foi. Jésus disait souvent: 'Ta foi t'a guéri.' La foi n'est pas l'absence de questions. C'est le choix de faire confiance à Dieu même quand nous n'avons pas toutes les réponses. Priez cette prière avec un coeur ouvert. Croyez que Dieu vous entend et qu'Il agit — même dans l'attente. Amen." },
+                { title: "Prière du Matin", prayer: "Seigneur, merci pour ce nouveau jour. Guide mes pas, mes paroles et mes pensées. Aide-moi à être une lumière pour ceux qui m'entourent. Que tout ce que je fais honore ton nom. Amen.", meditation: "Chaque matin est un cadeau de Dieu. Le fait que vous ayez ouvert les yeux, que vous puissiez respirer, que vous puissiez bouger — ce sont des miséricordes que nous prenons trop souvent pour acquises. Une prière du matin donne le ton pour toute la journée. Elle tourne vos premières pensées vers Dieu et invite Sa direction avant qu'aucune autre voix ne puisse parler dans votre vie. Quand vous commencez la journée par la prière, vous dites à Dieu: 'J'ai besoin de Toi aujourd'hui.' Vous reconnaissez que vous ne pouvez pas marcher seul ce jour. Le psalmiste a écrit: 'Le matin, Seigneur, Tu entends ma voix.' Dieu écoute. Il se soucie des petits détails de votre journée. En priant cette prière, imaginez Dieu marchant à vos côtés dans la journée à venir. Il n'est pas loin. Il est plus proche que votre propre souffle. Amen." },
+                { title: "Prière du Soir", prayer: "Père, alors que ce jour se termine, nous te remercions pour ta protection et ta provision. Pardonne-nous nos manquements. Veille sur nous pendant la nuit, et accorde-nous le repos. Amen.", meditation: "Le soir est un moment sacré. C'est le moment où le bruit de la journée s'estompe et où nous venons devant Dieu les mains ouvertes. Une prière du soir est un acte d'abandon. Elle dit: 'Seigneur, je n'ai pas tout bien fait aujourd'hui, mais je Te le donne.' C'est le moment de revoir la journée avec Dieu — non pas pour nous flageller, mais pour apprendre, grandir et nous reposer. Quand nous demandons à Dieu de veiller sur nous pendant la nuit, nous faisons confiance que Sa protection ne dort jamais. Le psalmiste a écrit: 'Celui qui garde Israël ne sommeille ni ne dort.' En vous couchant, rappelez-vous que Dieu est toujours sur Son trône. Vous pouvez vous reposer parce qu'Il ne le fait pas. Donnez-Lui vos fardeaux, et laissez Sa paix vous laver. Amen." },
+                { title: "Prière de Remerciement", prayer: "Seigneur, nous te remercions pour ta bonté, ta miséricorde et ta fidélité. Merci pour le don de la vie, pour la famille et pour les amis. Que nos coeurs débordent de reconnaissance. Amen.", meditation: "L'action de grâce est le battement de coeur d'une vie spirituelle saine. Quand nous remercions Dieu, nous ne Lui rendons pas service — nous nous en rendons un. La gratitude remodèle l'âme. Elle détourne notre attention de ce qui nous manque vers ce que nous avons. Elle transforme la comparaison en contentement et l'envie en joie. Quand nous remercions Dieu, nous reconnaissons que tout bon don vient de Sa main. Votre famille. Vos amis. Votre souffle. Votre salut. Tout est grâce. La gratitude nous protège aussi de la cécité spirituelle. Quand nous cessons de remercier Dieu, nous commençons à Le tenir pour acquis — et c'est le début du déclin spirituel. En priant cette prière, nommez trois choses spécifiques pour lesquelles vous êtes reconnaissant aujourd'hui. Laissez la gratitude s'élever comme un encens devant le trône de Dieu. Amen." },
+                { title: "Prière de Protection", prayer: "Dieu tout-puissant, nous te demandons ta protection sur nous, nos familles et nos proches. Entoure-nous de tes anges. Garde nos allées et venues. Sois notre bouclier et notre haute retraite. Amen.", meditation: "Nous vivons dans un monde plein de danger et d'incertitude. Mais nous servons un Dieu qui est notre refuge et notre forteresse. Quand nous prions pour la protection, nous ne demandons pas une vie sans difficulté. Nous demandons à Dieu d'être avec nous au milieu d'elle. Les psaumes décrivent Dieu comme notre bouclier, notre haute retraite, notre lieu de refuge. Il entoure Son peuple d'anges. Il garde nos allées et venues. Il ne nous abandonne jamais et ne nous délaisse jamais. En priant cette prière, pensez aux domaines de votre vie où vous vous sentez le plus vulnérable. Donnez-les à Dieu. Confiez-Lui votre famille, vos finances, votre santé, votre avenir. Il est fidèle. Il veille. Il protège. Vous n'êtes pas seul. Amen." },
+                { title: "Prière pour la Sagesse", prayer: "Seigneur, accorde-nous une sagesse au-delà de nos années et une intelligence au-delà de nos connaissances. Guide nos décisions, dirige nos sentiers, et fais-nous marcher dans ta vérité tous les jours de notre vie. Amen.", meditation: "La sagesse est différente de la connaissance. La connaissance vous dit quoi faire. La sagesse vous dit quand le faire, comment le faire, et si oui ou non il faut le faire. La crainte du Seigneur est le commencement de la sagesse. Quand nous prions pour la sagesse, nous demandons à Dieu de nous donner Sa perspective sur nos vies. Nous Lui demandons de nous aider à voir comme Il voit — non pas avec une compréhension humaine limitée mais avec une vision éternelle. Jacques nous dit que si nous manquons de sagesse, nous devons demander à Dieu, et Il donnera généreusement à tous sans faire de reproche. Alors demandez. Demandez avec audace. Demandez avec persévérance. La sagesse n'est pas réservée à quelques élus. Elle est disponible pour chaque enfant de Dieu qui la cherche humblement. En priant cette prière, ouvrez votre coeur à ce que Dieu veut vous révéler. Amen." },
+                { title: "Prière pour la Famille", prayer: "Père, nous te présentons nos familles. Bénis chaque mariage, chaque enfant, chaque foyer. Guéris les relations brisées, renforce les liens d'amour, et fais de nos maisons des lieux de paix. Amen.", meditation: "La famille est l'un des plus grands dons de Dieu. C'est le premier endroit où nous apprenons à aimer, à pardonner, à nous sacrifier. Mais la famille peut aussi être le lieu de nos blessures les plus profondes. Quand nous prions pour nos familles, nous apportons notre douleur et notre espérance à Celui qui a créé la famille. Le dessein de Dieu pour la famille est un dessein d'amour, de sécurité et de nourriture spirituelle. Une maison où Dieu est honoré devient une lumière pour tout le quartier. Le psalmiste a dit: 'Si l'Éternel ne bâtit la maison, ceux qui la bâtissent travaillent en vain.' Nous ne pouvons pas bâtir des familles saines par nos propres forces. Nous avons besoin de Dieu au centre. En priant cette prière, élevez chaque membre de votre famille par son nom. Demandez à Dieu de les bénir, de les protéger et de les attirer plus près de Lui. Amen." },
+                { title: "Prière pour le Monde", prayer: "Seigneur, nous prions pour les nations. Apporte la consolation aux souffrants, l'espérance aux désespérés, et la lumière à ceux qui sont dans les ténèbres. Suscite des dirigeants intègres, et que ton règne vienne sur la terre comme au ciel. Amen.", meditation: "Le monde est plus grand que notre cercle immédiat. Quand nous prions pour le monde, nous unissons nos coeurs au coeur de Dieu, qui aime chaque nation, chaque tribu, chaque langue. Dieu n'est pas le Dieu d'un seul pays ou d'une seule culture. Il est le Dieu de tous les peuples. Quand nous prions pour le monde, nous intercédons pour ceux qui souffrent — les affamés, les déplacés, les persécutés, les oubliés. Nous prions pour les dirigeants, qu'ils gouvernent avec intégrité et justice. Nous prions pour la paix dans les régions déchirées par le conflit. Nous prions pour un réveil dans les nations qui se sont détournées de Dieu. Et nous nous rappelons que nous sommes nous-mêmes une partie du monde que Dieu a tant aimé qu'Il a donné Son Fils unique. En priant cette prière, laissez votre coeur s'élargir. Demandez à Dieu de briser votre coeur pour ce qui brise le Sien. Amen." }
             ]
         };
 
@@ -1034,12 +932,10 @@
             if (!speechSynth) return;
             let voices = speechSynth.getVoices();
             if (voices.length === 0) { speechSynth.onvoiceschanged = () => { setupVoices(); }; return; }
-
             maleVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Microsoft David') || v.name.includes('Daniel')) ||
                         voices.find(v => v.lang === 'en-US' && v.name.toLowerCase().includes('male')) || voices[0];
             femaleVoice = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Microsoft Zira') || v.name.includes('Samantha') || v.name.includes('Victoria')) ||
                           voices.find(v => v.lang === 'en-US' && v.name.toLowerCase().includes('female')) || voices[voices.length - 1];
-
             haitianVoice = voices.find(v => {
                 const lang = (v.lang || '').toLowerCase();
                 const name = (v.name || '').toLowerCase();
@@ -1047,19 +943,26 @@
                        name.includes('haitian') || name.includes('creole') ||
                        name.includes('kreyòl') || name.includes('kreyol');
             }) || null;
-
             frenchVoice = voices.find(v => v.lang === 'fr-FR') ||
                           voices.find(v => v.lang === 'fr-CA') ||
                           voices.find(v => (v.lang || '').toLowerCase().startsWith('fr')) ||
                           voices.find(v => (v.name || '').toLowerCase().includes('french')) ||
                           voices.find(v => (v.name || '').toLowerCase().includes('français')) ||
                           null;
+            pickDebateVoices();
         }
 
         function getVoiceForLanguage(langCode, isFemale) {
             if (langCode === 'ht') return haitianVoice || frenchVoice || (isFemale ? femaleVoice : maleVoice);
             if (langCode === 'fr') return frenchVoice || (isFemale ? femaleVoice : maleVoice);
             return isFemale ? femaleVoice : maleVoice;
+        }
+
+        function getDebateVoice(voiceRole) {
+            if (voiceRole === 'moderator') return moderatorVoice;
+            if (voiceRole === 'affirmative') return affirmativeVoice;
+            if (voiceRole === 'negative') return negativeVoice;
+            return null;
         }
 
         function speakSingle(text, options = {}) {
@@ -1069,24 +972,34 @@
                 rate = 0.95,
                 pitch = null,
                 langCode = 'en',
+                voiceRole = null,
                 onEndCallback = null
             } = options;
 
+            let effectiveRate = rate;
+            let effectivePitch = pitch;
+
+            if (voiceRole && DEBATE_VOICE_PROFILES[voiceRole]) {
+                const profile = DEBATE_VOICE_PROFILES[voiceRole];
+                effectiveRate = profile.rate;
+                effectivePitch = profile.pitch;
+            }
+
             const kind = pickVoiceKind(langCode);
             let ttsText = text;
-            if (langCode === 'ht') {
-                ttsText = applyHaitianVoiceMasterPrompt(text, kind);
-            }
+            if (langCode === 'ht') ttsText = applyHaitianVoiceMasterPrompt(text, kind);
 
             let ttsLangTag = 'en-US';
             if (langCode === 'fr') ttsLangTag = 'fr-FR';
             else if (langCode === 'ht') ttsLangTag = kind === 'native' ? 'ht-HT' : 'fr-FR';
 
-            let effectiveRate = rate;
-            let effectivePitch = pitch !== null ? pitch : (isFemale ? 1.15 : 0.95);
             if (langCode === 'ht') {
                 effectiveRate = HAITIAN_VOICE_MASTER_PROMPT.delivery.rate;
                 effectivePitch = HAITIAN_VOICE_MASTER_PROMPT.delivery.pitch;
+            }
+
+            if (effectivePitch === null) {
+                effectivePitch = isFemale ? 1.15 : 0.95;
             }
 
             const utterance = new SpeechSynthesisUtterance(ttsText);
@@ -1095,7 +1008,13 @@
             utterance.volume = isMuted ? 0 : volume;
             utterance.lang = ttsLangTag;
 
-            const chosenVoice = getVoiceForLanguage(langCode, isFemale);
+            let chosenVoice = null;
+            if (voiceRole) {
+                chosenVoice = getDebateVoice(voiceRole);
+            }
+            if (!chosenVoice) {
+                chosenVoice = getVoiceForLanguage(langCode, isFemale);
+            }
             if (chosenVoice) utterance.voice = chosenVoice;
 
             if (onEndCallback) utterance.onend = onEndCallback;
@@ -1138,9 +1057,7 @@
             }
             isSpeaking = true;
             const item = speechQueue.shift();
-            const delay = item.langCode === 'ht'
-                ? HAITIAN_VOICE_MASTER_PROMPT.delivery.pauseBetweenChunks
-                : 300;
+            const delay = item.langCode === 'ht' ? HAITIAN_VOICE_MASTER_PROMPT.delivery.pauseBetweenChunks : 300;
             speakSingle(item.text, {
                 isFemale: item.isFemale,
                 langCode: item.langCode,
@@ -1266,7 +1183,6 @@
             const stream = radioStations.bible.streams[currentStationIndex];
             const langCode = getLanguageCodeForStream(stream);
             const displayLang = getDisplayLanguage(langCode);
-
             document.getElementById('anchorContainer').classList.add('active');
             document.getElementById('now-playing').style.display = 'none';
             document.getElementById('anchorName').textContent = 'Bible Reading · 24/7';
@@ -1275,24 +1191,19 @@
             const roleEl = document.getElementById('currentSpeakerRole');
             roleEl.className = 'debate-role mod';
             roleEl.textContent = `📖 ${displayLang}`;
-
             document.getElementById('trackTitle').textContent = 'Holy Bible Reading';
             document.getElementById('trackArtist').textContent = `Bible Reading · ${displayLang}`;
             document.getElementById('trackGenre').textContent = stream.description;
             document.getElementById('audioStatus').textContent = `📖 Bible Reading · ${displayLang}`;
-
             const pool = bibleContent[langCode];
             const dailyOffset = getDayOfYear() % pool.length;
             readingIndex = dailyOffset;
-
             function readNext() {
                 if (currentChannel !== 'bible') return;
                 const verse = pool[readingIndex % pool.length];
                 readingIndex++;
-
                 const displayText = `${verse.ref}. ${verse.text}`;
                 const speechText = `${formatReferenceForSpeech(verse.ref, langCode)}. ${verse.text}`;
-
                 document.getElementById('anchorNewsText').textContent = displayText;
                 speakSingle(speechText, {
                     langCode: langCode,
@@ -1314,7 +1225,6 @@
             const stream = radioStations.prayer.streams[currentStationIndex];
             const langCode = getLanguageCodeForStream(stream);
             const displayLang = getDisplayLanguage(langCode);
-
             document.getElementById('anchorContainer').classList.add('active');
             document.getElementById('now-playing').style.display = 'none';
             document.getElementById('anchorName').textContent = 'Christian Prayer · 24/7';
@@ -1323,21 +1233,17 @@
             const roleEl = document.getElementById('currentSpeakerRole');
             roleEl.className = 'debate-role mod';
             roleEl.textContent = `🙏 ${displayLang}`;
-
             document.getElementById('trackTitle').textContent = 'Christian Prayer + Meditation';
             document.getElementById('trackArtist').textContent = `Prayer Channel · ${displayLang}`;
             document.getElementById('trackGenre').textContent = stream.description;
             document.getElementById('audioStatus').textContent = `🙏 Prayer + Meditation · ${displayLang}`;
-
             const pool = prayerLibrary[langCode];
             const dailyOffset = getDayOfYear() % pool.length;
             readingIndex = dailyOffset;
             readingPhase = 'prayer';
-
             function readNext() {
                 if (currentChannel !== 'prayer') return;
                 const entry = pool[readingIndex % pool.length];
-
                 if (readingPhase === 'prayer') {
                     const introText = `Prayer: ${entry.title}. ${entry.prayer}`;
                     document.getElementById('anchorNewsText').textContent = introText;
@@ -1351,8 +1257,7 @@
                         }
                     });
                 } else {
-                    const medHeader = langCode === 'en' ? `Meditation on ${entry.title}.`
-                                    : `Méditation sur ${entry.title}.`;
+                    const medHeader = langCode === 'en' ? `Meditation on ${entry.title}.` : `Méditation sur ${entry.title}.`;
                     const fullText = `${medHeader} ${entry.meditation}`;
                     document.getElementById('anchorNewsText').textContent = fullText;
                     readingPhase = 'prayer';
@@ -1511,24 +1416,24 @@
             const playbook = debatePlaybook[categoryKey] || debatePlaybook.default;
 
             const statements = [
-                { role: 'mod', text: `Good evening, I'm JP, and welcome to The Political Debate. Our topic tonight: "${topicTitle}". ${topicDesc ? topicDesc + '. ' : ''}We have two guests: the affirmative, who supports action, and the opposition, who urges caution. Let's begin with opening statements.`, isFemale: false },
-                { role: 'aff', text: `Thank you, JP. The affirmative's position on "${topicTitle}" is clear. ${playbook.aff.opening(topicTitle)}`, isFemale: false },
-                { role: 'neg', text: `Thank you, JP. The opposition sees "${topicTitle}" differently. ${playbook.neg.opening(topicTitle)}`, isFemale: true },
-                { role: 'mod', text: `Thank you both. Let's move to the arguments.`, isFemale: false },
-                { role: 'aff', text: playbook.aff.args[0](topicTitle), isFemale: false },
-                { role: 'neg', text: playbook.neg.args[0](topicTitle), isFemale: true },
-                { role: 'aff', text: playbook.aff.args[1](topicTitle), isFemale: false },
-                { role: 'neg', text: playbook.neg.args[1](topicTitle), isFemale: true },
-                { role: 'mod', text: `Now let's move to rebuttals.`, isFemale: false },
-                { role: 'aff', text: playbook.aff.args[2](topicTitle), isFemale: false },
-                { role: 'neg', text: playbook.neg.args[2](topicTitle), isFemale: true },
-                { role: 'mod', text: `Cross-talk now.`, isFemale: false },
-                { role: 'aff', text: playbook.aff.cross(topicTitle), isFemale: false },
-                { role: 'neg', text: playbook.neg.cross(topicTitle), isFemale: true },
-                { role: 'mod', text: `Closing statements.`, isFemale: false },
-                { role: 'aff', text: playbook.aff.closing(topicTitle), isFemale: false },
-                { role: 'neg', text: playbook.neg.closing(topicTitle), isFemale: true },
-                { role: 'mod', text: `That concludes our debate on "${topicTitle}". Thank you to both guests and to our audience. We would love to hear your thoughts — please send your opinions and feedback to jpierre722@yahoo.com. We now return you to our R&B and Soul channel. Enjoy the music.`, isFemale: false }
+                { role: 'mod', voiceRole: 'moderator', text: `Good evening, I'm JP, and welcome to The Political Debate. Our topic tonight: "${topicTitle}". ${topicDesc ? topicDesc + '. ' : ''}We have two guests: the affirmative, who supports action, and the opposition, who urges caution. Let's begin with opening statements.` },
+                { role: 'aff', voiceRole: 'affirmative', text: `Thank you, JP. The affirmative's position on "${topicTitle}" is clear. ${playbook.aff.opening(topicTitle)}` },
+                { role: 'neg', voiceRole: 'negative', text: `Thank you, JP. The opposition sees "${topicTitle}" differently. ${playbook.neg.opening(topicTitle)}` },
+                { role: 'mod', voiceRole: 'moderator', text: `Thank you both. Let's move to the arguments.` },
+                { role: 'aff', voiceRole: 'affirmative', text: playbook.aff.args[0](topicTitle) },
+                { role: 'neg', voiceRole: 'negative', text: playbook.neg.args[0](topicTitle) },
+                { role: 'aff', voiceRole: 'affirmative', text: playbook.aff.args[1](topicTitle) },
+                { role: 'neg', voiceRole: 'negative', text: playbook.neg.args[1](topicTitle) },
+                { role: 'mod', voiceRole: 'moderator', text: `Now let's move to rebuttals.` },
+                { role: 'aff', voiceRole: 'affirmative', text: playbook.aff.args[2](topicTitle) },
+                { role: 'neg', voiceRole: 'negative', text: playbook.neg.args[2](topicTitle) },
+                { role: 'mod', voiceRole: 'moderator', text: `Cross-talk now.` },
+                { role: 'aff', voiceRole: 'affirmative', text: playbook.aff.cross(topicTitle) },
+                { role: 'neg', voiceRole: 'negative', text: playbook.neg.cross(topicTitle) },
+                { role: 'mod', voiceRole: 'moderator', text: `Closing statements.` },
+                { role: 'aff', voiceRole: 'affirmative', text: playbook.aff.closing(topicTitle) },
+                { role: 'neg', voiceRole: 'negative', text: playbook.neg.closing(topicTitle) },
+                { role: 'mod', voiceRole: 'moderator', text: `That concludes our debate on "${topicTitle}". Thank you to both guests and to our audience. We would love to hear your thoughts — please send your opinions and feedback to jpierre722@yahoo.com. We now return you to our R&B and Soul channel. Enjoy the music.` }
             ];
 
             let step = 0;
@@ -1546,7 +1451,11 @@
                 const s = statements[step];
                 updateRoleBadge(s.role);
                 document.getElementById('anchorNewsText').textContent = s.text;
-                speakSingle(s.text, { isFemale: s.isFemale, langCode: 'en', onEndCallback: () => { step++; setTimeout(nextStep, 500); } });
+                speakSingle(s.text, {
+                    voiceRole: s.voiceRole,
+                    langCode: 'en',
+                    onEndCallback: () => { step++; setTimeout(nextStep, 500); }
+                });
             }
             nextStep();
 
@@ -1557,27 +1466,24 @@
                 if (!isDebating && debateTransitionPending) return;
                 isDebating = false;
                 debateTransitionPending = true;
-
                 document.getElementById('anchorContainer').classList.remove('active');
                 document.getElementById('now-playing').style.display = 'block';
                 document.getElementById('anchorName').textContent = 'The Political Debate';
                 document.getElementById('anchorAvatar').textContent = '🗣️';
                 document.getElementById('anchorStatus').textContent = 'Moderated by JP';
                 updateRoleBadge('mod');
-
                 setTimeout(() => {
                     debateTransitionPending = false;
                     currentChannel = 'rnb';
                     currentStationIndex = 0;
                     document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
-                    const map = ['rnb','rock','classical','electronic','french','haitian','aimusic','aireligious','bible','prayer','debate','mix','sportflash'];
+                    const map = ['rnb','rock','classical','electronic','french','haitian','aimusic','aireligious','bible','prayer','ainews_en','ainews_fr','businesstv_en','businesstv_fr','debate','mix','sportflash'];
                     const idx = map.indexOf('rnb');
                     const btns = document.querySelectorAll('.channel-btn');
                     if (btns[idx]) btns[idx].classList.add('active');
                     playStream();
                     document.getElementById('audioStatus').textContent = '🎵 Now playing: R&B / Soul';
                 }, 2500);
-
                 if (debateLoopActive) {
                     const now = new Date();
                     const nextHour = new Date(now);
@@ -1631,6 +1537,7 @@
         // ============================================
         function playStream() {
             if (!audioElement) createAudioElement();
+            if (!videoElement) videoElement = document.getElementById('newsVideo');
 
             if (continuousMixInterval) { clearInterval(continuousMixInterval); continuousMixInterval = null; }
             if (mixBulletinTimeoutId) { clearTimeout(mixBulletinTimeoutId); mixBulletinTimeoutId = null; }
@@ -1639,6 +1546,64 @@
             if (sportMusicInterval) { clearInterval(sportMusicInterval); sportMusicInterval = null; }
             clearAdScheduler();
             stopReadingLoop();
+
+            // ---- Video channels (News TV + Business TV / BFM Business) ----
+            if (videoChannels.includes(currentChannel)) {
+                document.getElementById('anchorContainer').classList.remove('active');
+                document.getElementById('now-playing').style.display = 'none';
+                document.getElementById('videoContainer').style.display = 'block';
+                document.getElementById('audioStatus').textContent = '📺 Live Stream';
+
+                const stream = radioStations[currentChannel].streams[currentStationIndex];
+                document.getElementById('trackTitle').textContent = stream.name;
+                document.getElementById('trackArtist').textContent = radioStations[currentChannel].name;
+                document.getElementById('trackGenre').textContent = stream.description;
+
+                // Business TV channels are video-only — ensure audio element stays paused and silent
+                if (audioElement) {
+                    audioElement.pause();
+                    audioElement.volume = 0;
+                    audioElement.src = '';
+                }
+                stopSpeech();
+                if (debateLoopActive) stopDebateLoop();
+
+                if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+
+                const video = videoElement;
+                video.pause();
+                video.removeAttribute('src');
+                video.load();
+
+                if (Hls.isSupported()) {
+                    hlsInstance = new Hls({ enableWorker: true, lowLatencyMode: true });
+                    hlsInstance.loadSource(stream.url);
+                    hlsInstance.attachMedia(video);
+                    hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                        video.play().catch(() => {
+                            document.getElementById('audioStatus').textContent = '⚠️ Click play to start video';
+                        });
+                    });
+                    hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+                        if (data.fatal) {
+                            document.getElementById('audioStatus').textContent = '⚠️ Stream error — try next station (⏭)';
+                        }
+                    });
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    video.src = stream.url;
+                    video.addEventListener('loadedmetadata', () => {
+                        video.play().catch(() => {});
+                    }, { once: true });
+                } else {
+                    document.getElementById('audioStatus').textContent = '⚠️ HLS not supported in this browser';
+                }
+                return;
+            }
+
+            // Hide video for all other channels
+            document.getElementById('videoContainer').style.display = 'none';
+            if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+            if (videoElement) { videoElement.pause(); videoElement.removeAttribute('src'); videoElement.load(); }
 
             if (currentChannel === 'bible') {
                 if (audioElement) audioElement.pause();
@@ -1674,14 +1639,15 @@
             if (currentChannel === 'mix') {
                 document.getElementById('anchorContainer').classList.remove('active');
                 document.getElementById('now-playing').style.display = 'block';
-                document.getElementById('audioStatus').textContent = '🎧 Continuous Feed Active';
-                document.getElementById('trackTitle').textContent = 'Continuous Feed';
-                document.getElementById('trackArtist').textContent = 'Music + News Mix';
+                document.getElementById('audioStatus').textContent = '⚡ Flash News Active';
+                document.getElementById('trackTitle').textContent = 'Flash News';
+                document.getElementById('trackArtist').textContent = 'Music + News Bulletins';
                 document.getElementById('trackGenre').textContent = 'Auto Mix';
                 const randomChannel = musicChannels[Math.floor(Math.random() * musicChannels.length)];
                 const randomStreams = radioStations[randomChannel].streams;
                 const randomStream = randomStreams[Math.floor(Math.random() * randomStreams.length)];
                 audioElement.src = randomStream.url;
+                audioElement.volume = isMuted ? 0 : volume;
                 audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; });
                 const performBulletin = () => {
                     if (currentChannel !== 'mix' || isDebating || isMuted) return;
@@ -1703,6 +1669,7 @@
                 const randomStreams = radioStations[randomChannel].streams;
                 const randomStream = randomStreams[Math.floor(Math.random() * randomStreams.length)];
                 audioElement.src = randomStream.url;
+                audioElement.volume = isMuted ? 0 : volume;
                 audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; });
                 if (sportNewsPool.length === 0) {
                     fetchSportsNews().then(() => { sportFlashTimeoutId = setTimeout(() => { performSportsFlash(); sportFlashInterval = setInterval(performSportsFlash, 900000); }, 10000); });
@@ -1717,6 +1684,7 @@
                 return;
             }
 
+            // Music channels
             document.getElementById('anchorContainer').classList.remove('active');
             document.getElementById('now-playing').style.display = 'block';
             document.getElementById('audioStatus').textContent = '📡 Connecting...';
@@ -1727,6 +1695,7 @@
             document.getElementById('trackArtist').textContent = radioStations[currentChannel].name;
             document.getElementById('trackGenre').textContent = stream.description;
             audioElement.src = stream.url;
+            audioElement.volume = isMuted ? 0 : volume;
             if (audioElement) audioElement.pause();
             playAd(() => {
                 if (audioElement && !isMuted) { audioElement.volume = volume; audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; }); }
@@ -1736,7 +1705,7 @@
 
         function speakMixBulletin() {
             if (newsPool.length === 0) return;
-            let bulletinText = "This is JP AI Radio News flash. ";
+            let bulletinText = "This is JP AI Radio Flash News. ";
             for (let i = 0; i < 4; i++) {
                 const item = newsPool[(anchorNewsIndex + i) % newsPool.length];
                 bulletinText += `${item.title}. ${item.description} `;
@@ -1778,7 +1747,7 @@
             readingIndex = 0;
             readingPhase = 'prayer';
             document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
-            const map = ['rnb','rock','classical','electronic','french','haitian','aimusic','aireligious','bible','prayer','debate','mix','sportflash'];
+            const map = ['rnb','rock','classical','electronic','french','haitian','aimusic','aireligious','bible','prayer','ainews_en','ainews_fr','businesstv_en','businesstv_fr','debate','mix','sportflash'];
             const idx = map.indexOf(channel);
             const btns = document.querySelectorAll('.channel-btn');
             if (btns[idx]) btns[idx].classList.add('active');
@@ -1789,6 +1758,11 @@
 
         function togglePlay() {
             if (currentChannel === 'debate') return;
+            if (videoChannels.includes(currentChannel)) {
+                const v = document.getElementById('newsVideo');
+                if (v.paused) v.play().catch(() => {}); else v.pause();
+                return;
+            }
             if (voiceChannels.includes(currentChannel)) {
                 if (speechSynth) {
                     if (speechSynth.paused) speechSynth.resume();
@@ -1801,6 +1775,10 @@
         }
         function toggleMute() {
             isMuted = !isMuted;
+            if (videoChannels.includes(currentChannel)) {
+                const v = document.getElementById('newsVideo');
+                if (v) v.muted = isMuted;
+            }
             if (audioElement) {
                 if (isMuted) audioElement.volume = 0;
                 else if (adInProgress || (currentChannel === 'mix' && isSpeaking) || (currentChannel === 'sportflash' && isSpeaking)) audioElement.volume = 0.15;
@@ -1815,6 +1793,10 @@
             if (slider) {
                 slider.style.background = `linear-gradient(90deg, var(--gold) 0%, var(--gold) ${value}%, rgba(255,255,255,0.08) ${value}%)`;
             }
+            if (videoChannels.includes(currentChannel)) {
+                const v = document.getElementById('newsVideo');
+                if (v) v.volume = volume;
+            }
             if (audioElement && !isMuted) {
                 if (adInProgress || (currentChannel === 'mix' && isSpeaking) || (currentChannel === 'sportflash' && isSpeaking)) audioElement.volume = 0.15;
                 else audioElement.volume = volume;
@@ -1823,6 +1805,11 @@
         function nextStation() {
             if (currentChannel === 'mix' || currentChannel === 'debate' || currentChannel === 'sportflash') return;
             const streams = radioStations[currentChannel].streams;
+            // Single-stream video channels don't cycle — just reload the same stream
+            if (singleStreamVideoChannels.includes(currentChannel) || streams.length <= 1) {
+                playStream();
+                return;
+            }
             currentStationIndex = (currentStationIndex + 1) % streams.length;
             readingIndex = 0;
             readingPhase = 'prayer';
@@ -1831,6 +1818,10 @@
         function previousStation() {
             if (currentChannel === 'mix' || currentChannel === 'debate' || currentChannel === 'sportflash') return;
             const streams = radioStations[currentChannel].streams;
+            if (singleStreamVideoChannels.includes(currentChannel) || streams.length <= 1) {
+                playStream();
+                return;
+            }
             currentStationIndex = (currentStationIndex - 1 + streams.length) % streams.length;
             readingIndex = 0;
             readingPhase = 'prayer';
@@ -1940,9 +1931,10 @@
             createAudioElement();
             setupVoices();
             if (speechSynth) {
-                speechSynth.onvoiceschanged = setupVoices;
-                setTimeout(setupVoices, 500);
-                setTimeout(setupVoices, 1500);
+                speechSynth.onvoiceschanged = () => { setupVoices(); pickDebateVoices(); };
+                setTimeout(() => { setupVoices(); pickDebateVoices(); }, 500);
+                setTimeout(() => { setupVoices(); pickDebateVoices(); }, 1500);
+                setTimeout(() => { setupVoices(); pickDebateVoices(); }, 3000);
             }
             playStream();
             fetchWorldNews();
@@ -1968,7 +1960,8 @@
         createVisualizer();
         updateScheduleHighlight();
         document.getElementById('cityInput').value = 'Boston, MA';
-        console.log('%c📖 JP AI Radio · v7 · Bible Reading (EN + FR) · Prayer (EN + FR) · ":" reads as "verse" / "verset"', 'color:#c9a961;font-weight:bold;');
+        console.log('%c💼 JP AI Radio · v14 · Business TV (EN) + BFM Business (FR) — single video stream, video-only', 'color:#c9a961;font-weight:bold;');
+        console.log('%c📺 4 video channels: News TV (EN/FR) + Business TV (EN) + BFM Business (FR)', 'color:#c9a961;font-weight:bold;');
     </script>
 </body>
 </html>
