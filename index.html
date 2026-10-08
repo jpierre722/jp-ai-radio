@@ -1384,4 +1384,675 @@
                     args: [(t) => `First, on "${t}" — immigrants fill labor shortages.`, (t) => `Second, a pathway to citizenship is fair and practical.`, (t) => `Third, comprehensive reform is the only lasting solution.`],
                     cross: (t) => `On "${t}", the affirmative stands for dignity and due process.`,
                     closing: (t) => `In closing, the affirmative urges a yes on "${t}".` },
-                neg: { opening: (
+                neg: { opening: (t) => `The opposition insists on order on "${t}".`,
+                    args: [(t) => `First, on "${t}" — border security comes first.`, (t) => `Second, immigration levels must be sustainable.`, (t) => `Third, local communities should have a say.`],
+                    cross: (t) => `On "${t}", the opposition stands for law and sovereignty.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}" until the border is secure.` }
+            },
+            climate: {
+                aff: { opening: (t) => `The affirmative treats "${t}" as an emergency.`,
+                    args: [(t) => `First, on "${t}" — renewable energy creates jobs.`, (t) => `Second, we owe future generations a livable planet.`, (t) => `Third, clean air and water are public health imperatives.`],
+                    cross: (t) => `On "${t}", we refuse to trade the planet for profit.`,
+                    closing: (t) => `In closing, the affirmative urges a yes on "${t}".` },
+                neg: { opening: (t) => `The opposition is against "${t}" as written.`,
+                    args: [(t) => `First, on "${t}" — the transition must be gradual.`, (t) => `Second, we should focus on adaptation and innovation.`, (t) => `Third, international cooperation is necessary.`],
+                    cross: (t) => `On "${t}", the opposition stands for balance and competitiveness.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}" until it is fair.` }
+            },
+            gun: {
+                aff: { opening: (t) => `The affirmative confronts "${t}" with urgency.`,
+                    args: [(t) => `First, on "${t}" — universal background checks save lives.`, (t) => `Second, banning assault weapons reduces mass casualties.`, (t) => `Third, safe-storage laws protect children.`],
+                    cross: (t) => `On "${t}", reform and the Second Amendment can coexist.`,
+                    closing: (t) => `In closing, the affirmative urges a yes on "${t}".` },
+                neg: { opening: (t) => `The opposition defends the Second Amendment on "${t}".`,
+                    args: [(t) => `First, on "${t}" — enforcement of existing laws works.`, (t) => `Second, law-abiding citizens have a right to self-defense.`, (t) => `Third, mental health and school security are the real solutions.`],
+                    cross: (t) => `On "${t}", the opposition stands for liberty and constitutional rights.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}".` }
+            },
+            education: {
+                aff: { opening: (t) => `The affirmative champions "${t}".`,
+                    args: [(t) => `First, on "${t}" — funding public schools closes achievement gaps.`, (t) => `Second, affordable higher education opens doors.`, (t) => `Third, early childhood education pays dividends.`],
+                    cross: (t) => `On "${t}", education is the great equalizer.`,
+                    closing: (t) => `In closing, the affirmative urges a yes on "${t}".` },
+                neg: { opening: (t) => `The opposition insists on accountability on "${t}".`,
+                    args: [(t) => `First, on "${t}" — parental choice drives improvement.`, (t) => `Second, focus on basics — reading, writing, math.`, (t) => `Third, local control is what works.`],
+                    cross: (t) => `On "${t}", the opposition stands for parents and results.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}" until accountability is guaranteed.` }
+            },
+            default: {
+                aff: { opening: (t) => `The affirmative takes a clear position on "${t}".`,
+                    args: [(t) => `First, on "${t}" — acting now is better than waiting.`, (t) => `Second, fairness and effectiveness are not opposites.`, (t) => `Third, future generations will thank us.`],
+                    cross: (t) => `On "${t}", the affirmative stands for progress.`,
+                    closing: (t) => `In closing, the affirmative urges a yes on "${t}".` },
+                neg: { opening: (t) => `The opposition urges caution on "${t}".`,
+                    args: [(t) => `First, on "${t}" — unintended consequences can be severe.`, (t) => `Second, there are better alternatives.`, (t) => `Third, the burden of proof is on those who want change.`],
+                    cross: (t) => `On "${t}", the opposition stands for prudence.`,
+                    closing: (t) => `In closing, the opposition urges a no vote on "${t}".` }
+            }
+        };
+
+        function detectDebateCategory(topicText) {
+            const t = topicText.toLowerCase();
+            const map = [
+                { key: 'election', words: ['election','vote','voting','ballot','senate','congress','parliament','primary','poll'] },
+                { key: 'tax', words: ['tax','taxes','irs','revenue','budget','deficit','tariff'] },
+                { key: 'health', words: ['health','healthcare','medicare','medicaid','hospital','insurance','drug','pharma','vaccine'] },
+                { key: 'immigration', words: ['immigration','immigrant','border','migrant','asylum','visa','deport'] },
+                { key: 'climate', words: ['climate','energy','green','carbon','emission','renewable','oil','gas','environment'] },
+                { key: 'gun', words: ['gun','firearm','shooting','weapon','second amendment','nra'] },
+                { key: 'education', words: ['education','school','student','teacher','university','college','curriculum'] }
+            ];
+            for (const entry of map) {
+                if (entry.words.some(w => t.includes(w))) return entry.key;
+            }
+            return 'default';
+        }
+
+        function startDebateLoop() {
+            if (debateLoopActive) return;
+            debateLoopActive = true;
+            pickAndStartDebate();
+        }
+
+        function pickAndStartDebate() {
+            if (!debateLoopActive) return;
+            if (newsPool.length === 0) {
+                newsPool = backupWorldNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+            }
+            const politicalKeywords = ['election','president','government','senate','congress','policy','law','vote','minister','prime minister','political','parliament','bill','tax','health','immigration','climate','energy','defense','education','trade','gun','border','budget'];
+            const politicalItems = newsPool.filter(item =>
+                politicalKeywords.some(keyword => (item.title + ' ' + item.description).toLowerCase().includes(keyword))
+            );
+            const topic = politicalItems.length > 0 ? politicalItems[0] : newsPool[0];
+            if (!topic) return;
+            topic.debated = true;
+            if (newsPool.every(item => item.debated)) newsPool.forEach(item => item.debated = false);
+            runProfessionalDebate(topic, 1800000);
+        }
+
+        function runProfessionalDebate(topic, duration) {
+            isDebating = true;
+            debateTransitionPending = false;
+            stopSpeech();
+            document.getElementById('anchorContainer').classList.add('active');
+            document.getElementById('now-playing').style.display = 'none';
+            document.getElementById('anchorName').textContent = 'The Political Debate';
+            document.getElementById('anchorAvatar').textContent = '🗣️';
+            document.getElementById('anchorStatus').textContent = 'Moderated by JP';
+
+            const topicTitle = topic.title;
+            const topicDesc = topic.description || '';
+            const categoryKey = detectDebateCategory((topicTitle + ' ' + topicDesc).toLowerCase());
+            const playbook = debatePlaybook[categoryKey] || debatePlaybook.default;
+
+            const statements = [
+                { role: 'mod', voiceRole: 'moderator', text: `Good evening, I'm JP, and welcome to The Political Debate. Our topic tonight: "${topicTitle}". ${topicDesc ? topicDesc + '. ' : ''}We have two guests: the affirmative, who supports action, and the opposition, who urges caution. Let's begin with opening statements.` },
+                { role: 'aff', voiceRole: 'affirmative', text: `Thank you, JP. The affirmative's position on "${topicTitle}" is clear. ${playbook.aff.opening(topicTitle)}` },
+                { role: 'neg', voiceRole: 'negative', text: `Thank you, JP. The opposition sees "${topicTitle}" differently. ${playbook.neg.opening(topicTitle)}` },
+                { role: 'mod', voiceRole: 'moderator', text: `Thank you both. Let's move to the arguments.` },
+                { role: 'aff', voiceRole: 'affirmative', text: playbook.aff.args[0](topicTitle) },
+                { role: 'neg', voiceRole: 'negative', text: playbook.neg.args[0](topicTitle) },
+                { role: 'aff', voiceRole: 'affirmative', text: playbook.aff.args[1](topicTitle) },
+                { role: 'neg', voiceRole: 'negative', text: playbook.neg.args[1](topicTitle) },
+                { role: 'mod', voiceRole: 'moderator', text: `Now let's move to rebuttals.` },
+                { role: 'aff', voiceRole: 'affirmative', text: playbook.aff.args[2](topicTitle) },
+                { role: 'neg', voiceRole: 'negative', text: playbook.neg.args[2](topicTitle) },
+                { role: 'mod', voiceRole: 'moderator', text: `Cross-talk now.` },
+                { role: 'aff', voiceRole: 'affirmative', text: playbook.aff.cross(topicTitle) },
+                { role: 'neg', voiceRole: 'negative', text: playbook.neg.cross(topicTitle) },
+                { role: 'mod', voiceRole: 'moderator', text: `Closing statements.` },
+                { role: 'aff', voiceRole: 'affirmative', text: playbook.aff.closing(topicTitle) },
+                { role: 'neg', voiceRole: 'negative', text: playbook.neg.closing(topicTitle) },
+                { role: 'mod', voiceRole: 'moderator', text: `That concludes our debate on "${topicTitle}". Thank you to both guests and to our audience. We would love to hear your thoughts — please send your opinions and feedback to jpierre722@yahoo.com. We now return you to our R&B and Soul channel. Enjoy the music.` }
+            ];
+
+            let step = 0;
+            const roleEl = document.getElementById('currentSpeakerRole');
+
+            function updateRoleBadge(role) {
+                if (!roleEl) return;
+                roleEl.className = 'debate-role ' + (role === 'aff' ? 'aff' : role === 'neg' ? 'neg' : 'mod');
+                roleEl.textContent = role === 'aff' ? '🟢 Affirmative Guest' : role === 'neg' ? '🔴 Opposition Guest' : '🎙️ Moderator';
+            }
+
+            function nextStep() {
+                if (!isDebating) return;
+                if (step >= statements.length) { endDebate(); return; }
+                const s = statements[step];
+                updateRoleBadge(s.role);
+                document.getElementById('anchorNewsText').textContent = s.text;
+                speakSingle(s.text, {
+                    voiceRole: s.voiceRole,
+                    langCode: 'en',
+                    onEndCallback: () => { step++; setTimeout(nextStep, 500); }
+                });
+            }
+            nextStep();
+
+            const safetyTimer = setTimeout(() => { if (isDebating) endDebate(); }, duration + 5000);
+            debateTimers.push(safetyTimer);
+
+            function endDebate() {
+                if (!isDebating && debateTransitionPending) return;
+                isDebating = false;
+                debateTransitionPending = true;
+                document.getElementById('anchorContainer').classList.remove('active');
+                document.getElementById('now-playing').style.display = 'block';
+                document.getElementById('anchorName').textContent = 'The Political Debate';
+                document.getElementById('anchorAvatar').textContent = '🗣️';
+                document.getElementById('anchorStatus').textContent = 'Moderated by JP';
+                updateRoleBadge('mod');
+                setTimeout(() => {
+                    debateTransitionPending = false;
+                    currentChannel = 'rnb';
+                    currentStationIndex = 0;
+                    document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
+                    const map = ['rnb','rock','classical','electronic','french','haitian','aimusic','aireligious','bible','prayer','ainews_en','ainews_fr','aiflashtv','businesstv_en','businesstv_fr','debate','mix','sportflash'];
+                    const idx = map.indexOf('rnb');
+                    const btns = document.querySelectorAll('.channel-btn');
+                    if (btns[idx]) btns[idx].classList.add('active');
+                    playStream();
+                    document.getElementById('audioStatus').textContent = '🎵 Now playing: R&B / Soul';
+                }, 2500);
+                if (debateLoopActive) {
+                    const now = new Date();
+                    const nextHour = new Date(now);
+                    nextHour.setHours(now.getHours() + 1, 0, 0, 0);
+                    debateTimeoutId = setTimeout(() => { pickAndStartDebate(); }, nextHour - now);
+                }
+            }
+        }
+
+        function stopDebateLoop() {
+            debateLoopActive = false;
+            isDebating = false;
+            debateTimers.forEach(t => clearTimeout(t));
+            debateTimers = [];
+            if (debateTimeoutId) clearTimeout(debateTimeoutId);
+            document.getElementById('anchorContainer').classList.remove('active');
+            document.getElementById('now-playing').style.display = 'block';
+        }
+
+        // ============================================
+        // ADS
+        // ============================================
+        const adScripts = [
+            "This is JP AI Radio. Geico can save you 15% or more on car insurance. Visit Geico.com today.",
+            "This is JP AI Radio. Liberty Mutual customizes your car insurance so you only pay for what you need."
+        ];
+        function playAd(callback) {
+            if (!musicChannels.includes(currentChannel) || isMuted || isDebating || adInProgress) { if (callback) callback(); return; }
+            adInProgress = true;
+            const adText = adScripts[adIndex % adScripts.length];
+            adIndex++;
+            const isInitialAd = !audioElement || audioElement.paused;
+            if (!isInitialAd) audioElement.volume = 0.15;
+            document.getElementById('anchorNewsText').textContent = adText;
+            speakLongText(adText, false, () => {
+                adInProgress = false;
+                if (!isInitialAd && audioElement && !isMuted) audioElement.volume = volume;
+                if (callback) callback();
+            }, 'en');
+        }
+        function startAdScheduler() {
+            if (adIntervalId) clearInterval(adIntervalId);
+            adIntervalId = setInterval(() => { if (musicChannels.includes(currentChannel)) playAd(); }, 1800000);
+        }
+        function clearAdScheduler() {
+            if (adIntervalId) { clearInterval(adIntervalId); adIntervalId = null; }
+        }
+
+        // ============================================
+        // CHANNEL MANAGEMENT
+        // ============================================
+        function playStream() {
+            if (!audioElement) createAudioElement();
+            if (!videoElement) videoElement = document.getElementById('newsVideo');
+
+            // Clear all schedulers and intervals
+            if (continuousMixInterval) { clearInterval(continuousMixInterval); continuousMixInterval = null; }
+            if (mixBulletinTimeoutId) { clearTimeout(mixBulletinTimeoutId); mixBulletinTimeoutId = null; }
+            if (sportFlashInterval) { clearInterval(sportFlashInterval); sportFlashInterval = null; }
+            if (sportFlashTimeoutId) { clearTimeout(sportFlashTimeoutId); sportFlashTimeoutId = null; }
+            if (sportMusicInterval) { clearInterval(sportMusicInterval); sportMusicInterval = null; }
+            if (aiFlashInterval) { clearInterval(aiFlashInterval); aiFlashInterval = null; }
+            if (aiFlashTimeoutId) { clearTimeout(aiFlashTimeoutId); aiFlashTimeoutId = null; }
+            aiFlashBulletinActive = false;
+            clearAdScheduler();
+            stopReadingLoop();
+
+            // ---- Video channels (News TV + AI Flash TV + Business TV) ----
+            if (videoChannels.includes(currentChannel)) {
+                document.getElementById('anchorContainer').classList.remove('active');
+                document.getElementById('now-playing').style.display = 'none';
+                document.getElementById('videoContainer').style.display = 'block';
+                document.getElementById('audioStatus').textContent = '📺 Live Stream';
+
+                const stream = radioStations[currentChannel].streams[currentStationIndex];
+                document.getElementById('trackTitle').textContent = stream.name;
+                document.getElementById('trackArtist').textContent = radioStations[currentChannel].name;
+                document.getElementById('trackGenre').textContent = stream.description;
+
+                if (audioElement) audioElement.pause();
+                stopSpeech();
+                if (debateLoopActive) stopDebateLoop();
+
+                if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+
+                const video = videoElement;
+                video.pause();
+                video.removeAttribute('src');
+                video.load();
+
+                // Business TV channels are video-only — mute the audio element entirely
+                if (singleStreamVideoChannels.includes(currentChannel)) {
+                    if (audioElement) {
+                        audioElement.pause();
+                        audioElement.volume = 0;
+                        audioElement.src = '';
+                    }
+                }
+
+                if (Hls.isSupported()) {
+                    hlsInstance = new Hls({ enableWorker: true, lowLatencyMode: true });
+                    hlsInstance.loadSource(stream.url);
+                    hlsInstance.attachMedia(video);
+                    hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                        video.play().catch(() => {
+                            document.getElementById('audioStatus').textContent = '⚠️ Click play to start video';
+                        });
+                    });
+                    hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+                        if (data.fatal) {
+                            document.getElementById('audioStatus').textContent = '⚠️ Stream error — try next station (⏭)';
+                        }
+                    });
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    video.src = stream.url;
+                    video.addEventListener('loadedmetadata', () => {
+                        video.play().catch(() => {});
+                    }, { once: true });
+                } else {
+                    document.getElementById('audioStatus').textContent = '⚠️ HLS not supported in this browser';
+                }
+
+                // ---- AI Flash TV: schedule AI bulletins every 15 minutes ----
+                if (currentChannel === 'aiflashtv') {
+                    // First bulletin after 30 seconds (give the video a moment to load)
+                    aiFlashTimeoutId = setTimeout(() => {
+                        if (currentChannel !== 'aiflashtv') return;
+                        performAIFlashBulletinTV();
+                        // Then every 15 minutes
+                        aiFlashInterval = setInterval(() => {
+                            if (currentChannel !== 'aiflashtv') return;
+                            performAIFlashBulletinTV();
+                        }, 900000);
+                    }, 30000);
+                }
+                return;
+            }
+
+            // Hide video for all other channels
+            document.getElementById('videoContainer').style.display = 'none';
+            if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+            if (videoElement) { videoElement.pause(); videoElement.removeAttribute('src'); videoElement.load(); }
+
+            if (currentChannel === 'bible') {
+                if (audioElement) audioElement.pause();
+                stopSpeech();
+                if (debateLoopActive) stopDebateLoop();
+                startBibleReading();
+                return;
+            }
+
+            if (currentChannel === 'prayer') {
+                if (audioElement) audioElement.pause();
+                stopSpeech();
+                if (debateLoopActive) stopDebateLoop();
+                startPrayerReading();
+                return;
+            }
+
+            if (currentChannel === 'debate') {
+                document.getElementById('anchorContainer').classList.add('active');
+                document.getElementById('now-playing').style.display = 'none';
+                document.getElementById('audioStatus').textContent = '🗣️ Debate Mode';
+                if (audioElement) audioElement.pause();
+                stopSpeech();
+                debateTimers.forEach(t => clearTimeout(t));
+                debateTimers = [];
+                if (debateTimeoutId) clearTimeout(debateTimeoutId);
+                debateLoopActive = false;
+                isDebating = false;
+                startDebateLoop();
+                return;
+            }
+
+            if (currentChannel === 'mix') {
+                document.getElementById('anchorContainer').classList.remove('active');
+                document.getElementById('now-playing').style.display = 'block';
+                document.getElementById('audioStatus').textContent = '⚡ Flash News Active';
+                document.getElementById('trackTitle').textContent = 'Flash News';
+                document.getElementById('trackArtist').textContent = 'Music + News Bulletins';
+                document.getElementById('trackGenre').textContent = 'Auto Mix';
+                const randomChannel = musicChannels[Math.floor(Math.random() * musicChannels.length)];
+                const randomStreams = radioStations[randomChannel].streams;
+                const randomStream = randomStreams[Math.floor(Math.random() * randomStreams.length)];
+                audioElement.src = randomStream.url;
+                audioElement.volume = isMuted ? 0 : volume;
+                audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; });
+                const performBulletin = () => {
+                    if (currentChannel !== 'mix' || isDebating || isMuted) return;
+                    audioElement.pause();
+                    if (newsPool.length === 0) { fetchWorldNews().then(() => { speakMixBulletin(); }); } else { speakMixBulletin(); }
+                };
+                mixBulletinTimeoutId = setTimeout(() => { performBulletin(); continuousMixInterval = setInterval(performBulletin, 900000); }, 10000);
+                return;
+            }
+
+            if (currentChannel === 'sportflash') {
+                document.getElementById('anchorContainer').classList.remove('active');
+                document.getElementById('now-playing').style.display = 'block';
+                document.getElementById('audioStatus').textContent = '🏈 Sport Flash Active';
+                document.getElementById('trackTitle').textContent = 'Sport Flash';
+                document.getElementById('trackArtist').textContent = 'Music + Sports Updates';
+                document.getElementById('trackGenre').textContent = 'Every 15 Minutes';
+                const randomChannel = musicChannels[Math.floor(Math.random() * musicChannels.length)];
+                const randomStreams = radioStations[randomChannel].streams;
+                const randomStream = randomStreams[Math.floor(Math.random() * randomStreams.length)];
+                audioElement.src = randomStream.url;
+                audioElement.volume = isMuted ? 0 : volume;
+                audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; });
+                if (sportNewsPool.length === 0) {
+                    fetchSportsNews().then(() => { sportFlashTimeoutId = setTimeout(() => { performSportsFlash(); sportFlashInterval = setInterval(performSportsFlash, 900000); }, 10000); });
+                } else {
+                    sportFlashTimeoutId = setTimeout(() => { performSportsFlash(); sportFlashInterval = setInterval(performSportsFlash, 900000); }, 10000);
+                }
+                function performSportsFlash() {
+                    if (currentChannel !== 'sportflash' || isDebating || isMuted) return;
+                    audioElement.pause();
+                    speakSportsFlash(() => { if (audioElement && !isMuted) { audioElement.volume = volume; audioElement.play().catch(() => {}); } });
+                }
+                return;
+            }
+
+            // Music channels
+            document.getElementById('anchorContainer').classList.remove('active');
+            document.getElementById('now-playing').style.display = 'block';
+            document.getElementById('audioStatus').textContent = '📡 Connecting...';
+            stopSpeech();
+            if (debateLoopActive) stopDebateLoop();
+            const stream = radioStations[currentChannel].streams[currentStationIndex];
+            document.getElementById('trackTitle').textContent = stream.name;
+            document.getElementById('trackArtist').textContent = radioStations[currentChannel].name;
+            document.getElementById('trackGenre').textContent = stream.description;
+            audioElement.src = stream.url;
+            audioElement.volume = isMuted ? 0 : volume;
+            if (audioElement) audioElement.pause();
+            playAd(() => {
+                if (audioElement && !isMuted) { audioElement.volume = volume; audioElement.play().catch(() => { document.getElementById('audioStatus').textContent = '⚠️ Click play to start'; }); }
+                startAdScheduler();
+            });
+        }
+
+        function speakMixBulletin() {
+            if (newsPool.length === 0) return;
+            let bulletinText = "This is JP AI Radio Flash News. ";
+            for (let i = 0; i < 4; i++) {
+                const item = newsPool[(anchorNewsIndex + i) % newsPool.length];
+                bulletinText += `${item.title}. ${item.description} `;
+            }
+            anchorNewsIndex = (anchorNewsIndex + 4) % newsPool.length;
+            bulletinText += "That's your news flash for now.";
+            document.getElementById('anchorNewsText').textContent = bulletinText;
+            speakLongText(bulletinText, false, () => {
+                if (currentChannel === 'mix') {
+                    if (audioElement && !isMuted) { audioElement.volume = volume; audioElement.play().catch(() => {}); }
+                    const nextAnnouncement = `Next news flash will be in 15 minutes.`;
+                    speakLongText(nextAnnouncement, false, () => {}, 'en');
+                }
+            }, 'en');
+        }
+
+        function speakSportsFlash(onComplete = null) {
+            if (sportNewsPool.length === 0) {
+                sportNewsPool = backupSportsNews.map(title => ({ title, description: '', pubDate: new Date().toISOString() }));
+            }
+            let flashText = "This is JP AI Radio Sports Flash. Scores: ";
+            for (let i = 0; i < 3; i++) {
+                const item = sportNewsPool[(sportNewsIndex + i) % sportNewsPool.length];
+                flashText += `${item.title}. `;
+            }
+            sportNewsIndex = (sportNewsIndex + 3) % sportNewsPool.length;
+            flashText += "Upcoming games: ";
+            upcomingGames.forEach(game => {
+                flashText += `${game.away} at ${game.home} on ${game.date} at ${game.time}. `;
+            });
+            flashText += "That's your sports update for now.";
+            document.getElementById('anchorNewsText').textContent = flashText;
+            speakLongText(flashText, false, onComplete, 'en');
+        }
+
+        function switchChannel(channel) {
+            currentChannel = channel;
+            currentStationIndex = 0;
+            readingIndex = 0;
+            readingPhase = 'prayer';
+            document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
+            const map = ['rnb','rock','classical','electronic','french','haitian','aimusic','aireligious','bible','prayer','ainews_en','ainews_fr','aiflashtv','businesstv_en','businesstv_fr','debate','mix','sportflash'];
+            const idx = map.indexOf(channel);
+            const btns = document.querySelectorAll('.channel-btn');
+            if (btns[idx]) btns[idx].classList.add('active');
+            playStream();
+            if (channel === 'mix' || channel === 'debate' || channel === 'aiflashtv') { if (newsPool.length === 0) fetchWorldNews(); }
+            if (channel === 'sportflash') { if (sportNewsPool.length === 0) fetchSportsNews(); }
+        }
+
+        function togglePlay() {
+            if (currentChannel === 'debate') return;
+            if (videoChannels.includes(currentChannel)) {
+                const v = document.getElementById('newsVideo');
+                if (v.paused) v.play().catch(() => {}); else v.pause();
+                return;
+            }
+            if (voiceChannels.includes(currentChannel)) {
+                if (speechSynth) {
+                    if (speechSynth.paused) speechSynth.resume();
+                    else speechSynth.pause();
+                }
+                return;
+            }
+            if (!audioElement) { createAudioElement(); playStream(); return; }
+            if (isPlaying) audioElement.pause(); else audioElement.play();
+        }
+        function toggleMute() {
+            isMuted = !isMuted;
+            if (videoChannels.includes(currentChannel)) {
+                const v = document.getElementById('newsVideo');
+                if (v) v.muted = isMuted;
+            }
+            if (audioElement) {
+                if (isMuted) audioElement.volume = 0;
+                else if (adInProgress || (currentChannel === 'mix' && isSpeaking) || (currentChannel === 'sportflash' && isSpeaking)) audioElement.volume = 0.15;
+                else audioElement.volume = volume;
+            }
+            if (speechSynth) { if (isMuted) speechSynth.cancel(); }
+            document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🔊';
+        }
+        function adjustVolume(value) {
+            volume = value/100;
+            const slider = document.getElementById('volumeSlider');
+            if (slider) {
+                slider.style.background = `linear-gradient(90deg, var(--gold) 0%, var(--gold) ${value}%, rgba(255,255,255,0.08) ${value}%)`;
+            }
+            if (videoChannels.includes(currentChannel)) {
+                const v = document.getElementById('newsVideo');
+                if (v && !aiFlashBulletinActive) v.volume = volume;
+            }
+            if (audioElement && !isMuted) {
+                if (adInProgress || (currentChannel === 'mix' && isSpeaking) || (currentChannel === 'sportflash' && isSpeaking)) audioElement.volume = 0.15;
+                else audioElement.volume = volume;
+            }
+        }
+        function nextStation() {
+            if (currentChannel === 'mix' || currentChannel === 'debate' || currentChannel === 'sportflash') return;
+            const streams = radioStations[currentChannel].streams;
+            if (singleStreamVideoChannels.includes(currentChannel) || streams.length <= 1) {
+                playStream();
+                return;
+            }
+            currentStationIndex = (currentStationIndex + 1) % streams.length;
+            readingIndex = 0;
+            readingPhase = 'prayer';
+            playStream();
+        }
+        function previousStation() {
+            if (currentChannel === 'mix' || currentChannel === 'debate' || currentChannel === 'sportflash') return;
+            const streams = radioStations[currentChannel].streams;
+            if (singleStreamVideoChannels.includes(currentChannel) || streams.length <= 1) {
+                playStream();
+                return;
+            }
+            currentStationIndex = (currentStationIndex - 1 + streams.length) % streams.length;
+            readingIndex = 0;
+            readingPhase = 'prayer';
+            playStream();
+        }
+
+        // ============================================
+        // WEATHER & SPORTS SCORES
+        // ============================================
+        async function fetchWeather() {
+            try {
+                if (!userLocation) userLocation = BOSTON_LOCATION;
+                const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${userLocation.lat}&longitude=${userLocation.lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&timezone=America%2FNew_York`);
+                const d = await r.json();
+                if (d.current) {
+                    const tempF = Math.round(d.current.temperature_2m * 9/5 + 32);
+                    const humidity = Math.round(d.current.relative_humidity_2m);
+                    const wind = Math.round(d.current.wind_speed_10m);
+                    const code = d.current.weather_code;
+                    const wmap = {0:{icon:'☀️',desc:'Clear Sky'},1:{icon:'🌤️',desc:'Mostly Clear'},2:{icon:'⛅',desc:'Partly Cloudy'},3:{icon:'☁️',desc:'Overcast'},45:{icon:'🌫️',desc:'Foggy'},61:{icon:'🌧️',desc:'Light Rain'},63:{icon:'🌧️',desc:'Rain'},65:{icon:'🌧️',desc:'Heavy Rain'},71:{icon:'🌨️',desc:'Light Snow'},95:{icon:'⛈️',desc:'Thunderstorm'}};
+                    const w = wmap[code] || {icon:'🌤️',desc:'Unknown'};
+                    document.getElementById('weatherIcon').textContent = w.icon;
+                    document.getElementById('weatherTemp').textContent = `${tempF}°F`;
+                    document.getElementById('weatherLocation').textContent = `📍 ${userLocation.city}, ${userLocation.region}`;
+                    document.getElementById('weatherDescription').textContent = w.desc;
+                    document.getElementById('weatherWind').textContent = `${wind} km/h`;
+                    document.getElementById('weatherHumidity').textContent = `${humidity}%`;
+                }
+            } catch(e) {}
+        }
+        async function fetchSportsScores() {
+            try {
+                const r = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard');
+                const d = await r.json();
+                if (d.events && d.events.length > 0) displaySportsScores(d.events);
+            } catch(e) {}
+        }
+        function displaySportsScores(events) {
+            const c = document.getElementById('sportsScores');
+            c.innerHTML = '';
+            events.slice(0,3).forEach(ev => {
+                const comp = ev.competitions[0];
+                const home = comp.competitors.find(x => x.homeAway === 'home');
+                const away = comp.competitors.find(x => x.homeAway === 'away');
+                if (home && away) {
+                    const div = document.createElement('div');
+                    div.className = 'sports-score';
+                    div.innerHTML = `<strong>${away.team.displayName}</strong> ${away.score||'0'} &nbsp;—&nbsp; ${home.score||'0'} <strong>${home.team.displayName}</strong><br><small>${comp.status.type.detail||'Upcoming'}</small>`;
+                    c.appendChild(div);
+                }
+            });
+        }
+
+        function setCustomCity() {
+            const input = document.getElementById('cityInput').value.trim();
+            if (!input) return;
+            userLocation = { ...BOSTON_LOCATION, city: input, region: '', source: 'Custom' };
+            fetchWeather();
+            document.getElementById('dataStatus').textContent = `📍 Weather city set to ${input}`;
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        function createVisualizer() {
+            const viz = document.getElementById('visualizer');
+            viz.innerHTML = '';
+            for (let i=0; i<40; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'visualizer-bar';
+                bar.style.animationDelay = `${i*0.05}s`;
+                bar.style.animationDuration = `${0.45+Math.random()*0.9}s`;
+                viz.appendChild(bar);
+            }
+        }
+        function createAudioElement() {
+            if (audioElement) { audioElement.pause(); audioElement.remove(); }
+            audioElement = new Audio();
+            audioElement.crossOrigin = "anonymous";
+            audioElement.volume = isMuted ? 0 : volume;
+            audioElement.addEventListener('play', () => { isPlaying = true; document.getElementById('playBtn').textContent='⏸'; document.getElementById('audioStatus').textContent='🔊 Streaming Live'; });
+            audioElement.addEventListener('pause', () => { isPlaying = false; document.getElementById('playBtn').textContent='▶'; document.getElementById('audioStatus').textContent='⏸ Paused'; });
+            audioElement.addEventListener('playing', () => { document.getElementById('audioStatus').textContent='✅ Playing'; });
+            audioElement.addEventListener('error', () => { document.getElementById('audioStatus').textContent='⚠️ Stream error'; });
+        }
+        function updateClock() {
+            document.getElementById('currentTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        }
+        function updateListeners() {
+            listeners += Math.floor(Math.random()*20)-5;
+            listeners = Math.max(1500, Math.min(5000, listeners));
+            document.getElementById('listeners').textContent = listeners.toLocaleString();
+        }
+        function updateScheduleHighlight() {
+            const hour = new Date().getHours();
+            const items = document.querySelectorAll('.schedule-item');
+            items.forEach(i => { i.style.background='transparent'; i.style.boxShadow='none'; });
+            let idx = hour<6?0:hour<10?1:hour<14?2:hour<18?3:hour<22?4:5;
+            if (items[idx]) {
+                items[idx].style.background='rgba(201, 169, 97, 0.08)';
+                items[idx].style.boxShadow='inset 2px 0 0 var(--gold)';
+            }
+        }
+
+        function startRadio() {
+            document.getElementById('startScreen').style.display = 'none';
+            createAudioElement();
+            setupVoices();
+            if (speechSynth) {
+                speechSynth.onvoiceschanged = () => { setupVoices(); pickDebateVoices(); };
+                setTimeout(() => { setupVoices(); pickDebateVoices(); }, 500);
+                setTimeout(() => { setupVoices(); pickDebateVoices(); }, 1500);
+                setTimeout(() => { setupVoices(); pickDebateVoices(); }, 3000);
+            }
+            playStream();
+            fetchWorldNews();
+            fetchSportsNews();
+            fetchWeather();
+            fetchSportsScores();
+            updateClock();
+            adjustVolume(document.getElementById('volumeSlider').value);
+            setInterval(updateClock, 1000);
+            setInterval(fetchWorldNews, 3600000);
+            setInterval(fetchSportsNews, 3600000);
+            setInterval(fetchWeather, 600000);
+            setInterval(fetchSportsScores, 60000);
+            setInterval(displayNextNews, 10000);
+            updateListeners();
+            setInterval(updateListeners, 15000);
+            updateScheduleHighlight();
+            setInterval(updateScheduleHighlight, 60000);
+        }
+
+        window.refreshWorldNews = fetchWorldNews;
+
+        createVisualizer();
+        updateScheduleHighlight();
+        document.getElementById('cityInput').value = 'Boston, MA';
+        console.log('%c📡 JP AI Radio · v15 · AI Flash News TV added — live video + AI bulletins every 15 minutes', 'color:#c9a961;font-weight:bold;');
+        console.log('%c📺 5 video channels: News TV (EN/FR) + AI Flash TV + Business TV (EN) + BFM Business (FR)', 'color:#c9a961;font-weight:bold;');
+    </script>
+</body>
+</html>
