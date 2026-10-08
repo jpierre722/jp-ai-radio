@@ -44,11 +44,37 @@
         @keyframes visualize{0%,100%{height:4px;opacity:0.4;}50%{height:26px;opacity:1;}}
         .ai-news-studio{display:none;position:relative;margin-bottom:24px;border-radius:3px;border:1px solid var(--hairline-strong);background:#000;overflow:hidden;aspect-ratio:16/9;max-height:540px;font-family:'Inter',sans-serif;}
         .ai-news-studio.active{display:block;}
+
+        /* ============ HIGH-RES IMAGE LAYER — SHARP & CRISP ============ */
         .ai-news-image-layer{position:absolute;inset:0;z-index:1;overflow:hidden;background:#050508;}
-        .ai-news-image{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.4s ease;will-change:opacity,transform;}
-        .ai-news-image.active{opacity:1;animation:kenBurns 18s ease-in-out infinite alternate;}
-        @keyframes kenBurns{0%{transform:scale(1) translate(0,0);}100%{transform:scale(1.1) translate(-1.2%,-1%);}}
-        .ai-news-image-layer::after{content:'';position:absolute;inset:0;z-index:2;background:linear-gradient(90deg,rgba(5,5,8,0.95) 0%,rgba(5,5,8,0.82) 45%,rgba(5,5,8,0.4) 100%),linear-gradient(0deg,rgba(5,5,8,0.98) 0%,rgba(5,5,8,0.6) 25%,transparent 55%,rgba(5,5,8,0.55) 100%);pointer-events:none;}
+        .ai-news-image{
+            position:absolute;inset:0;
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            object-position:center center;
+            display:block;
+            opacity:0;
+            transition:opacity 1.1s ease;
+            will-change:opacity,transform;
+            transform:translateZ(0) scale(1.001);
+            backface-visibility:hidden;
+            -webkit-backface-visibility:hidden;
+            -webkit-user-select:none;
+            user-select:none;
+            pointer-events:none;
+        }
+        .ai-news-image.active{
+            opacity:1;
+            /* Very gentle drift — the image is always at native resolution, so it stays razor-sharp */
+            animation:kenBurns 26s ease-in-out infinite alternate;
+        }
+        @keyframes kenBurns{
+            0%{transform:translateZ(0) scale(1.001);}
+            100%{transform:translateZ(0) scale(1.065);}
+        }
+        .ai-news-image-layer::after{content:'';position:absolute;inset:0;z-index:2;background:linear-gradient(90deg,rgba(5,5,8,0.93) 0%,rgba(5,5,8,0.74) 45%,rgba(5,5,8,0.18) 100%),linear-gradient(0deg,rgba(5,5,8,0.95) 0%,rgba(5,5,8,0.45) 25%,transparent 55%,rgba(5,5,8,0.45) 100%);pointer-events:none;}
+
         .ai-news-brandbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 28px;background:linear-gradient(180deg,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0) 100%);z-index:5;}
         .ai-news-brand-left{display:flex;align-items:center;gap:14px;}
         .ai-news-live{display:inline-flex;align-items:center;gap:6px;background:var(--crimson);color:white;font-size:10px;font-weight:800;letter-spacing:0.2em;padding:5px 10px 5px 8px;border-radius:3px;}
@@ -58,7 +84,7 @@
         .ai-news-brand-right{display:flex;align-items:center;gap:20px;font-size:11px;color:var(--mist);letter-spacing:0.15em;font-variant-numeric:tabular-nums;text-shadow:0 2px 8px rgba(0,0,0,0.9);}
         .ai-news-clock{color:var(--platinum);font-weight:600;font-size:14px;letter-spacing:0.1em;}
         .ai-news-body{position:absolute;top:70px;left:0;right:0;bottom:90px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:20px 60px;z-index:4;pointer-events:none;}
-        .ai-news-category{display:inline-block;font-size:11px;font-weight:800;letter-spacing:0.35em;color:var(--gold);padding:6px 14px;border:1px solid var(--hairline-strong);background:rgba(10,10,13,0.7);backdrop-filter:blur(6px);border-radius:2px;margin-bottom:22px;text-transform:uppercase;}
+        .ai-news-category{display:inline-block;font-size:11px;font-weight:800;letter-spacing:0.35em;color:var(--gold);padding:6px 14px;border:1px solid var(--hairline-strong);background:rgba(10,10,13,0.75);backdrop-filter:blur(6px);border-radius:2px;margin-bottom:22px;text-transform:uppercase;}
         .ai-news-headline{font-family:'Cormorant Garamond',Georgia,serif;font-size:42px;font-weight:600;line-height:1.15;color:var(--platinum);max-width:92%;margin-bottom:24px;text-shadow:0 4px 30px rgba(0,0,0,0.95),0 2px 8px rgba(0,0,0,0.9);transition:opacity 0.5s ease,transform 0.5s ease;}
         .ai-news-headline.fade-out{opacity:0;transform:translateY(-10px);}
         .ai-news-meta{display:flex;align-items:center;gap:28px;font-size:11px;color:var(--mist);letter-spacing:0.15em;text-transform:uppercase;text-shadow:0 2px 10px rgba(0,0,0,0.9);}
@@ -76,7 +102,7 @@
         .ai-news-ticker-scroll{display:inline-block;white-space:nowrap;padding-left:100%;animation:newsScroll 80s linear infinite;color:white;font-size:13px;font-weight:500;letter-spacing:0.02em;}
         @keyframes newsScroll{0%{transform:translateX(0);}100%{transform:translateX(-100%);}}
         .ai-news-ticker-scroll .separator{display:inline-block;margin:0 24px;color:var(--gold);font-weight:700;}
-        .ai-news-studio::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:6;background:repeating-linear-gradient(0deg,rgba(201,169,97,0.012) 0px,rgba(201,169,97,0.012) 1px,transparent 1px,transparent 3px);opacity:0.9;}
+        .ai-news-studio::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:6;background:repeating-linear-gradient(0deg,rgba(201,169,97,0.008) 0px,rgba(201,169,97,0.008) 1px,transparent 1px,transparent 3px);opacity:0.6;}
         .ai-news-corner{position:absolute;width:22px;height:22px;border:2px solid var(--gold);z-index:7;opacity:0.75;}
         .ai-news-corner.tl{top:12px;left:12px;border-right:none;border-bottom:none;}
         .ai-news-corner.tr{top:12px;right:12px;border-left:none;border-bottom:none;}
@@ -166,9 +192,8 @@
         .start-button:hover{transform:translateY(-2px);}
         .start-info{color:var(--mist);text-align:center;font-size:12px;line-height:2;}
         @media (max-width:980px){.channels{grid-template-columns:repeat(5,1fr);}}
-        @media (max-width:900px){.info-section{grid-template-columns:1fr;}}
+        @media (max-width:900px){.info-section{grid-template-columns:1fr;}.ai-news-headline{font-size:30px;}.ai-news-body{padding:20px 40px;}.ai-news-anchor-avatar{width:48px;height:48px;font-size:22px;}}
         @media (max-width:700px){body{padding:12px 8px;}.header{padding:20px 22px;flex-direction:column;align-items:flex-start;gap:14px;}.header-meta{display:none;}.brand-title{font-size:24px;}.content-pad{padding:20px 22px;}.status-bar{padding:12px 22px;gap:16px;}.channels{grid-template-columns:repeat(3,1fr);gap:6px;}.channel-btn{padding:10px 3px 8px;font-size:8px;letter-spacing:0.06em;}.channel-btn .channel-icon{font-size:17px;}.track-title{font-size:24px;}.control-btn{width:40px;height:40px;font-size:12px;}.control-btn.play{width:52px;height:52px;font-size:15px;}.now-playing{padding:24px 20px;}.anchor-container{padding:24px 20px;}.anchor-avatar{width:56px;height:56px;font-size:24px;}.anchor-info h2{font-size:18px;}.anchor-news-text{font-size:16px;padding:18px 20px;}.weather-temp{font-size:34px;}.start-title{font-size:32px;}.start-button{padding:16px 32px;font-size:11px;}.volume-slider{width:140px;}}
-        @media (max-width:900px){.ai-news-headline{font-size:30px;}.ai-news-body{padding:20px 40px;}.ai-news-anchor-avatar{width:48px;height:48px;font-size:22px;}}
         @media (max-width:600px){.ai-news-headline{font-size:22px;max-width:100%;}.ai-news-body{padding:20px 24px;top:60px;bottom:80px;}.ai-news-brandbar{padding:12px 16px;}.ai-news-brand-right{display:none;}.ai-news-anchor{bottom:80px;right:12px;}.ai-news-bottomticker{height:80px;}.ai-news-corner.bl,.ai-news-corner.br{bottom:90px;}}
     </style>
 </head>
@@ -222,8 +247,8 @@
             <!-- English AI News Flash TV Studio -->
             <div id="aiNewsStudio" class="ai-news-studio">
                 <div class="ai-news-image-layer">
-                    <div class="ai-news-image" id="aiNewsImageA"></div>
-                    <div class="ai-news-image" id="aiNewsImageB"></div>
+                    <img class="ai-news-image" id="aiNewsImageA" alt="" decoding="async" fetchpriority="high">
+                    <img class="ai-news-image" id="aiNewsImageB" alt="" decoding="async" fetchpriority="high">
                 </div>
                 <div class="ai-news-corner tl"></div>
                 <div class="ai-news-corner tr"></div>
@@ -266,8 +291,8 @@
             <!-- French AI News Flash TV Studio -->
             <div id="aiNewsStudioFr" class="ai-news-studio">
                 <div class="ai-news-image-layer">
-                    <div class="ai-news-image" id="aiNewsFrImageA"></div>
-                    <div class="ai-news-image" id="aiNewsFrImageB"></div>
+                    <img class="ai-news-image" id="aiNewsFrImageA" alt="" decoding="async" fetchpriority="high">
+                    <img class="ai-news-image" id="aiNewsFrImageB" alt="" decoding="async" fetchpriority="high">
                 </div>
                 <div class="ai-news-corner tl"></div>
                 <div class="ai-news-corner tr"></div>
@@ -371,7 +396,7 @@
                     <span class="marquee-divider">◆</span>
                     ⏭ <span class="marquee-em">Tip:</span> Click the forward (⏭) button to listen to a different station within the same category channel
                     <span class="marquee-divider">◆</span>
-                    🤖 <span class="marquee-em">AI News Flash TV (EN/FR):</span> 100% AI-generated broadcast with live imagery — bulletins every 60 seconds
+                    🤖 <span class="marquee-em">AI News Flash TV (EN/FR):</span> 100% AI-generated broadcast with high-resolution imagery — bulletins every 60 seconds
                     <span class="marquee-divider">◆</span>
                     🗣️ <span class="marquee-em">Debate Channel:</span> Three distinct voices — Moderator, Affirmative guest, Opposition guest
                     <span class="marquee-divider">◆</span>
@@ -428,10 +453,11 @@
 
     <script>
         // ============================================
-        // JP AI RADIO — PREMIUM EDITION v20
-        // - Removed: Business TV (EN) + BFM Business (FR)
-        // - Added: Closing message + 60s news theme music
-        //   between AI News Flash broadcast cycles (EN + FR)
+        // JP AI RADIO — PREMIUM EDITION v22
+        // - Native <img> layers with object-fit:cover → razor-sharp imagery
+        // - Removed pixelated "crisp-edges" hint that was destroying image quality
+        // - decode()-before-reveal → no blurry half-loaded frames
+        // - Brand-new warm, cinematic broadcast news theme with lush delay FX
         // ============================================
 
         const HAITIAN_VOICE_MASTER_PROMPT = {enabled:true,tone:'dous, cho, natif natal',pronunciation:'kreyòl ayisyen klè',nasalRule:'an, en, on, oun byen make — n pa yon konsòn separe',substitutions:{'ou':'oo','è':'eh','ò':'aw','ay':'eye','im':'eem'},constraints:['pa tradui','pa chanje mo yo','li egzak jan li ekri','ritm natirèl yon Ayisyen'],delivery:{rate:0.72,pitch:0.92,volume:1.0,pauseBetweenSentences:900,pauseBetweenChunks:1400}};
@@ -492,17 +518,61 @@
             if (!negativeVoice) negativeVoice = femaleVoice || enVoices[enVoices.length - 1];
         }
 
+        // ============================================================
+        // 📸 HIGH-RESOLUTION IMAGE POOLS
+        // 2560px wide, q=95 — plenty of headroom for the subtle drift
+        // ============================================================
         const CATEGORY_IMAGES = {
-            'POLITICS':['https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1920&q=80','https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1920&q=80','https://images.unsplash.com/photo-1555848962-6e79363ec58f?auto=format&fit=crop&w=1920&q=80'],
-            'BUSINESS':['https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1920&q=80','https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1920&q=80','https://images.unsplash.com/photo-1560221328-12fe60f83ab8?auto=format&fit=crop&w=1920&q=80'],
-            'CLIMATE':['https://images.unsplash.com/photo-1502920514313-52581002a659?auto=format&fit=crop&w=1920&q=80','https://images.unsplash.com/photo-1569163139394-de4e4f43e4e3?auto=format&fit=crop&w=1920&q=80','https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=1920&q=80'],
-            'CONFLICT':['https://images.unsplash.com/photo-1580136579312-94651dfd596d?auto=format&fit=crop&w=1920&q=80','https://images.unsplash.com/photo-1601813219462-f2bbd41cd7b1?auto=format&fit=crop&w=1920&q=80'],
-            'HEALTH':['https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=1920&q=80','https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?auto=format&fit=crop&w=1920&q=80'],
-            'TECHNOLOGY':['https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1920&q=80','https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1920&q=80'],
-            'SPORTS':['https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1920&q=80','https://images.unsplash.com/photo-1547347298-4074fc3086f0?auto=format&fit=crop&w=1920&q=80'],
-            'DIPLOMACY':['https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?auto=format&fit=crop&w=1920&q=80','https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=1920&q=80'],
-            'WORLD NEWS':['https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1920&q=80','https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=1920&q=80','https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80']
+            'POLITICS': [
+                'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1555848962-6e79363ec58f?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1569243115784-cf4e8d1b1d5e?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+            ],
+            'BUSINESS': [
+                'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1560221328-12fe60f83ab8?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1554260570-e9689a3418b8?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+            ],
+            'CLIMATE': [
+                'https://images.unsplash.com/photo-1502920514313-52581002a659?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1569163139394-de4e4f43e4e3?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+            ],
+            'CONFLICT': [
+                'https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1601813219462-f2bbd41cd7b1?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1580744723289-cd04cc1a17cf?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+            ],
+            'HEALTH': [
+                'https://images.unsplash.com/photo-1584515933487-779824d29309?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+            ],
+            'TECHNOLOGY': [
+                'https://images.unsplash.com/photo-1518770660439-4636190af475?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+            ],
+            'SPORTS': [
+                'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1547347298-4074fc3086f0?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+            ],
+            'DIPLOMACY': [
+                'https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+            ],
+            'WORLD NEWS': [
+                'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=2560&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+            ]
         };
+
         const categoryRotation = {};
         function getCategoryImage(category) {
             const pool = CATEGORY_IMAGES[category] || CATEGORY_IMAGES['WORLD NEWS'];
@@ -512,7 +582,7 @@
         }
         function getFallbackImage(headline) {
             const seed = encodeURIComponent((headline || 'news').substring(0, 40).replace(/[^a-z0-9]/gi, ''));
-            return `https://picsum.photos/seed/${seed}/1920/1080`;
+            return `https://picsum.photos/seed/${seed}/2560/1440`;
         }
 
         // STATE
@@ -530,13 +600,11 @@
         let sportNewsPool = [], sportNewsIndex = 0, upcomingGames = [];
         let debateTransitionPending = false, readingLoopTimeoutId = null, readingIndex = 0, readingPhase = 'prayer';
 
-        // AI News Flash TV (EN)
         let aiNewsActive = false, aiNewsLoopTimeoutId = null, aiNewsClockInterval = null;
         let aiNewsHeadlineIndex = 0, currentImageSlot = 'A';
         let aiNewsHeadlinesInCycle = 0;
         const AI_NEWS_CYCLE_LENGTH = 5;
 
-        // AI News Flash TV (FR)
         let aiNewsFrActive = false, aiNewsFrLoopTimeoutId = null, aiNewsFrClockInterval = null;
         let aiNewsFrHeadlineIndex = 0, currentFrImageSlot = 'A';
         let aiNewsFrHeadlinesInCycle = 0;
@@ -547,7 +615,6 @@
         const voiceChannels = ['bible','prayer'];
         const BOSTON_LOCATION = {lat:42.3601,lon:-71.0589,city:'Boston',region:'Massachusetts',country:'US',source:'Default'};
 
-        // CHANNEL STREAMS
         const radioStations = {
             rnb:{name:"R&B / Soul",genre:"R&B, Soul, Funk",icon:"🎤",streams:[
                 {name:"Smooth Grooves",description:"Smooth R&B & Soul",url:"https://ice1.somafm.com/illstreet-128-mp3"},
@@ -595,7 +662,6 @@
             sportflash:{name:"Sport Flash",genre:"Sports Updates",icon:"🏈",streams:[]}
         };
 
-        // BIBLE LIBRARY
         const bibleContent = {
             en:[
                 {ref:"Genesis 1:1",text:"In the beginning God created the heaven and the earth."},
@@ -633,9 +699,8 @@
             ]
         };
 
-        // PRAYER LIBRARY (compressed reference — full meditations inline)
+        // PRAYER LIBRARY — full meditations
         const prayerLibrary = (function() {
-            const mk = (en, fr) => ({en, fr});
             const en1 = {title:"The Lord's Prayer",prayer:"Our Father, which art in heaven, hallowed be thy name. Thy kingdom come, thy will be done, in earth as it is in heaven. Give us this day our daily bread. And forgive us our trespasses, as we forgive those who trespass against us. And lead us not into temptation, but deliver us from evil. For thine is the kingdom, and the power, and the glory, for ever and ever. Amen.",meditation:"This prayer is the model Jesus Himself gave us. When we call God 'Our Father', we acknowledge that we are not alone — we belong to a family that spans every nation and generation. When we pray 'hallowed be thy name', we recognize that God's name is holy, and we are called to honor it with our lives. 'Thy kingdom come' is a plea for God's reign of love, justice, and peace to take root in our hearts and in our world. 'Give us this day our daily bread' reminds us that we depend on God for everything — not just food, but every breath we take. When we forgive others, we open the door for God's forgiveness to flow through us. And when we ask to be delivered from evil, we acknowledge that we cannot walk this road alone. Pray this prayer slowly. Let every word sink into your heart. Let it become the pattern of your entire life. Amen."};
             const en2 = {title:"Prayer for Peace",prayer:"Lord, we pray for peace in our hearts, in our homes, in our cities, and in our world. Calm the storms around us and within us. Let your peace that passes all understanding guard our hearts and minds. Amen.",meditation:"Peace is not the absence of conflict. It is the presence of God. When we pray for peace, we are not asking for a world without problems — we are inviting God to be the center of every situation. The peace that God gives is not like the peace the world offers. It is a deep, unshakable calm that remains even when everything around us is shaking. This peace begins in the individual heart. Before we can bring peace to our homes and our communities, we must first allow God to quiet our own inner storms. As you pray this prayer, invite the Holy Spirit to search your heart. Are there fears, anxieties, or resentments that need to be surrendered? Let them go. Let the peace of Christ rule in your heart, and it will overflow into everything you touch. Amen."};
             const en3 = {title:"Prayer for Healing",prayer:"Heavenly Father, we lift up all who are sick, hurting, or in pain. Place your healing hand upon them. Restore their strength, renew their hope, and bring comfort to their families. In Jesus' name, amen.",meditation:"Healing is more than physical restoration. It is the gentle touch of God reaching into every broken place of our lives. When we pray for healing, we acknowledge that we are not self-sufficient. We need God. We need His grace. We need His mercy. Some healing comes instantly. Some comes slowly. Some comes in ways we do not expect — through a word of encouragement, a friend's presence, or a deeper trust in God's plan. True healing is always tied to faith. Jesus often said, 'Your faith has made you well.' Faith is not the absence of questions. It is the choice to trust God even when we do not have all the answers. Pray this prayer with an open heart. Trust that God hears you, and trust that He is working — even in the waiting. Amen."};
@@ -649,19 +714,18 @@
 
             const fr1 = {title:"Notre Père",prayer:"Notre Père qui es aux cieux, que ton nom soit sanctifié, que ton règne vienne, que ta volonté soit faite sur la terre comme au ciel. Donne-nous aujourd'hui notre pain quotidien. Pardonne-nous nos offenses, comme nous pardonnons aussi à ceux qui nous ont offensés. Et ne nous soumets pas à la tentation, mais délivre-nous du mal. Car c'est à toi qu'appartiennent le règne, la puissance et la gloire, aux siècles des siècles. Amen.",meditation:"Cette prière est le modèle que Jésus Lui-même nous a donné. Quand nous appelons Dieu 'Notre Père', nous reconnaissons que nous ne sommes pas seuls — nous appartenons à une famille qui s'étend à toutes les nations et à toutes les générations. Quand nous prions 'que ton nom soit sanctifié', nous reconnaissons que le nom de Dieu est saint et que nous sommes appelés à l'honorer par notre vie. 'Que ton règne vienne' est un appel pour que le règne d'amour, de justice et de paix de Dieu prenne racine dans nos coeurs et dans notre monde. 'Donne-nous aujourd'hui notre pain quotidien' nous rappelle que nous dépendons de Dieu pour tout. Quand nous pardonnons aux autres, nous ouvrons la porte à ce que le pardon de Dieu coule à travers nous. Priez cette prière lentement. Laissez chaque mot pénétrer votre coeur. Laissez-la devenir le modèle de toute votre vie. Amen."};
             const fr2 = {title:"Prière pour la Paix",prayer:"Seigneur, nous prions pour la paix dans nos coeurs, dans nos maisons, dans nos villes et dans notre monde. Calme les tempêtes autour de nous et en nous. Que ta paix qui surpasse toute intelligence garde nos coeurs et nos pensées. Amen.",meditation:"La paix n'est pas l'absence de conflit. C'est la présence de Dieu. Quand nous prions pour la paix, nous ne demandons pas un monde sans problèmes — nous invitons Dieu à être au centre de chaque situation. La paix que Dieu donne n'est pas comme celle que le monde offre. C'est un calme profond et inébranlable qui demeure même quand tout autour de nous tremble. Cette paix commence dans le coeur individuel. Avant d'apporter la paix dans nos maisons et nos communautés, nous devons d'abord permettre à Dieu d'apaiser nos propres tempêtes intérieures. En priant cette prière, invitez le Saint-Esprit à sonder votre coeur. Y a-t-il des peurs, des angoisses ou des ressentiments qui doivent être abandonnés? Laissez-les aller. Laissez la paix du Christ régner dans votre coeur, et elle débordera sur tout ce que vous touchez. Amen."};
-            const fr3 = {title:"Prière pour la Guérison",prayer:"Père céleste, nous te présentons tous ceux qui sont malades, blessés ou souffrants. Pose ta main guérissante sur eux. Restaure leur force, renouvelle leur espérance, et apporte le réconfort à leurs familles. Au nom de Jésus, amen.",meditation:"La guérison est plus qu'une restauration physique. C'est le toucher doux de Dieu atteignant chaque endroit brisé de notre vie. Quand nous prions pour la guérison, nous reconnaissons que nous ne sommes pas autosuffisants. Nous avons besoin de Dieu. Nous avons besoin de Sa grâce. Nous avons besoin de Sa miséricorde. Certaines guérisons viennent instantanément. D'autres viennent lentement. D'autres viennent de manière inattendue — par un mot d'encouragement, la présence d'un ami, ou une confiance plus profonde dans le plan de Dieu. La vraie guérison est toujours liée à la foi. Jésus disait souvent: 'Ta foi t'a guéri.' La foi n'est pas l'absence de questions. Priez cette prière avec un coeur ouvert. Croyez que Dieu vous entend et qu'Il agit — même dans l'attente. Amen."};
-            const fr4 = {title:"Prière du Matin",prayer:"Seigneur, merci pour ce nouveau jour. Guide mes pas, mes paroles et mes pensées. Aide-moi à être une lumière pour ceux qui m'entourent. Que tout ce que je fais honore ton nom. Amen.",meditation:"Chaque matin est un cadeau de Dieu. Le fait que vous ayez ouvert les yeux, que vous puissiez respirer, que vous puissiez bouger — ce sont des miséricordes que nous prenons trop souvent pour acquises. Une prière du matin donne le ton pour toute la journée. Elle tourne vos premières pensées vers Dieu et invite Sa direction avant qu'aucune autre voix ne puisse parler dans votre vie. Quand vous commencez la journée par la prière, vous dites à Dieu: 'J'ai besoin de Toi aujourd'hui.' Le psalmiste a écrit: 'Le matin, Seigneur, Tu entends ma voix.' Dieu écoute. Il se soucie des petits détails de votre journée. En priant cette prière, imaginez Dieu marchant à vos côtés dans la journée à venir. Il est plus proche que votre propre souffle. Amen."};
-            const fr5 = {title:"Prière du Soir",prayer:"Père, alors que ce jour se termine, nous te remercions pour ta protection et ta provision. Pardonne-nous nos manquements. Veille sur nous pendant la nuit, et accorde-nous le repos. Amen.",meditation:"Le soir est un moment sacré. C'est le moment où le bruit de la journée s'estompe et où nous venons devant Dieu les mains ouvertes. Une prière du soir est un acte d'abandon. Elle dit: 'Seigneur, je n'ai pas tout bien fait aujourd'hui, mais je Te le donne.' C'est le moment de revoir la journée avec Dieu — non pas pour nous flageller, mais pour apprendre, grandir et nous reposer. Quand nous demandons à Dieu de veiller sur nous pendant la nuit, nous faisons confiance que Sa protection ne dort jamais. Le psalmiste a écrit: 'Celui qui garde Israël ne sommeille ni ne dort.' En vous couchant, rappelez-vous que Dieu est toujours sur Son trône. Vous pouvez vous reposer parce qu'Il ne le fait pas. Donnez-Lui vos fardeaux. Amen."};
-            const fr6 = {title:"Prière de Remerciement",prayer:"Seigneur, nous te remercions pour ta bonté, ta miséricorde et ta fidélité. Merci pour le don de la vie, pour la famille et pour les amis. Que nos coeurs débordent de reconnaissance. Amen.",meditation:"L'action de grâce est le battement de coeur d'une vie spirituelle saine. Quand nous remercions Dieu, nous ne Lui rendons pas service — nous nous en rendons un. La gratitude remodèle l'âme. Elle détourne notre attention de ce qui nous manque vers ce que nous avons. Elle transforme la comparaison en contentement et l'envie en joie. Quand nous remercions Dieu, nous reconnaissons que tout bon don vient de Sa main. Votre famille. Vos amis. Votre souffle. Votre salut. Tout est grâce. La gratitude nous protège aussi de la cécité spirituelle. En priant cette prière, nommez trois choses spécifiques pour lesquelles vous êtes reconnaissant aujourd'hui. Laissez la gratitude s'élever comme un encens devant le trône de Dieu. Amen."};
-            const fr7 = {title:"Prière de Protection",prayer:"Dieu tout-puissant, nous te demandons ta protection sur nous, nos familles et nos proches. Entoure-nous de tes anges. Garde nos allées et venues. Sois notre bouclier et notre haute retraite. Amen.",meditation:"Nous vivons dans un monde plein de danger et d'incertitude. Mais nous servons un Dieu qui est notre refuge et notre forteresse. Quand nous prions pour la protection, nous ne demandons pas une vie sans difficulté. Nous demandons à Dieu d'être avec nous au milieu d'elle. Les psaumes décrivent Dieu comme notre bouclier, notre haute retraite, notre lieu de refuge. Il entoure Son peuple d'anges. Il garde nos allées et venues. Il ne nous abandonne jamais. En priant cette prière, pensez aux domaines de votre vie où vous vous sentez le plus vulnérable. Donnez-les à Dieu. Il est fidèle. Il veille. Il protège. Vous n'êtes pas seul. Amen."};
-            const fr8 = {title:"Prière pour la Sagesse",prayer:"Seigneur, accorde-nous une sagesse au-delà de nos années et une intelligence au-delà de nos connaissances. Guide nos décisions, dirige nos sentiers, et fais-nous marcher dans ta vérité tous les jours de notre vie. Amen.",meditation:"La sagesse est différente de la connaissance. La connaissance vous dit quoi faire. La sagesse vous dit quand le faire, comment le faire, et si oui ou non il faut le faire. La crainte du Seigneur est le commencement de la sagesse. Quand nous prions pour la sagesse, nous demandons à Dieu de nous donner Sa perspective sur nos vies. Jacques nous dit que si nous manquons de sagesse, nous devons demander à Dieu, et Il donnera généreusement à tous sans faire de reproche. Alors demandez. Demandez avec audace. La sagesse est disponible pour chaque enfant de Dieu qui la cherche humblement. Amen."};
-            const fr9 = {title:"Prière pour la Famille",prayer:"Père, nous te présentons nos familles. Bénis chaque mariage, chaque enfant, chaque foyer. Guéris les relations brisées, renforce les liens d'amour, et fais de nos maisons des lieux de paix. Amen.",meditation:"La famille est l'un des plus grands dons de Dieu. C'est le premier endroit où nous apprenons à aimer, à pardonner, à nous sacrifier. Mais la famille peut aussi être le lieu de nos blessures les plus profondes. Quand nous prions pour nos familles, nous apportons notre douleur et notre espérance à Celui qui a créé la famille. Le dessein de Dieu pour la famille est un dessein d'amour, de sécurité et de nourriture spirituelle. Une maison où Dieu est honoré devient une lumière pour tout le quartier. En priant cette prière, élevez chaque membre de votre famille par son nom. Demandez à Dieu de les bénir, de les protéger et de les attirer plus près de Lui. Amen."};
-            const fr10 = {title:"Prière pour le Monde",prayer:"Seigneur, nous prions pour les nations. Apporte la consolation aux souffrants, l'espérance aux désespérés, et la lumière à ceux qui sont dans les ténèbres. Suscite des dirigeants intègres, et que ton règne vienne sur la terre comme au ciel. Amen.",meditation:"Le monde est plus grand que notre cercle immédiat. Quand nous prions pour le monde, nous unissons nos coeurs au coeur de Dieu, qui aime chaque nation, chaque tribu, chaque langue. Dieu n'est pas le Dieu d'un seul pays ou d'une seule culture. Il est le Dieu de tous les peuples. Quand nous prions pour le monde, nous intercédons pour ceux qui souffrent. Nous prions pour les dirigeants, qu'ils gouvernent avec intégrité et justice. Nous prions pour la paix dans les régions déchirées par le conflit. Et nous nous rappelons que nous sommes nous-mêmes une partie du monde que Dieu a tant aimé qu'Il a donné Son Fils unique. En priant cette prière, laissez votre coeur s'élargir. Amen."};
+            const fr3 = {title:"Prière pour la Guérison",prayer:"Père céleste, nous te présentons tous ceux qui sont malades, blessés ou souffrants. Pose ta main guérissante sur eux. Restaure leur force, renouvelle leur espérance, et apporte le réconfort à leurs familles. Au nom de Jésus, amen.",meditation:"La guérison est plus qu'une restauration physique. C'est le toucher doux de Dieu atteignant chaque endroit brisé de notre vie. Quand nous prions pour la guérison, nous reconnaissons que nous ne sommes pas autosuffisants. Nous avons besoin de Dieu. Nous avons besoin de Sa grâce. Nous avons besoin de Sa miséricorde. Certaines guérisons viennent instantanément. D'autres viennent lentement. D'autres viennent de manière inattendue. La vraie guérison est toujours liée à la foi. Jésus disait souvent: 'Ta foi t'a guéri.' Priez cette prière avec un coeur ouvert. Croyez que Dieu vous entend et qu'Il agit — même dans l'attente. Amen."};
+            const fr4 = {title:"Prière du Matin",prayer:"Seigneur, merci pour ce nouveau jour. Guide mes pas, mes paroles et mes pensées. Aide-moi à être une lumière pour ceux qui m'entourent. Que tout ce que je fais honore ton nom. Amen.",meditation:"Chaque matin est un cadeau de Dieu. Le fait que vous ayez ouvert les yeux, que vous puissiez respirer, que vous puissiez bouger — ce sont des miséricordes que nous prenons trop souvent pour acquises. Une prière du matin donne le ton pour toute la journée. Elle tourne vos premières pensées vers Dieu et invite Sa direction avant qu'aucune autre voix ne puisse parler dans votre vie. Quand vous commencez la journée par la prière, vous dites à Dieu: 'J'ai besoin de Toi aujourd'hui.' Le psalmiste a écrit: 'Le matin, Seigneur, Tu entends ma voix.' En priant cette prière, imaginez Dieu marchant à vos côtés dans la journée à venir. Il est plus proche que votre propre souffle. Amen."};
+            const fr5 = {title:"Prière du Soir",prayer:"Père, alors que ce jour se termine, nous te remercions pour ta protection et ta provision. Pardonne-nous nos manquements. Veille sur nous pendant la nuit, et accorde-nous le repos. Amen.",meditation:"Le soir est un moment sacré. C'est le moment où le bruit de la journée s'estompe et où nous venons devant Dieu les mains ouvertes. Une prière du soir est un acte d'abandon. Elle dit: 'Seigneur, je n'ai pas tout bien fait aujourd'hui, mais je Te le donne.' Quand nous demandons à Dieu de veiller sur nous pendant la nuit, nous faisons confiance que Sa protection ne dort jamais. Le psalmiste a écrit: 'Celui qui garde Israël ne sommeille ni ne dort.' En vous couchant, rappelez-vous que Dieu est toujours sur Son trône. Donnez-Lui vos fardeaux. Amen."};
+            const fr6 = {title:"Prière de Remerciement",prayer:"Seigneur, nous te remercions pour ta bonté, ta miséricorde et ta fidélité. Merci pour le don de la vie, pour la famille et pour les amis. Que nos coeurs débordent de reconnaissance. Amen.",meditation:"L'action de grâce est le battement de coeur d'une vie spirituelle saine. Quand nous remercions Dieu, nous ne Lui rendons pas service — nous nous en rendons un. La gratitude remodèle l'âme. Elle détourne notre attention de ce qui nous manque vers ce que nous avons. Elle transforme la comparaison en contentement et l'envie en joie. En priant cette prière, nommez trois choses spécifiques pour lesquelles vous êtes reconnaissant aujourd'hui. Laissez la gratitude s'élever comme un encens devant le trône de Dieu. Amen."};
+            const fr7 = {title:"Prière de Protection",prayer:"Dieu tout-puissant, nous te demandons ta protection sur nous, nos familles et nos proches. Entoure-nous de tes anges. Garde nos allées et venues. Sois notre bouclier et notre haute retraite. Amen.",meditation:"Nous vivons dans un monde plein de danger et d'incertitude. Mais nous servons un Dieu qui est notre refuge et notre forteresse. Les psaumes décrivent Dieu comme notre bouclier, notre haute retraite, notre lieu de refuge. Il entoure Son peuple d'anges. Il garde nos allées et venues. Il ne nous abandonne jamais. En priant cette prière, pensez aux domaines de votre vie où vous vous sentez le plus vulnérable. Donnez-les à Dieu. Il est fidèle. Il veille. Il protège. Vous n'êtes pas seul. Amen."};
+            const fr8 = {title:"Prière pour la Sagesse",prayer:"Seigneur, accorde-nous une sagesse au-delà de nos années et une intelligence au-delà de nos connaissances. Guide nos décisions, dirige nos sentiers, et fais-nous marcher dans ta vérité tous les jours de notre vie. Amen.",meditation:"La sagesse est différente de la connaissance. La connaissance vous dit quoi faire. La sagesse vous dit quand le faire, comment le faire, et si oui ou non il faut le faire. La crainte du Seigneur est le commencement de la sagesse. Jacques nous dit que si nous manquons de sagesse, nous devons demander à Dieu, et Il donnera généreusement à tous sans faire de reproche. Alors demandez. Demandez avec audace. La sagesse est disponible pour chaque enfant de Dieu qui la cherche humblement. Amen."};
+            const fr9 = {title:"Prière pour la Famille",prayer:"Père, nous te présentons nos familles. Bénis chaque mariage, chaque enfant, chaque foyer. Guéris les relations brisées, renforce les liens d'amour, et fais de nos maisons des lieux de paix. Amen.",meditation:"La famille est l'un des plus grands dons de Dieu. C'est le premier endroit où nous apprenons à aimer, à pardonner, à nous sacrifier. Mais la famille peut aussi être le lieu de nos blessures les plus profondes. Le dessein de Dieu pour la famille est un dessein d'amour, de sécurité et de nourriture spirituelle. Une maison où Dieu est honoré devient une lumière pour tout le quartier. En priant cette prière, élevez chaque membre de votre famille par son nom. Demandez à Dieu de les bénir, de les protéger et de les attirer plus près de Lui. Amen."};
+            const fr10 = {title:"Prière pour le Monde",prayer:"Seigneur, nous prions pour les nations. Apporte la consolation aux souffrants, l'espérance aux désespérés, et la lumière à ceux qui sont dans les ténèbres. Suscite des dirigeants intègres, et que ton règne vienne sur la terre comme au ciel. Amen.",meditation:"Le monde est plus grand que notre cercle immédiat. Quand nous prions pour le monde, nous unissons nos coeurs au coeur de Dieu, qui aime chaque nation, chaque tribu, chaque langue. Nous intercédons pour ceux qui souffrent. Nous prions pour les dirigeants, qu'ils gouvernent avec intégrité et justice. Nous prions pour la paix dans les régions déchirées par le conflit. Et nous nous rappelons que nous sommes nous-mêmes une partie du monde que Dieu a tant aimé qu'Il a donné Son Fils unique. En priant cette prière, laissez votre coeur s'élargir. Amen."};
 
             return {en:[en1,en2,en3,en4,en5,en6,en7,en8,en9,en10], fr:[fr1,fr2,fr3,fr4,fr5,fr6,fr7,fr8,fr9,fr10]};
         })();
 
-        // NEWS FEEDS
         const worldFeeds = [
             'https://feeds.bbci.co.uk/news/world/rss.xml',
             'https://feeds.bbci.co.uk/news/world/asia/rss.xml',
@@ -686,7 +750,6 @@
         const backupSportsNews = ["Lakers defeat Warriors in overtime","Patriots win against Jets","Red Sox beat Yankees","Champions League final set"];
         const upcomingGamesData = [{home:"Lakers",away:"Warriors",date:"Tomorrow",time:"7:30 PM"},{home:"Patriots",away:"Jets",date:"Sunday",time:"1:00 PM"},{home:"Red Sox",away:"Yankees",date:"Saturday",time:"4:05 PM"},{home:"Manchester City",away:"Liverpool",date:"Next Wednesday",time:"3:00 PM"}];
 
-        // SPEECH ENGINE
         function setupVoices() {
             if (!speechSynth) return;
             let voices = speechSynth.getVoices();
@@ -791,18 +854,20 @@
             }
         }
 
-        // ============================================
-        // 🎵 NEWS THEME MUSIC — synthesized with Web Audio API
-        // ============================================
-        let newsThemeCtx = null;
-        let newsThemeMaster = null;
-        let newsThemeTimeoutId = null;
+        // ============================================================
+        // NEWS THEME MUSIC — Premium Cinematic Broadcast Bed
+        // Warm Cmaj7 – G – Am – F progression over 8 seconds, with a
+        // lush feedback-delay FX bus, bell arpeggios and soft percussion.
+        // ============================================================
+        let newsThemeCtx = null, newsThemeMaster = null, newsThemeTimeoutId = null;
+        function updateNewsThemeGain() { if (newsThemeMaster) newsThemeMaster.gain.value = isMuted ? 0 : Math.max(0.35, volume * 0.6); }
 
-        function updateNewsThemeGain() {
-            if (newsThemeMaster) {
-                newsThemeMaster.gain.value = isMuted ? 0 : Math.max(0.35, volume * 0.6);
-            }
-        }
+        const NEWS_PROGRESSION = [
+            { bass: 65.41,  pad: [261.63, 329.63, 392.00, 493.88], arp: [523.25, 659.25, 783.99, 987.77] }, // Cmaj7
+            { bass: 98.00,  pad: [246.94, 293.66, 392.00, 587.33], arp: [493.88, 587.33, 783.99, 987.77] }, // G
+            { bass: 110.00, pad: [220.00, 261.63, 329.63, 440.00], arp: [440.00, 523.25, 659.25, 880.00] }, // Am
+            { bass: 87.31,  pad: [261.63, 349.23, 440.00, 523.25], arp: [440.00, 523.25, 698.46, 880.00] }  // F
+        ];
 
         function playNewsTheme(durationMs, onComplete) {
             try {
@@ -811,15 +876,36 @@
                 if (!AudioCtx) { if (onComplete) setTimeout(onComplete, durationMs); return; }
                 const ctx = new AudioCtx();
                 if (ctx.state === 'suspended') ctx.resume();
+
                 const master = ctx.createGain();
                 master.gain.value = isMuted ? 0 : Math.max(0.35, volume * 0.6);
                 master.connect(ctx.destination);
+
+                // ---- Shared FX bus: warm feedback delay ----
+                const fxSend = ctx.createGain();
+                fxSend.gain.value = 0.32;
+                const delay = ctx.createDelay(1.0);
+                delay.delayTime.value = 0.34;
+                const damp = ctx.createBiquadFilter();
+                damp.type = 'lowpass';
+                damp.frequency.value = 2200;
+                const fb = ctx.createGain();
+                fb.gain.value = 0.28;
+                const fxReturn = ctx.createGain();
+                fxReturn.gain.value = 0.55;
+                fxSend.connect(delay);
+                delay.connect(damp);
+                damp.connect(fb);
+                fb.connect(delay);
+                delay.connect(fxReturn);
+                fxReturn.connect(master);
+
                 const start = ctx.currentTime;
                 const totalSec = durationMs / 1000;
-                const loopLen = 4;
+                const loopLen = 8;
                 let offset = 0;
                 while (offset < totalSec) {
-                    scheduleNewsLoopSegment(ctx, master, start + offset, Math.min(loopLen, totalSec - offset));
+                    scheduleNewsLoopSegment(ctx, master, fxSend, start + offset, Math.min(loopLen, totalSec - offset));
                     offset += loopLen;
                 }
                 newsThemeCtx = ctx;
@@ -829,104 +915,138 @@
                     if (onComplete) onComplete();
                 }, durationMs);
             } catch (e) {
-                console.error('News theme error:', e);
                 if (onComplete) setTimeout(onComplete, durationMs);
             }
         }
 
-        function scheduleNewsLoopSegment(ctx, dest, t0, dur) {
-            const chords = [
-                [220.00, 261.63, 329.63],
-                [174.61, 220.00, 261.63],
-                [261.63, 329.63, 392.00],
-                [196.00, 246.94, 293.66]
-            ];
-            const bassNotes = [110.00, 87.31, 130.81, 98.00];
+        function scheduleNewsLoopSegment(ctx, dest, fxSend, t0, dur) {
+            const barLen = 2; // seconds per chord
+            const endT = t0 + dur;
 
-            for (let i = 0; i < 4; i++) {
-                const chordStart = t0 + i;
-                if (chordStart >= t0 + dur) break;
-                const chordDur = Math.min(1, t0 + dur - chordStart);
-                chords[i].forEach(freq => {
+            for (let b = 0; b < 4; b++) {
+                const barStart = t0 + b * barLen;
+                if (barStart >= endT) break;
+                const barEnd = Math.min(barStart + barLen, endT);
+                const barDur = barEnd - barStart;
+
+                // ---- Warm sustained pad ----
+                NEWS_PROGRESSION[b].pad.forEach((freq, i) => {
                     const osc = ctx.createOscillator();
-                    osc.type = 'sawtooth';
-                    osc.frequency.value = freq;
+                    osc.type = (i % 2 === 0) ? 'sine' : 'triangle';
+                    osc.frequency.value = freq / 2;
+                    osc.detune.value = (i - 1.5) * 5;
                     const filt = ctx.createBiquadFilter();
                     filt.type = 'lowpass';
-                    filt.frequency.setValueAtTime(800, chordStart);
-                    filt.frequency.linearRampToValueAtTime(2000, chordStart + 0.3);
-                    filt.frequency.linearRampToValueAtTime(700, chordStart + chordDur);
-                    filt.Q.value = 4;
+                    filt.frequency.value = 1500;
+                    filt.Q.value = 0.6;
                     const g = ctx.createGain();
-                    g.gain.setValueAtTime(0, chordStart);
-                    g.gain.linearRampToValueAtTime(0.045, chordStart + 0.1);
-                    g.gain.setValueAtTime(0.045, chordStart + chordDur - 0.1);
-                    g.gain.linearRampToValueAtTime(0, chordStart + chordDur);
-                    osc.connect(filt).connect(g).connect(dest);
-                    osc.start(chordStart);
-                    osc.stop(chordStart + chordDur);
+                    const peak = 0.022;
+                    const atk = Math.min(0.8, barDur * 0.35);
+                    const rel = Math.min(0.7, barDur * 0.35);
+                    g.gain.setValueAtTime(0.0001, barStart);
+                    g.gain.linearRampToValueAtTime(peak, barStart + atk);
+                    g.gain.setValueAtTime(peak, Math.max(barStart + atk, barEnd - rel));
+                    g.gain.linearRampToValueAtTime(0.0001, barEnd);
+                    osc.connect(filt).connect(g);
+                    g.connect(dest);
+                    g.connect(fxSend);
+                    osc.start(barStart);
+                    osc.stop(barEnd + 0.05);
                 });
+
+                // ---- Bass ----
+                const bassOsc = ctx.createOscillator();
+                bassOsc.type = 'sine';
+                bassOsc.frequency.value = NEWS_PROGRESSION[b].bass;
+                const bassG = ctx.createGain();
+                const bDecay = Math.min(1.6, barDur);
+                bassG.gain.setValueAtTime(0.0001, barStart);
+                bassG.gain.linearRampToValueAtTime(0.13, barStart + 0.05);
+                bassG.gain.exponentialRampToValueAtTime(0.0001, barStart + bDecay);
+                bassOsc.connect(bassG).connect(dest);
+                bassOsc.start(barStart);
+                bassOsc.stop(barStart + bDecay + 0.05);
+
+                // ---- Bell arpeggio melody ----
+                const arp = NEWS_PROGRESSION[b].arp;
+                const amps = [0.055, 0.042, 0.034, 0.028];
+                const step = barDur / 4;
+                arp.forEach((freq, i) => {
+                    const t = barStart + i * step;
+                    if (t >= endT) return;
+                    const pan = (i % 2 === 0) ? -0.35 : 0.35;
+                    playBell(ctx, dest, fxSend, freq, t, amps[i], 1.5, pan);
+                    playBell(ctx, dest, fxSend, freq * 2, t + 0.02, 0.011, 0.7, -pan);
+                });
+
+                // ---- Soft percussion ----
+                softKick(ctx, dest, barStart, 0.16);
+                if (barStart + barDur / 2 < endT) softKick(ctx, dest, barStart + barDur / 2, 0.09);
+                for (let s = 0.25; s < barDur; s += 0.5) {
+                    const t = barStart + s;
+                    if (t < endT) softHat(ctx, dest, t, 0.018);
+                }
             }
-            for (let i = 0; i < 4; i++) {
-                const bStart = t0 + i;
-                if (bStart >= t0 + dur) break;
-                const bDur = Math.min(0.9, t0 + dur - bStart);
-                const osc = ctx.createOscillator();
-                osc.type = 'sine';
-                osc.frequency.value = bassNotes[i];
-                const g = ctx.createGain();
-                g.gain.setValueAtTime(0, bStart);
-                g.gain.linearRampToValueAtTime(0.18, bStart + 0.05);
-                g.gain.exponentialRampToValueAtTime(0.001, bStart + bDur);
-                osc.connect(g).connect(dest);
-                osc.start(bStart);
-                osc.stop(bStart + bDur);
+        }
+
+        function playBell(ctx, dest, fxSend, freq, t, amp, decay, pan) {
+            const osc = ctx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            const g = ctx.createGain();
+            g.gain.setValueAtTime(0.0001, t);
+            g.gain.linearRampToValueAtTime(amp, t + 0.008);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+            osc.connect(g);
+            let tail = g;
+            if (pan !== undefined && ctx.createStereoPanner) {
+                const p = ctx.createStereoPanner();
+                p.pan.value = pan;
+                g.connect(p);
+                tail = p;
             }
-            for (let i = 0; i < dur; i += 0.5) {
-                const hitT = t0 + i;
-                const osc = ctx.createOscillator();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(120, hitT);
-                osc.frequency.exponentialRampToValueAtTime(45, hitT + 0.12);
-                const g = ctx.createGain();
-                g.gain.setValueAtTime(0.3, hitT);
-                g.gain.exponentialRampToValueAtTime(0.001, hitT + 0.25);
-                osc.connect(g).connect(dest);
-                osc.start(hitT);
-                osc.stop(hitT + 0.25);
-            }
-            for (let i = 0.25; i < dur; i += 0.5) {
-                const hitT = t0 + i;
-                const bufSize = Math.floor(ctx.sampleRate * 0.1);
-                const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-                const data = buf.getChannelData(0);
-                for (let j = 0; j < bufSize; j++) data[j] = (Math.random() * 2 - 1) * (1 - j / bufSize);
-                const noise = ctx.createBufferSource();
-                noise.buffer = buf;
-                const nf = ctx.createBiquadFilter();
-                nf.type = 'highpass';
-                nf.frequency.value = 6000;
-                const ng = ctx.createGain();
-                ng.gain.setValueAtTime(0.05, hitT);
-                ng.gain.exponentialRampToValueAtTime(0.001, hitT + 0.08);
-                noise.connect(nf).connect(ng).connect(dest);
-                noise.start(hitT);
-                noise.stop(hitT + 0.1);
-            }
+            tail.connect(dest);
+            tail.connect(fxSend);
+            osc.start(t);
+            osc.stop(t + decay + 0.05);
+        }
+
+        function softKick(ctx, dest, t, amp) {
+            const osc = ctx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(110, t);
+            osc.frequency.exponentialRampToValueAtTime(45, t + 0.14);
+            const g = ctx.createGain();
+            g.gain.setValueAtTime(amp, t);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+            osc.connect(g).connect(dest);
+            osc.start(t);
+            osc.stop(t + 0.35);
+        }
+
+        function softHat(ctx, dest, t, amp) {
+            const len = Math.floor(ctx.sampleRate * 0.06);
+            const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+            const data = buf.getChannelData(0);
+            for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+            const src = ctx.createBufferSource();
+            src.buffer = buf;
+            const hp = ctx.createBiquadFilter();
+            hp.type = 'highpass';
+            hp.frequency.value = 7000;
+            const g = ctx.createGain();
+            g.gain.value = amp;
+            src.connect(hp).connect(g).connect(dest);
+            src.start(t);
+            src.stop(t + 0.08);
         }
 
         function stopNewsTheme() {
             if (newsThemeTimeoutId) { clearTimeout(newsThemeTimeoutId); newsThemeTimeoutId = null; }
-            if (newsThemeCtx) {
-                try { newsThemeCtx.close(); } catch(e) {}
-                newsThemeCtx = null;
-                newsThemeMaster = null;
-            }
+            if (newsThemeCtx) { try { newsThemeCtx.close(); } catch(e) {} newsThemeCtx = null; newsThemeMaster = null; }
         }
 
-        // ============================================
         // NEWS FETCHING
-        // ============================================
         async function fetchNewsFromFeeds(feedList, backupList) {
             let allItems = [];
             for (const feedUrl of feedList) {
@@ -1017,13 +1137,10 @@
         }
 
         function refreshWorldNews() { fetchWorldNews(); fetchWorldNewsFR(); }
-
-        // Helpers
         function getDayOfYear() { const now = new Date(); const start = new Date(now.getFullYear(), 0, 0); return Math.floor((now - start) / (1000 * 60 * 60 * 24)); }
         function getLanguageCodeForStream(stream) { if (stream.name.includes('English')) return 'en'; if (stream.name.includes('Français')) return 'fr'; return 'ht'; }
         function getDisplayLanguage(langCode) { if (langCode === 'en') return 'English'; if (langCode === 'fr') return 'Français'; return 'Kreyòl Ayisyen'; }
 
-        // BIBLE / PRAYER READING LOOPS
         function stopReadingLoop() { if (readingLoopTimeoutId) { clearTimeout(readingLoopTimeoutId); readingLoopTimeoutId = null; } stopSpeech(); }
 
         function startBibleReading() {
@@ -1099,7 +1216,6 @@
             readNext();
         }
 
-        // AI NEWS FLASH EN — category detection + display
         function detectNewsCategory(text) {
             const t = (text || '').toLowerCase();
             if (/\b(election|president|senate|congress|parliament|vote|political|minister|policy|law)\b/.test(t)) return 'POLITICS';
@@ -1124,9 +1240,7 @@
             if (/\b(nations unies|otan|ue|traité|sommet|diplomate|g7|brics)\b/.test(t)) return 'DIPLOMATIE';
             return 'ACTUALITÉS MONDIALES';
         }
-        function frCategoryToImageKey(fr) {
-            return {'POLITIQUE':'POLITICS','ÉCONOMIE':'BUSINESS','CLIMAT':'CLIMATE','CONFLIT':'CONFLICT','SANTÉ':'HEALTH','TECHNOLOGIE':'TECHNOLOGY','SPORTS':'SPORTS','DIPLOMATIE':'DIPLOMACY','ACTUALITÉS MONDIALES':'WORLD NEWS'}[fr] || 'WORLD NEWS';
-        }
+        function frCategoryToImageKey(fr) { return {'POLITIQUE':'POLITICS','ÉCONOMIE':'BUSINESS','CLIMAT':'CLIMATE','CONFLIT':'CONFLICT','SANTÉ':'HEALTH','TECHNOLOGIE':'TECHNOLOGY','SPORTS':'SPORTS','DIPLOMATIE':'DIPLOMACY','ACTUALITÉS MONDIALES':'WORLD NEWS'}[fr] || 'WORLD NEWS'; }
 
         function buildAnchorScript(item) {
             const title = item.title || '';
@@ -1154,46 +1268,64 @@
             return getCategoryImage(category);
         }
 
+        // ============================================================
+        // Sharp, blur-free image crossfade.
+        // Preloads → decodes → only then reveals the new frame, so the
+        // viewer never sees a half-decoded (soft) image.
+        // ============================================================
         function setAINewsImage(imageUrl) {
             const imgA = document.getElementById('aiNewsImageA');
             const imgB = document.getElementById('aiNewsImageB');
             const incoming = currentImageSlot === 'A' ? imgB : imgA;
             const outgoing = currentImageSlot === 'A' ? imgA : imgB;
+
+            const commit = (url) => {
+                incoming.classList.remove('active');
+                incoming.src = url;
+                const reveal = () => {
+                    incoming.classList.add('active');
+                    outgoing.classList.remove('active');
+                    currentImageSlot = currentImageSlot === 'A' ? 'B' : 'A';
+                };
+                if (incoming.decode) {
+                    incoming.decode().then(reveal).catch(reveal);
+                } else {
+                    reveal();
+                }
+            };
+
             const preloader = new Image();
-            preloader.onload = () => {
-                incoming.style.backgroundImage = `url("${imageUrl}")`;
-                incoming.classList.add('active');
-                outgoing.classList.remove('active');
-                currentImageSlot = currentImageSlot === 'A' ? 'B' : 'A';
-            };
-            preloader.onerror = () => {
-                const fallback = getFallbackImage(imageUrl);
-                incoming.style.backgroundImage = `url("${fallback}")`;
-                incoming.classList.add('active');
-                outgoing.classList.remove('active');
-                currentImageSlot = currentImageSlot === 'A' ? 'B' : 'A';
-            };
+            preloader.crossOrigin = 'anonymous';
+            preloader.onload = () => commit(imageUrl);
+            preloader.onerror = () => commit(getFallbackImage(imageUrl));
             preloader.src = imageUrl;
         }
+
         function setAINewsFrImage(imageUrl) {
             const imgA = document.getElementById('aiNewsFrImageA');
             const imgB = document.getElementById('aiNewsFrImageB');
             const incoming = currentFrImageSlot === 'A' ? imgB : imgA;
             const outgoing = currentFrImageSlot === 'A' ? imgA : imgB;
+
+            const commit = (url) => {
+                incoming.classList.remove('active');
+                incoming.src = url;
+                const reveal = () => {
+                    incoming.classList.add('active');
+                    outgoing.classList.remove('active');
+                    currentFrImageSlot = currentFrImageSlot === 'A' ? 'B' : 'A';
+                };
+                if (incoming.decode) {
+                    incoming.decode().then(reveal).catch(reveal);
+                } else {
+                    reveal();
+                }
+            };
+
             const preloader = new Image();
-            preloader.onload = () => {
-                incoming.style.backgroundImage = `url("${imageUrl}")`;
-                incoming.classList.add('active');
-                outgoing.classList.remove('active');
-                currentFrImageSlot = currentFrImageSlot === 'A' ? 'B' : 'A';
-            };
-            preloader.onerror = () => {
-                const fallback = getFallbackImage(imageUrl);
-                incoming.style.backgroundImage = `url("${fallback}")`;
-                incoming.classList.add('active');
-                outgoing.classList.remove('active');
-                currentFrImageSlot = currentFrImageSlot === 'A' ? 'B' : 'A';
-            };
+            preloader.crossOrigin = 'anonymous';
+            preloader.onload = () => commit(imageUrl);
+            preloader.onerror = () => commit(getFallbackImage(imageUrl));
             preloader.src = imageUrl;
         }
 
@@ -1274,7 +1406,6 @@
             aiNewsFrClockInterval = setInterval(update, 1000);
         }
 
-        // 🔔 EN broadcast cycle — reads 5 headlines → closing → 60s theme → restart
         function startAINewsTVLoop() {
             if (!aiNewsActive) return;
             if (newsPool.length === 0) {
@@ -1287,17 +1418,14 @@
                 document.getElementById('aiNewsCategory').textContent = 'STAY TUNED';
                 document.getElementById('aiNewsHeadline').textContent = 'Stay tuned — next news flash in 60 seconds...';
                 document.getElementById('aiNewsCounter').textContent = 'Next news flash in 60 seconds';
-                speakSingle(closingMsg, {
-                    isFemale: false, pitch: 0.82, rate: 0.93, langCode: 'en',
-                    onEndCallback: () => {
+                speakSingle(closingMsg, {isFemale: false, pitch: 0.82, rate: 0.93, langCode: 'en', onEndCallback: () => {
+                    if (!aiNewsActive) return;
+                    playNewsTheme(THEME_DURATION_MS, () => {
                         if (!aiNewsActive) return;
-                        playNewsTheme(THEME_DURATION_MS, () => {
-                            if (!aiNewsActive) return;
-                            aiNewsHeadlinesInCycle = 0;
-                            startAINewsTVLoop();
-                        });
-                    }
-                });
+                        aiNewsHeadlinesInCycle = 0;
+                        startAINewsTVLoop();
+                    });
+                }});
                 return;
             }
             const item = newsPool[aiNewsHeadlineIndex % newsPool.length];
@@ -1306,16 +1434,12 @@
             displayAIHeadline(item);
             updateAINewsTicker();
             const script = buildAnchorScript(item);
-            speakSingle(script, {
-                isFemale: false, pitch: 0.82, rate: 0.93, langCode: 'en',
-                onEndCallback: () => {
-                    if (!aiNewsActive) return;
-                    aiNewsLoopTimeoutId = setTimeout(startAINewsTVLoop, 3500);
-                }
-            });
+            speakSingle(script, {isFemale: false, pitch: 0.82, rate: 0.93, langCode: 'en', onEndCallback: () => {
+                if (!aiNewsActive) return;
+                aiNewsLoopTimeoutId = setTimeout(startAINewsTVLoop, 3500);
+            }});
         }
 
-        // 🔔 FR broadcast cycle — 5 headlines → closing → 60s theme → restart
         function startAINewsTVLoopFR() {
             if (!aiNewsFrActive) return;
             if (newsPoolFR.length === 0) {
@@ -1328,17 +1452,14 @@
                 document.getElementById('aiNewsFrCategory').textContent = 'RESTEZ À L\'ÉCOUTE';
                 document.getElementById('aiNewsFrHeadline').textContent = 'Restez à l\'écoute — prochain flash dans 60 secondes...';
                 document.getElementById('aiNewsFrCounter').textContent = 'Prochain flash dans 60 secondes';
-                speakSingle(closingMsgFR, {
-                    isFemale: false, pitch: 0.88, rate: 0.94, langCode: 'fr',
-                    onEndCallback: () => {
+                speakSingle(closingMsgFR, {isFemale: false, pitch: 0.88, rate: 0.94, langCode: 'fr', onEndCallback: () => {
+                    if (!aiNewsFrActive) return;
+                    playNewsTheme(THEME_DURATION_MS, () => {
                         if (!aiNewsFrActive) return;
-                        playNewsTheme(THEME_DURATION_MS, () => {
-                            if (!aiNewsFrActive) return;
-                            aiNewsFrHeadlinesInCycle = 0;
-                            startAINewsTVLoopFR();
-                        });
-                    }
-                });
+                        aiNewsFrHeadlinesInCycle = 0;
+                        startAINewsTVLoopFR();
+                    });
+                }});
                 return;
             }
             const item = newsPoolFR[aiNewsFrHeadlineIndex % newsPoolFR.length];
@@ -1347,13 +1468,10 @@
             displayAIHeadlineFR(item);
             updateAINewsTickerFR();
             const script = buildAnchorScriptFR(item);
-            speakSingle(script, {
-                isFemale: false, pitch: 0.88, rate: 0.94, langCode: 'fr',
-                onEndCallback: () => {
-                    if (!aiNewsFrActive) return;
-                    aiNewsFrLoopTimeoutId = setTimeout(startAINewsTVLoopFR, 3500);
-                }
-            });
+            speakSingle(script, {isFemale: false, pitch: 0.88, rate: 0.94, langCode: 'fr', onEndCallback: () => {
+                if (!aiNewsFrActive) return;
+                aiNewsFrLoopTimeoutId = setTimeout(startAINewsTVLoopFR, 3500);
+            }});
         }
 
         function startAINewsTV() {
@@ -1415,14 +1533,14 @@
 
         // DEBATE
         const debatePlaybook = {
-            election: {aff: {opening: (t) => `The affirmative stands firmly on this issue: "${t}". Free and fair elections are the bedrock of our democracy.`, args: [(t) => `First, on "${t}" — expanding access to the ballot is a constitutional promise.`, (t) => `Second, modernizing election infrastructure protects every vote.`, (t) => `Third, we must remove barriers like long lines and restrictive ID laws.`], cross: (t) => `We reject the premise that security and access are in conflict.`, closing: (t) => `In closing, the affirmative believes "${t}" strengthens democracy. We urge a yes.`}, neg: {opening: (t) => `The opposition takes a cautious view of "${t}". Rushed changes can undermine confidence.`, args: [(t) => `First, on "${t}", we cannot ignore the risk of fraud and error.`, (t) => `Second, one-size-fits-all mandates ignore local diversity.`, (t) => `Third, the cost of poorly designed reforms falls on taxpayers.`], cross: (t) => `We are not against reform — we are against reckless reform.`, closing: (t) => `In closing, the opposition urges a no vote on "${t}" until safeguards are guaranteed.`}},
-            tax: {aff: {opening: (t) => `The affirmative is clear on "${t}": our tax code is too complex and punishes hard work.`, args: [(t) => `First, on "${t}" — lowering rates stimulates growth.`, (t) => `Second, we can cut waste and close loopholes.`, (t) => `Third, tax relief is a stimulus that creates jobs.`], cross: (t) => `On "${t}", pro-growth tax policy benefits everyone.`, closing: (t) => `In closing, the affirmative believes "${t}" is the path to prosperity.`}, neg: {opening: (t) => `The opposition sees "${t}" differently. Tax cuts must be paid for.`, args: [(t) => `First, on "${t}" — cuts for the wealthy increase inequality.`, (t) => `Second, we need revenue for infrastructure and education.`, (t) => `Third, targeted credits are more effective.`], cross: (t) => `On "${t}", fairness matters.`, closing: (t) => `In closing, the opposition urges a no vote on "${t}" until it is fair.`}},
-            health: {aff: {opening: (t) => `The affirmative believes "${t}" is a moral test. Healthcare is a right.`, args: [(t) => `First, on "${t}" — expanding coverage saves lives.`, (t) => `Second, no one should be denied care because of pre-existing conditions.`, (t) => `Third, a healthier population is more productive.`], cross: (t) => `On "${t}", quality and access can coexist.`, closing: (t) => `In closing, the affirmative urges a yes on "${t}".`}, neg: {opening: (t) => `The opposition approaches "${t}" with realism.`, args: [(t) => `First, on "${t}" — we must preserve patient choice.`, (t) => `Second, cost controls must come before expansion.`, (t) => `Third, innovation depends on a competitive market.`], cross: (t) => `On "${t}", the opposition stands for choice and responsibility.`, closing: (t) => `In closing, the opposition urges a no vote on "${t}" until costs are controlled.`}},
-            immigration: {aff: {opening: (t) => `The affirmative welcomes debate on "${t}". Immigrants strengthen our nation.`, args: [(t) => `First, on "${t}" — immigrants fill labor shortages.`, (t) => `Second, a pathway to citizenship is fair and practical.`, (t) => `Third, comprehensive reform is the only lasting solution.`], cross: (t) => `On "${t}", the affirmative stands for dignity and due process.`, closing: (t) => `In closing, the affirmative urges a yes on "${t}".`}, neg: {opening: (t) => `The opposition insists on order on "${t}".`, args: [(t) => `First, on "${t}" — border security comes first.`, (t) => `Second, immigration levels must be sustainable.`, (t) => `Third, local communities should have a say.`], cross: (t) => `On "${t}", the opposition stands for law and sovereignty.`, closing: (t) => `In closing, the opposition urges a no vote on "${t}" until the border is secure.`}},
-            climate: {aff: {opening: (t) => `The affirmative treats "${t}" as an emergency.`, args: [(t) => `First, on "${t}" — renewable energy creates jobs.`, (t) => `Second, we owe future generations a livable planet.`, (t) => `Third, clean air and water are public health imperatives.`], cross: (t) => `On "${t}", we refuse to trade the planet for profit.`, closing: (t) => `In closing, the affirmative urges a yes on "${t}".`}, neg: {opening: (t) => `The opposition is against "${t}" as written.`, args: [(t) => `First, on "${t}" — the transition must be gradual.`, (t) => `Second, we should focus on adaptation and innovation.`, (t) => `Third, international cooperation is necessary.`], cross: (t) => `On "${t}", the opposition stands for balance and competitiveness.`, closing: (t) => `In closing, the opposition urges a no vote on "${t}" until it is fair.`}},
-            gun: {aff: {opening: (t) => `The affirmative confronts "${t}" with urgency.`, args: [(t) => `First, on "${t}" — universal background checks save lives.`, (t) => `Second, banning assault weapons reduces mass casualties.`, (t) => `Third, safe-storage laws protect children.`], cross: (t) => `On "${t}", reform and the Second Amendment can coexist.`, closing: (t) => `In closing, the affirmative urges a yes on "${t}".`}, neg: {opening: (t) => `The opposition defends the Second Amendment on "${t}".`, args: [(t) => `First, on "${t}" — enforcement of existing laws works.`, (t) => `Second, law-abiding citizens have a right to self-defense.`, (t) => `Third, mental health and school security are the real solutions.`], cross: (t) => `On "${t}", the opposition stands for liberty and constitutional rights.`, closing: (t) => `In closing, the opposition urges a no vote on "${t}".`}},
-            education: {aff: {opening: (t) => `The affirmative champions "${t}".`, args: [(t) => `First, on "${t}" — funding public schools closes achievement gaps.`, (t) => `Second, affordable higher education opens doors.`, (t) => `Third, early childhood education pays dividends.`], cross: (t) => `On "${t}", education is the great equalizer.`, closing: (t) => `In closing, the affirmative urges a yes on "${t}".`}, neg: {opening: (t) => `The opposition insists on accountability on "${t}".`, args: [(t) => `First, on "${t}" — parental choice drives improvement.`, (t) => `Second, focus on basics — reading, writing, math.`, (t) => `Third, local control is what works.`], cross: (t) => `On "${t}", the opposition stands for parents and results.`, closing: (t) => `In closing, the opposition urges a no vote on "${t}" until accountability is guaranteed.`}},
-            default: {aff: {opening: (t) => `The affirmative takes a clear position on "${t}".`, args: [(t) => `First, on "${t}" — acting now is better than waiting.`, (t) => `Second, fairness and effectiveness are not opposites.`, (t) => `Third, future generations will thank us.`], cross: (t) => `On "${t}", the affirmative stands for progress.`, closing: (t) => `In closing, the affirmative urges a yes on "${t}".`}, neg: {opening: (t) => `The opposition urges caution on "${t}".`, args: [(t) => `First, on "${t}" — unintended consequences can be severe.`, (t) => `Second, there are better alternatives.`, (t) => `Third, the burden of proof is on those who want change.`], cross: (t) => `On "${t}", the opposition stands for prudence.`, closing: (t) => `In closing, the opposition urges a no vote on "${t}".`}}
+            election: {aff:{opening:(t)=>`The affirmative stands firmly on this issue: "${t}". Free and fair elections are the bedrock of our democracy.`,args:[(t)=>`First, on "${t}" — expanding access to the ballot is a constitutional promise.`,(t)=>`Second, modernizing election infrastructure protects every vote.`,(t)=>`Third, we must remove barriers like long lines and restrictive ID laws.`],cross:(t)=>`We reject the premise that security and access are in conflict.`,closing:(t)=>`In closing, the affirmative believes "${t}" strengthens democracy. We urge a yes.`},neg:{opening:(t)=>`The opposition takes a cautious view of "${t}". Rushed changes can undermine confidence.`,args:[(t)=>`First, on "${t}", we cannot ignore the risk of fraud and error.`,(t)=>`Second, one-size-fits-all mandates ignore local diversity.`,(t)=>`Third, the cost of poorly designed reforms falls on taxpayers.`],cross:(t)=>`We are not against reform — we are against reckless reform.`,closing:(t)=>`In closing, the opposition urges a no vote on "${t}" until safeguards are guaranteed.`}},
+            tax: {aff:{opening:(t)=>`The affirmative is clear on "${t}": our tax code is too complex and punishes hard work.`,args:[(t)=>`First, on "${t}" — lowering rates stimulates growth.`,(t)=>`Second, we can cut waste and close loopholes.`,(t)=>`Third, tax relief is a stimulus that creates jobs.`],cross:(t)=>`On "${t}", pro-growth tax policy benefits everyone.`,closing:(t)=>`In closing, the affirmative believes "${t}" is the path to prosperity.`},neg:{opening:(t)=>`The opposition sees "${t}" differently. Tax cuts must be paid for.`,args:[(t)=>`First, on "${t}" — cuts for the wealthy increase inequality.`,(t)=>`Second, we need revenue for infrastructure and education.`,(t)=>`Third, targeted credits are more effective.`],cross:(t)=>`On "${t}", fairness matters.`,closing:(t)=>`In closing, the opposition urges a no vote on "${t}" until it is fair.`}},
+            health: {aff:{opening:(t)=>`The affirmative believes "${t}" is a moral test. Healthcare is a right.`,args:[(t)=>`First, on "${t}" — expanding coverage saves lives.`,(t)=>`Second, no one should be denied care because of pre-existing conditions.`,(t)=>`Third, a healthier population is more productive.`],cross:(t)=>`On "${t}", quality and access can coexist.`,closing:(t)=>`In closing, the affirmative urges a yes on "${t}".`},neg:{opening:(t)=>`The opposition approaches "${t}" with realism.`,args:[(t)=>`First, on "${t}" — we must preserve patient choice.`,(t)=>`Second, cost controls must come before expansion.`,(t)=>`Third, innovation depends on a competitive market.`],cross:(t)=>`On "${t}", the opposition stands for choice and responsibility.`,closing:(t)=>`In closing, the opposition urges a no vote on "${t}" until costs are controlled.`}},
+            immigration: {aff:{opening:(t)=>`The affirmative welcomes debate on "${t}". Immigrants strengthen our nation.`,args:[(t)=>`First, on "${t}" — immigrants fill labor shortages.`,(t)=>`Second, a pathway to citizenship is fair and practical.`,(t)=>`Third, comprehensive reform is the only lasting solution.`],cross:(t)=>`On "${t}", the affirmative stands for dignity and due process.`,closing:(t)=>`In closing, the affirmative urges a yes on "${t}".`},neg:{opening:(t)=>`The opposition insists on order on "${t}".`,args:[(t)=>`First, on "${t}" — border security comes first.`,(t)=>`Second, immigration levels must be sustainable.`,(t)=>`Third, local communities should have a say.`],cross:(t)=>`On "${t}", the opposition stands for law and sovereignty.`,closing:(t)=>`In closing, the opposition urges a no vote on "${t}" until the border is secure.`}},
+            climate: {aff:{opening:(t)=>`The affirmative treats "${t}" as an emergency.`,args:[(t)=>`First, on "${t}" — renewable energy creates jobs.`,(t)=>`Second, we owe future generations a livable planet.`,(t)=>`Third, clean air and water are public health imperatives.`],cross:(t)=>`On "${t}", we refuse to trade the planet for profit.`,closing:(t)=>`In closing, the affirmative urges a yes on "${t}".`},neg:{opening:(t)=>`The opposition is against "${t}" as written.`,args:[(t)=>`First, on "${t}" — the transition must be gradual.`,(t)=>`Second, we should focus on adaptation and innovation.`,(t)=>`Third, international cooperation is necessary.`],cross:(t)=>`On "${t}", the opposition stands for balance and competitiveness.`,closing:(t)=>`In closing, the opposition urges a no vote on "${t}" until it is fair.`}},
+            gun: {aff:{opening:(t)=>`The affirmative confronts "${t}" with urgency.`,args:[(t)=>`First, on "${t}" — universal background checks save lives.`,(t)=>`Second, banning assault weapons reduces mass casualties.`,(t)=>`Third, safe-storage laws protect children.`],cross:(t)=>`On "${t}", reform and the Second Amendment can coexist.`,closing:(t)=>`In closing, the affirmative urges a yes on "${t}".`},neg:{opening:(t)=>`The opposition defends the Second Amendment on "${t}".`,args:[(t)=>`First, on "${t}" — enforcement of existing laws works.`,(t)=>`Second, law-abiding citizens have a right to self-defense.`,(t)=>`Third, mental health and school security are the real solutions.`],cross:(t)=>`On "${t}", the opposition stands for liberty and constitutional rights.`,closing:(t)=>`In closing, the opposition urges a no vote on "${t}".`}},
+            education: {aff:{opening:(t)=>`The affirmative champions "${t}".`,args:[(t)=>`First, on "${t}" — funding public schools closes achievement gaps.`,(t)=>`Second, affordable higher education opens doors.`,(t)=>`Third, early childhood education pays dividends.`],cross:(t)=>`On "${t}", education is the great equalizer.`,closing:(t)=>`In closing, the affirmative urges a yes on "${t}".`},neg:{opening:(t)=>`The opposition insists on accountability on "${t}".`,args:[(t)=>`First, on "${t}" — parental choice drives improvement.`,(t)=>`Second, focus on basics — reading, writing, math.`,(t)=>`Third, local control is what works.`],cross:(t)=>`On "${t}", the opposition stands for parents and results.`,closing:(t)=>`In closing, the opposition urges a no vote on "${t}" until accountability is guaranteed.`}},
+            default: {aff:{opening:(t)=>`The affirmative takes a clear position on "${t}".`,args:[(t)=>`First, on "${t}" — acting now is better than waiting.`,(t)=>`Second, fairness and effectiveness are not opposites.`,(t)=>`Third, future generations will thank us.`],cross:(t)=>`On "${t}", the affirmative stands for progress.`,closing:(t)=>`In closing, the affirmative urges a yes on "${t}".`},neg:{opening:(t)=>`The opposition urges caution on "${t}".`,args:[(t)=>`First, on "${t}" — unintended consequences can be severe.`,(t)=>`Second, there are better alternatives.`,(t)=>`Third, the burden of proof is on those who want change.`],cross:(t)=>`On "${t}", the opposition stands for prudence.`,closing:(t)=>`In closing, the opposition urges a no vote on "${t}".`}}
         };
 
         function detectDebateCategory(topicText) {
@@ -1433,7 +1551,6 @@
         }
 
         function startDebateLoop() { if (debateLoopActive) return; debateLoopActive = true; pickAndStartDebate(); }
-
         function pickAndStartDebate() {
             if (!debateLoopActive) return;
             if (newsPool.length === 0) newsPool = backupWorldNews.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: ''}));
@@ -1447,9 +1564,7 @@
         }
 
         function runProfessionalDebate(topic, duration) {
-            isDebating = true;
-            debateTransitionPending = false;
-            stopSpeech();
+            isDebating = true; debateTransitionPending = false; stopSpeech();
             document.getElementById('anchorContainer').classList.add('active');
             document.getElementById('now-playing').style.display = 'none';
             document.getElementById('anchorName').textContent = 'The Political Debate';
@@ -1460,24 +1575,24 @@
             const categoryKey = detectDebateCategory((topicTitle + ' ' + topicDesc).toLowerCase());
             const playbook = debatePlaybook[categoryKey] || debatePlaybook.default;
             const statements = [
-                {role: 'mod', voiceRole: 'moderator', text: `Good evening, I'm JP, and welcome to The Political Debate. Our topic tonight: "${topicTitle}". ${topicDesc ? topicDesc + '. ' : ''}We have two guests: the affirmative, who supports action, and the opposition, who urges caution. Let's begin with opening statements.`},
-                {role: 'aff', voiceRole: 'affirmative', text: `Thank you, JP. The affirmative's position on "${topicTitle}" is clear. ${playbook.aff.opening(topicTitle)}`},
-                {role: 'neg', voiceRole: 'negative', text: `Thank you, JP. The opposition sees "${topicTitle}" differently. ${playbook.neg.opening(topicTitle)}`},
-                {role: 'mod', voiceRole: 'moderator', text: `Thank you both. Let's move to the arguments.`},
-                {role: 'aff', voiceRole: 'affirmative', text: playbook.aff.args[0](topicTitle)},
-                {role: 'neg', voiceRole: 'negative', text: playbook.neg.args[0](topicTitle)},
-                {role: 'aff', voiceRole: 'affirmative', text: playbook.aff.args[1](topicTitle)},
-                {role: 'neg', voiceRole: 'negative', text: playbook.neg.args[1](topicTitle)},
-                {role: 'mod', voiceRole: 'moderator', text: `Now let's move to rebuttals.`},
-                {role: 'aff', voiceRole: 'affirmative', text: playbook.aff.args[2](topicTitle)},
-                {role: 'neg', voiceRole: 'negative', text: playbook.neg.args[2](topicTitle)},
-                {role: 'mod', voiceRole: 'moderator', text: `Cross-talk now.`},
-                {role: 'aff', voiceRole: 'affirmative', text: playbook.aff.cross(topicTitle)},
-                {role: 'neg', voiceRole: 'negative', text: playbook.neg.cross(topicTitle)},
-                {role: 'mod', voiceRole: 'moderator', text: `Closing statements.`},
-                {role: 'aff', voiceRole: 'affirmative', text: playbook.aff.closing(topicTitle)},
-                {role: 'neg', voiceRole: 'negative', text: playbook.neg.closing(topicTitle)},
-                {role: 'mod', voiceRole: 'moderator', text: `That concludes our debate on "${topicTitle}". Thank you to both guests and to our audience. We would love to hear your thoughts — please send your opinions and feedback to jpierre722@yahoo.com. We now return you to our R&B and Soul channel. Enjoy the music.`}
+                {role:'mod',voiceRole:'moderator',text:`Good evening, I'm JP, and welcome to The Political Debate. Our topic tonight: "${topicTitle}". ${topicDesc ? topicDesc + '. ' : ''}We have two guests: the affirmative, who supports action, and the opposition, who urges caution. Let's begin with opening statements.`},
+                {role:'aff',voiceRole:'affirmative',text:`Thank you, JP. The affirmative's position on "${topicTitle}" is clear. ${playbook.aff.opening(topicTitle)}`},
+                {role:'neg',voiceRole:'negative',text:`Thank you, JP. The opposition sees "${topicTitle}" differently. ${playbook.neg.opening(topicTitle)}`},
+                {role:'mod',voiceRole:'moderator',text:`Thank you both. Let's move to the arguments.`},
+                {role:'aff',voiceRole:'affirmative',text:playbook.aff.args[0](topicTitle)},
+                {role:'neg',voiceRole:'negative',text:playbook.neg.args[0](topicTitle)},
+                {role:'aff',voiceRole:'affirmative',text:playbook.aff.args[1](topicTitle)},
+                {role:'neg',voiceRole:'negative',text:playbook.neg.args[1](topicTitle)},
+                {role:'mod',voiceRole:'moderator',text:`Now let's move to rebuttals.`},
+                {role:'aff',voiceRole:'affirmative',text:playbook.aff.args[2](topicTitle)},
+                {role:'neg',voiceRole:'negative',text:playbook.neg.args[2](topicTitle)},
+                {role:'mod',voiceRole:'moderator',text:`Cross-talk now.`},
+                {role:'aff',voiceRole:'affirmative',text:playbook.aff.cross(topicTitle)},
+                {role:'neg',voiceRole:'negative',text:playbook.neg.cross(topicTitle)},
+                {role:'mod',voiceRole:'moderator',text:`Closing statements.`},
+                {role:'aff',voiceRole:'affirmative',text:playbook.aff.closing(topicTitle)},
+                {role:'neg',voiceRole:'negative',text:playbook.neg.closing(topicTitle)},
+                {role:'mod',voiceRole:'moderator',text:`That concludes our debate on "${topicTitle}". Thank you to both guests and to our audience. We would love to hear your thoughts — please send your opinions and feedback to jpierre722@yahoo.com. We now return you to our R&B and Soul channel. Enjoy the music.`}
             ];
             let step = 0;
             const roleEl = document.getElementById('currentSpeakerRole');
@@ -1499,8 +1614,7 @@
             debateTimers.push(safetyTimer);
             function endDebate() {
                 if (!isDebating && debateTransitionPending) return;
-                isDebating = false;
-                debateTransitionPending = true;
+                isDebating = false; debateTransitionPending = true;
                 document.getElementById('anchorContainer').classList.remove('active');
                 document.getElementById('now-playing').style.display = 'block';
                 document.getElementById('anchorName').textContent = 'The Political Debate';
@@ -1529,16 +1643,13 @@
         }
 
         function stopDebateLoop() {
-            debateLoopActive = false;
-            isDebating = false;
-            debateTimers.forEach(t => clearTimeout(t));
-            debateTimers = [];
+            debateLoopActive = false; isDebating = false;
+            debateTimers.forEach(t => clearTimeout(t)); debateTimers = [];
             if (debateTimeoutId) clearTimeout(debateTimeoutId);
             document.getElementById('anchorContainer').classList.remove('active');
             document.getElementById('now-playing').style.display = 'block';
         }
 
-        // ADS
         const adScripts = ["This is JP AI Radio. Geico can save you 15% or more on car insurance. Visit Geico.com today.", "This is JP AI Radio. Liberty Mutual customizes your car insurance so you only pay for what you need."];
         function playAd(callback) {
             if (!musicChannels.includes(currentChannel) || isMuted || isDebating || adInProgress) { if (callback) callback(); return; }
@@ -1557,17 +1668,14 @@
         function startAdScheduler() { if (adIntervalId) clearInterval(adIntervalId); adIntervalId = setInterval(() => { if (musicChannels.includes(currentChannel)) playAd(); }, 1800000); }
         function clearAdScheduler() { if (adIntervalId) { clearInterval(adIntervalId); adIntervalId = null; } }
 
-        // CHANNEL MANAGEMENT
         function playStream() {
             if (!audioElement) createAudioElement();
             if (!videoElement) videoElement = document.getElementById('newsVideo');
             if (sportFlashInterval) { clearInterval(sportFlashInterval); sportFlashInterval = null; }
             if (sportFlashTimeoutId) { clearTimeout(sportFlashTimeoutId); sportFlashTimeoutId = null; }
             if (sportMusicInterval) { clearInterval(sportMusicInterval); sportMusicInterval = null; }
-            stopAINewsTV();
-            stopAINewsTVFR();
-            clearAdScheduler();
-            stopReadingLoop();
+            stopAINewsTV(); stopAINewsTVFR();
+            clearAdScheduler(); stopReadingLoop();
 
             if (currentChannel === 'mix') { if (audioElement) audioElement.pause(); startAINewsTV(); return; }
             if (currentChannel === 'mix_fr') { if (audioElement) audioElement.pause(); startAINewsTVFR(); return; }
@@ -1585,15 +1693,11 @@
                 document.getElementById('audioStatus').textContent = '🗣️ Debate Mode';
                 if (audioElement) audioElement.pause();
                 stopSpeech();
-                debateTimers.forEach(t => clearTimeout(t));
-                debateTimers = [];
+                debateTimers.forEach(t => clearTimeout(t)); debateTimers = [];
                 if (debateTimeoutId) clearTimeout(debateTimeoutId);
-                debateLoopActive = false;
-                isDebating = false;
-                startDebateLoop();
-                return;
+                debateLoopActive = false; isDebating = false;
+                startDebateLoop(); return;
             }
-
             if (currentChannel === 'sportflash') {
                 document.getElementById('anchorContainer').classList.remove('active');
                 document.getElementById('now-playing').style.display = 'block';
@@ -1619,7 +1723,6 @@
                 }
                 return;
             }
-
             document.getElementById('anchorContainer').classList.remove('active');
             document.getElementById('now-playing').style.display = 'block';
             document.getElementById('audioStatus').textContent = '📡 Connecting...';
@@ -1653,8 +1756,7 @@
         function switchChannel(channel) {
             currentChannel = channel;
             currentStationIndex = 0;
-            readingIndex = 0;
-            readingPhase = 'prayer';
+            readingIndex = 0; readingPhase = 'prayer';
             document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
             const map = ['rnb','rock','classical','electronic','french','haitian','aimusic','aireligious','bible','prayer','mix','mix_fr','debate','sportflash'];
             const idx = map.indexOf(channel);
@@ -1703,8 +1805,7 @@
             const streams = radioStations[currentChannel].streams;
             if (streams.length <= 1) { playStream(); return; }
             currentStationIndex = (currentStationIndex + 1) % streams.length;
-            readingIndex = 0;
-            readingPhase = 'prayer';
+            readingIndex = 0; readingPhase = 'prayer';
             playStream();
         }
         function previousStation() {
@@ -1712,12 +1813,10 @@
             const streams = radioStations[currentChannel].streams;
             if (streams.length <= 1) { playStream(); return; }
             currentStationIndex = (currentStationIndex - 1 + streams.length) % streams.length;
-            readingIndex = 0;
-            readingPhase = 'prayer';
+            readingIndex = 0; readingPhase = 'prayer';
             playStream();
         }
 
-        // WEATHER & SPORTS SCORES
         async function fetchWeather() {
             try {
                 if (!userLocation) userLocation = BOSTON_LOCATION;
@@ -1770,7 +1869,6 @@
             document.getElementById('dataStatus').textContent = `📍 Weather city set to ${input}`;
         }
 
-        // INIT
         function createVisualizer() {
             const viz = document.getElementById('visualizer');
             viz.innerHTML = '';
@@ -1838,7 +1936,8 @@
         createVisualizer();
         updateScheduleHighlight();
         document.getElementById('cityInput').value = 'Boston, MA';
-        console.log('%c🎵 JP AI Radio · v20 · Business TV removed · News theme music plays during 60s interval', 'color:#c9a961;font-weight:bold;');
+        console.log('%c📸 JP AI Radio · v22 · Native <img> layers — razor-sharp AI News Flash TV backgrounds', 'color:#c9a961;font-weight:bold;');
+        console.log('%c🎵 New cinematic broadcast news theme with lush delay FX', 'color:#c9a961;font-weight:bold;');
     </script>
 </body>
 </html>
