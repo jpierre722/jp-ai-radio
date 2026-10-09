@@ -45,7 +45,10 @@
         .ai-news-studio{display:none;position:relative;margin-bottom:24px;border-radius:3px;border:1px solid var(--hairline-strong);background:#000;overflow:hidden;aspect-ratio:16/9;max-height:540px;font-family:'Inter',sans-serif;}
         .ai-news-studio.active{display:block;}
 
-        /* ============ HIGH-RES IMAGE LAYER — SHARP & CRISP ============ */
+        /* ============ HIGH-RES IMAGE LAYER — MAXIMUM SHARPNESS ============
+           Clean, hardware-friendly CSS: no will-change, no backface tricks,
+           no image-rendering hints. The browser rasterizes the <img> at its
+           native resolution and the gentle scale keeps every pixel crisp. */
         .ai-news-image-layer{position:absolute;inset:0;z-index:1;overflow:hidden;background:#050508;}
         .ai-news-image{
             position:absolute;inset:0;
@@ -56,24 +59,21 @@
             display:block;
             opacity:0;
             transition:opacity 1.1s ease;
-            will-change:opacity,transform;
-            transform:translateZ(0) scale(1.001);
-            backface-visibility:hidden;
-            -webkit-backface-visibility:hidden;
+            transform:scale(1);
+            transform-origin:center center;
+            pointer-events:none;
             -webkit-user-select:none;
             user-select:none;
-            pointer-events:none;
         }
         .ai-news-image.active{
             opacity:1;
-            /* Very gentle drift — the image is always at native resolution, so it stays razor-sharp */
-            animation:kenBurns 26s ease-in-out infinite alternate;
+            animation:kenBurns 30s ease-in-out infinite alternate;
         }
         @keyframes kenBurns{
-            0%{transform:translateZ(0) scale(1.001);}
-            100%{transform:translateZ(0) scale(1.065);}
+            0%{transform:scale(1);}
+            100%{transform:scale(1.06);}
         }
-        .ai-news-image-layer::after{content:'';position:absolute;inset:0;z-index:2;background:linear-gradient(90deg,rgba(5,5,8,0.93) 0%,rgba(5,5,8,0.74) 45%,rgba(5,5,8,0.18) 100%),linear-gradient(0deg,rgba(5,5,8,0.95) 0%,rgba(5,5,8,0.45) 25%,transparent 55%,rgba(5,5,8,0.45) 100%);pointer-events:none;}
+        .ai-news-image-layer::after{content:'';position:absolute;inset:0;z-index:2;background:linear-gradient(90deg,rgba(5,5,8,0.93) 0%,rgba(5,5,8,0.72) 45%,rgba(5,5,8,0.15) 100%),linear-gradient(0deg,rgba(5,5,8,0.95) 0%,rgba(5,5,8,0.45) 25%,transparent 55%,rgba(5,5,8,0.45) 100%);pointer-events:none;}
 
         .ai-news-brandbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 28px;background:linear-gradient(180deg,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0) 100%);z-index:5;}
         .ai-news-brand-left{display:flex;align-items:center;gap:14px;}
@@ -453,11 +453,13 @@
 
     <script>
         // ============================================
-        // JP AI RADIO — PREMIUM EDITION v22
-        // - Native <img> layers with object-fit:cover → razor-sharp imagery
-        // - Removed pixelated "crisp-edges" hint that was destroying image quality
-        // - decode()-before-reveal → no blurry half-loaded frames
-        // - Brand-new warm, cinematic broadcast news theme with lush delay FX
+        // JP AI RADIO — PREMIUM EDITION v23
+        // - FR images now match headlines: robust FR category detection
+        //   + dedicated FR image pools + article-image priority
+        // - Brand-new ABC-News-style orchestral broadcast theme:
+        //   pulsing staccato strings, majestic brass, timpani, delay FX
+        // - Cleaned image CSS: removed will-change / backface / image-rendering
+        //   hints that were causing soft rendering. Native <img> = razor sharp.
         // ============================================
 
         const HAITIAN_VOICE_MASTER_PROMPT = {enabled:true,tone:'dous, cho, natif natal',pronunciation:'kreyòl ayisyen klè',nasalRule:'an, en, on, oun byen make — n pa yon konsòn separe',substitutions:{'ou':'oo','è':'eh','ò':'aw','ay':'eye','im':'eem'},constraints:['pa tradui','pa chanje mo yo','li egzak jan li ekri','ritm natirèl yon Ayisyen'],delivery:{rate:0.72,pitch:0.92,volume:1.0,pauseBetweenSentences:900,pauseBetweenChunks:1400}};
@@ -520,69 +522,88 @@
 
         // ============================================================
         // 📸 HIGH-RESOLUTION IMAGE POOLS
-        // 2560px wide, q=95 — plenty of headroom for the subtle drift
+        // All URLs: w=3200, q=95, auto=format, fit=crop → razor sharp
+        // even when scaled down and gently drifted.
         // ============================================================
         const CATEGORY_IMAGES = {
             'POLITICS': [
-                'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1555848962-6e79363ec58f?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1569243115784-cf4e8d1b1d5e?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+                'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1555848962-6e79363ec58f?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1569243115784-cf4e8d1b1d5e?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1575320181282-9afab399332c?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1604594849809-dfedbc827105?w=3200&q=95&auto=format&fit=crop&fm=jpg'
             ],
             'BUSINESS': [
-                'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1560221328-12fe60f83ab8?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1554260570-e9689a3418b8?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+                'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1560221328-12fe60f83ab8?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1554260570-e9689a3418b8?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?w=3200&q=95&auto=format&fit=crop&fm=jpg'
             ],
             'CLIMATE': [
-                'https://images.unsplash.com/photo-1502920514313-52581002a659?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1569163139394-de4e4f43e4e3?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+                'https://images.unsplash.com/photo-1502920514313-52581002a659?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1569163139394-de4e4f43e4e3?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1569163139599-0f4517e36f51?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=3200&q=95&auto=format&fit=crop&fm=jpg'
             ],
             'CONFLICT': [
-                'https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1601813219462-f2bbd41cd7b1?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1580744723289-cd04cc1a17cf?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+                'https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1601813219462-f2bbd41cd7b1?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1580744723289-cd04cc1a17cf?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1547483238-2cbf881a559f?w=3200&q=95&auto=format&fit=crop&fm=jpg'
             ],
             'HEALTH': [
-                'https://images.unsplash.com/photo-1584515933487-779824d29309?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+                'https://images.unsplash.com/photo-1584515933487-779824d29309?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1583912268183-0547ff1b0b2c?w=3200&q=95&auto=format&fit=crop&fm=jpg'
             ],
             'TECHNOLOGY': [
-                'https://images.unsplash.com/photo-1518770660439-4636190af475?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+                'https://images.unsplash.com/photo-1518770660439-4636190af475?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=3200&q=95&auto=format&fit=crop&fm=jpg'
             ],
             'SPORTS': [
-                'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1547347298-4074fc3086f0?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+                'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1547347298-4074fc3086f0?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=3200&q=95&auto=format&fit=crop&fm=jpg'
             ],
             'DIPLOMACY': [
-                'https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+                'https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=3200&q=95&auto=format&fit=crop&fm=jpg'
             ],
             'WORLD NEWS': [
-                'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=2560&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=2560&q=95&auto=format&fit=crop&fm=jpg'
+                'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=3200&q=95&auto=format&fit=crop&fm=jpg',
+                'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=3200&q=95&auto=format&fit=crop&fm=jpg'
             ]
         };
 
-        const categoryRotation = {};
-        function getCategoryImage(category) {
+        // Independent rotation state per language so EN and FR never share the same index
+        const categoryRotationEN = {};
+        const categoryRotationFR = {};
+        function getCategoryImage(category, lang) {
             const pool = CATEGORY_IMAGES[category] || CATEGORY_IMAGES['WORLD NEWS'];
-            const idx = categoryRotation[category] || 0;
-            categoryRotation[category] = (idx + 1) % pool.length;
+            const bucket = (lang === 'fr') ? categoryRotationFR : categoryRotationEN;
+            const idx = bucket[category] || 0;
+            bucket[category] = (idx + 1) % pool.length;
             return pool[idx];
         }
         function getFallbackImage(headline) {
             const seed = encodeURIComponent((headline || 'news').substring(0, 40).replace(/[^a-z0-9]/gi, ''));
-            return `https://picsum.photos/seed/${seed}/2560/1440`;
+            return `https://picsum.photos/seed/${seed}/3200/1800`;
         }
 
         // STATE
@@ -855,18 +876,26 @@
         }
 
         // ============================================================
-        // NEWS THEME MUSIC — Premium Cinematic Broadcast Bed
-        // Warm Cmaj7 – G – Am – F progression over 8 seconds, with a
-        // lush feedback-delay FX bus, bell arpeggios and soft percussion.
+        // 🎵 NEWS THEME MUSIC — ABC-News-style orchestral broadcast bed
+        // Driving staccato string ostinato + majestic brass + timpani
+        // + memorable melody over a lush feedback delay. 8s loop.
         // ============================================================
         let newsThemeCtx = null, newsThemeMaster = null, newsThemeTimeoutId = null;
         function updateNewsThemeGain() { if (newsThemeMaster) newsThemeMaster.gain.value = isMuted ? 0 : Math.max(0.35, volume * 0.6); }
 
-        const NEWS_PROGRESSION = [
-            { bass: 65.41,  pad: [261.63, 329.63, 392.00, 493.88], arp: [523.25, 659.25, 783.99, 987.77] }, // Cmaj7
-            { bass: 98.00,  pad: [246.94, 293.66, 392.00, 587.33], arp: [493.88, 587.33, 783.99, 987.77] }, // G
-            { bass: 110.00, pad: [220.00, 261.63, 329.63, 440.00], arp: [440.00, 523.25, 659.25, 880.00] }, // Am
-            { bass: 87.31,  pad: [261.63, 349.23, 440.00, 523.25], arp: [440.00, 523.25, 698.46, 880.00] }  // F
+        // i - VI - III - VII in D minor: Dm, Bb, F, C  (classic news urgency)
+        const NEWS_CHORDS = [
+            { bass: 73.42,  strings: [146.83, 174.61, 220.00], brass: [293.66, 349.23, 440.00] }, // Dm
+            { bass: 58.27,  strings: [116.54, 146.83, 174.61], brass: [233.08, 293.66, 349.23] }, // Bb
+            { bass: 87.31,  strings: [174.61, 220.00, 261.63], brass: [349.23, 440.00, 523.25] }, // F
+            { bass: 65.41,  strings: [130.81, 164.81, 196.00], brass: [261.63, 329.63, 392.00] }  // C
+        ];
+        // Memorable melody phrase (Hz, one entry per half-beat over 8s)
+        const NEWS_MELODY = [
+            587.33, 587.33, 523.25, 587.33, 698.46, 0,      587.33, 523.25,
+            466.16, 466.16, 440.00, 466.16, 587.33, 0,      523.25, 440.00,
+            523.25, 587.33, 698.46, 880.00, 698.46, 587.33, 523.25, 0,
+            440.00, 466.16, 523.25, 466.16, 440.00, 0,      0,      0
         ];
 
         function playNewsTheme(durationMs, onComplete) {
@@ -881,16 +910,16 @@
                 master.gain.value = isMuted ? 0 : Math.max(0.35, volume * 0.6);
                 master.connect(ctx.destination);
 
-                // ---- Shared FX bus: warm feedback delay ----
+                // FX bus — warm feedback delay for the melody & bells
                 const fxSend = ctx.createGain();
                 fxSend.gain.value = 0.32;
                 const delay = ctx.createDelay(1.0);
-                delay.delayTime.value = 0.34;
+                delay.delayTime.value = 0.30;
                 const damp = ctx.createBiquadFilter();
                 damp.type = 'lowpass';
-                damp.frequency.value = 2200;
+                damp.frequency.value = 2600;
                 const fb = ctx.createGain();
-                fb.gain.value = 0.28;
+                fb.gain.value = 0.30;
                 const fxReturn = ctx.createGain();
                 fxReturn.gain.value = 0.55;
                 fxSend.connect(delay);
@@ -920,112 +949,143 @@
         }
 
         function scheduleNewsLoopSegment(ctx, dest, fxSend, t0, dur) {
-            const barLen = 2; // seconds per chord
-            const endT = t0 + dur;
+            const beat = 0.5;              // 120 BPM
+            const barLen = 2.0;            // 4 beats
+            const sixteenth = beat / 4;    // 0.125s
 
-            for (let b = 0; b < 4; b++) {
-                const barStart = t0 + b * barLen;
-                if (barStart >= endT) break;
-                const barEnd = Math.min(barStart + barLen, endT);
-                const barDur = barEnd - barStart;
+            for (let bar = 0; bar < 4; bar++) {
+                const barStart = t0 + bar * barLen;
+                if (barStart >= t0 + dur) break;
+                const chord = NEWS_CHORDS[bar];
 
-                // ---- Warm sustained pad ----
-                NEWS_PROGRESSION[b].pad.forEach((freq, i) => {
-                    const osc = ctx.createOscillator();
-                    osc.type = (i % 2 === 0) ? 'sine' : 'triangle';
-                    osc.frequency.value = freq / 2;
-                    osc.detune.value = (i - 1.5) * 5;
-                    const filt = ctx.createBiquadFilter();
-                    filt.type = 'lowpass';
-                    filt.frequency.value = 1500;
-                    filt.Q.value = 0.6;
-                    const g = ctx.createGain();
-                    const peak = 0.022;
-                    const atk = Math.min(0.8, barDur * 0.35);
-                    const rel = Math.min(0.7, barDur * 0.35);
-                    g.gain.setValueAtTime(0.0001, barStart);
-                    g.gain.linearRampToValueAtTime(peak, barStart + atk);
-                    g.gain.setValueAtTime(peak, Math.max(barStart + atk, barEnd - rel));
-                    g.gain.linearRampToValueAtTime(0.0001, barEnd);
-                    osc.connect(filt).connect(g);
-                    g.connect(dest);
-                    g.connect(fxSend);
-                    osc.start(barStart);
-                    osc.stop(barEnd + 0.05);
+                // ---- Staccato string ostinato: 16th notes alternating root/fifth/octave ----
+                for (let i = 0; i < 16; i++) {
+                    const t = barStart + i * sixteenth;
+                    if (t >= t0 + dur) break;
+                    const noteIdx = i % 3;
+                    const octaveMul = (i % 8 < 4) ? 1 : 2;
+                    playStringNote(ctx, dest, chord.strings[noteIdx] * octaveMul, t, 0.09, 0.055);
+                }
+
+                // ---- Brass chord: sustained throughout the bar ----
+                chord.brass.forEach((freq, i) => {
+                    playBrassNote(ctx, dest, freq, barStart, barLen * 0.85, 0.055, i);
                 });
 
-                // ---- Bass ----
-                const bassOsc = ctx.createOscillator();
-                bassOsc.type = 'sine';
-                bassOsc.frequency.value = NEWS_PROGRESSION[b].bass;
-                const bassG = ctx.createGain();
-                const bDecay = Math.min(1.6, barDur);
-                bassG.gain.setValueAtTime(0.0001, barStart);
-                bassG.gain.linearRampToValueAtTime(0.13, barStart + 0.05);
-                bassG.gain.exponentialRampToValueAtTime(0.0001, barStart + bDecay);
-                bassOsc.connect(bassG).connect(dest);
-                bassOsc.start(barStart);
-                bassOsc.stop(barStart + bDecay + 0.05);
+                // ---- Timpani on beats 1 and 3 ----
+                playTimpani(ctx, dest, barStart, 0.28);
+                playTimpani(ctx, dest, barStart + beat * 2, 0.20);
 
-                // ---- Bell arpeggio melody ----
-                const arp = NEWS_PROGRESSION[b].arp;
-                const amps = [0.055, 0.042, 0.034, 0.028];
-                const step = barDur / 4;
-                arp.forEach((freq, i) => {
-                    const t = barStart + i * step;
-                    if (t >= endT) return;
-                    const pan = (i % 2 === 0) ? -0.35 : 0.35;
-                    playBell(ctx, dest, fxSend, freq, t, amps[i], 1.5, pan);
-                    playBell(ctx, dest, fxSend, freq * 2, t + 0.02, 0.011, 0.7, -pan);
-                });
+                // ---- Sub-bass pulse on every beat ----
+                for (let b = 0; b < 4; b++) {
+                    playSubBass(ctx, dest, chord.bass, barStart + b * beat, beat, 0.14);
+                }
 
-                // ---- Soft percussion ----
-                softKick(ctx, dest, barStart, 0.16);
-                if (barStart + barDur / 2 < endT) softKick(ctx, dest, barStart + barDur / 2, 0.09);
-                for (let s = 0.25; s < barDur; s += 0.5) {
+                // ---- Hi-hat shimmer on offbeats ----
+                for (let s = 0.25; s < barLen; s += 0.5) {
                     const t = barStart + s;
-                    if (t < endT) softHat(ctx, dest, t, 0.018);
+                    if (t < t0 + dur) playHat(ctx, dest, t, 0.014);
                 }
             }
+
+            // ---- Melody: 32 half-beats over 8s ----
+            const halfBeat = beat / 2;
+            NEWS_MELODY.forEach((freq, i) => {
+                if (!freq) return;
+                const t = t0 + i * halfBeat;
+                if (t >= t0 + dur) return;
+                playMelody(ctx, dest, fxSend, freq, t, 0.42, 0.085);
+                // Add a soft harmonic an octave up for air
+                playMelody(ctx, dest, fxSend, freq * 2, t + 0.005, 0.32, 0.018);
+            });
+
+            // ---- Big cymbal swell at the start of the loop ----
+            playCymbalSwell(ctx, dest, fxSend, t0, Math.min(1.6, dur), 0.09);
         }
 
-        function playBell(ctx, dest, fxSend, freq, t, amp, decay, pan) {
+        function playStringNote(ctx, dest, freq, t, decay, amp) {
+            const osc = ctx.createOscillator();
+            osc.type = 'sawtooth';
+            osc.frequency.value = freq;
+            const filt = ctx.createBiquadFilter();
+            filt.type = 'lowpass';
+            filt.frequency.setValueAtTime(2600, t);
+            filt.frequency.exponentialRampToValueAtTime(1400, t + decay);
+            filt.Q.value = 1.2;
+            const g = ctx.createGain();
+            g.gain.setValueAtTime(0.0001, t);
+            g.gain.linearRampToValueAtTime(amp, t + 0.005);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+            osc.connect(filt).connect(g).connect(dest);
+            osc.start(t);
+            osc.stop(t + decay + 0.03);
+        }
+
+        function playBrassNote(ctx, dest, freq, t, dur, amp, idx) {
+            const osc = ctx.createOscillator();
+            osc.type = 'sawtooth';
+            osc.frequency.value = freq;
+            osc.detune.value = (idx - 1) * 6;
+            const filt = ctx.createBiquadFilter();
+            filt.type = 'lowpass';
+            filt.frequency.setValueAtTime(900, t);
+            filt.frequency.linearRampToValueAtTime(3200, t + dur * 0.25);
+            filt.frequency.linearRampToValueAtTime(1400, t + dur);
+            filt.Q.value = 2.5;
+            const g = ctx.createGain();
+            g.gain.setValueAtTime(0.0001, t);
+            g.gain.linearRampToValueAtTime(amp, t + 0.08);
+            g.gain.setValueAtTime(amp * 0.85, t + dur * 0.5);
+            g.gain.linearRampToValueAtTime(0.0001, t + dur);
+            osc.connect(filt).connect(g).connect(dest);
+            osc.start(t);
+            osc.stop(t + dur + 0.05);
+        }
+
+        function playTimpani(ctx, dest, t, amp) {
+            const osc = ctx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(140, t);
+            osc.frequency.exponentialRampToValueAtTime(55, t + 0.35);
+            const g = ctx.createGain();
+            g.gain.setValueAtTime(amp, t);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+            osc.connect(g).connect(dest);
+            osc.start(t);
+            osc.stop(t + 0.6);
+            // Add a subtle body hit
+            const noise = ctx.createBufferSource();
+            const len = Math.floor(ctx.sampleRate * 0.04);
+            const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+            const data = buf.getChannelData(0);
+            for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+            noise.buffer = buf;
+            const bp = ctx.createBiquadFilter();
+            bp.type = 'bandpass';
+            bp.frequency.value = 180;
+            bp.Q.value = 1.2;
+            const ng = ctx.createGain();
+            ng.gain.value = amp * 0.6;
+            noise.connect(bp).connect(ng).connect(dest);
+            noise.start(t);
+            noise.stop(t + 0.05);
+        }
+
+        function playSubBass(ctx, dest, freq, t, dur, amp) {
             const osc = ctx.createOscillator();
             osc.type = 'sine';
             osc.frequency.value = freq;
             const g = ctx.createGain();
             g.gain.setValueAtTime(0.0001, t);
-            g.gain.linearRampToValueAtTime(amp, t + 0.008);
-            g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
-            osc.connect(g);
-            let tail = g;
-            if (pan !== undefined && ctx.createStereoPanner) {
-                const p = ctx.createStereoPanner();
-                p.pan.value = pan;
-                g.connect(p);
-                tail = p;
-            }
-            tail.connect(dest);
-            tail.connect(fxSend);
-            osc.start(t);
-            osc.stop(t + decay + 0.05);
-        }
-
-        function softKick(ctx, dest, t, amp) {
-            const osc = ctx.createOscillator();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(110, t);
-            osc.frequency.exponentialRampToValueAtTime(45, t + 0.14);
-            const g = ctx.createGain();
-            g.gain.setValueAtTime(amp, t);
-            g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+            g.gain.linearRampToValueAtTime(amp, t + 0.02);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.9);
             osc.connect(g).connect(dest);
             osc.start(t);
-            osc.stop(t + 0.35);
+            osc.stop(t + dur);
         }
 
-        function softHat(ctx, dest, t, amp) {
-            const len = Math.floor(ctx.sampleRate * 0.06);
+        function playHat(ctx, dest, t, amp) {
+            const len = Math.floor(ctx.sampleRate * 0.04);
             const buf = ctx.createBuffer(1, len, ctx.sampleRate);
             const data = buf.getChannelData(0);
             for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
@@ -1033,12 +1093,49 @@
             src.buffer = buf;
             const hp = ctx.createBiquadFilter();
             hp.type = 'highpass';
-            hp.frequency.value = 7000;
+            hp.frequency.value = 7500;
             const g = ctx.createGain();
             g.gain.value = amp;
             src.connect(hp).connect(g).connect(dest);
             src.start(t);
-            src.stop(t + 0.08);
+            src.stop(t + 0.06);
+        }
+
+        function playMelody(ctx, dest, fxSend, freq, t, decay, amp) {
+            const osc = ctx.createOscillator();
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            const g = ctx.createGain();
+            g.gain.setValueAtTime(0.0001, t);
+            g.gain.linearRampToValueAtTime(amp, t + 0.015);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+            osc.connect(g);
+            g.connect(dest);
+            g.connect(fxSend);
+            osc.start(t);
+            osc.stop(t + decay + 0.05);
+        }
+
+        function playCymbalSwell(ctx, dest, fxSend, t, dur, amp) {
+            const len = Math.floor(ctx.sampleRate * dur);
+            const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+            const data = buf.getChannelData(0);
+            for (let i = 0; i < len; i++) {
+                const env = Math.pow(i / len, 1.6) * Math.pow(1 - i / len, 0.6);
+                data[i] = (Math.random() * 2 - 1) * env;
+            }
+            const src = ctx.createBufferSource();
+            src.buffer = buf;
+            const hp = ctx.createBiquadFilter();
+            hp.type = 'highpass';
+            hp.frequency.value = 5500;
+            const g = ctx.createGain();
+            g.gain.value = amp;
+            src.connect(hp).connect(g);
+            g.connect(dest);
+            g.connect(fxSend);
+            src.start(t);
+            src.stop(t + dur);
         }
 
         function stopNewsTheme() {
@@ -1216,31 +1313,46 @@
             readNext();
         }
 
+        // ============================================================
+        // CATEGORY DETECTION — much richer for both EN and FR
+        // ============================================================
         function detectNewsCategory(text) {
             const t = (text || '').toLowerCase();
-            if (/\b(election|president|senate|congress|parliament|vote|political|minister|policy|law)\b/.test(t)) return 'POLITICS';
-            if (/\b(market|stock|economy|econom|business|trade|dollar|inflation|bank|finance)\b/.test(t)) return 'BUSINESS';
-            if (/\b(climate|environment|energy|emission|carbon|warming|renewable)\b/.test(t)) return 'CLIMATE';
-            if (/\b(war|conflict|military|attack|troops|invasion|strike|ceasefire)\b/.test(t)) return 'CONFLICT';
-            if (/\b(health|virus|disease|hospital|medical|vaccine|outbreak)\b/.test(t)) return 'HEALTH';
-            if (/\b(tech|ai|artificial intelligence|cyber|digital|software|data)\b/.test(t)) return 'TECHNOLOGY';
-            if (/\b(sport|match|league|championship|olympic|tournament)\b/.test(t)) return 'SPORTS';
-            if (/\b(united nations|nato|eu|treaty|summit|diplomat|g7|brics)\b/.test(t)) return 'DIPLOMACY';
+            if (/\b(election|president|presidential|senate|congress|parliament|vote|voting|ballot|political|politician|minister|prime minister|policy|law|legislation|government|governor|mayor|diplomat|referendum|impeachment|campaign|white house|kremlin)\b/.test(t)) return 'POLITICS';
+            if (/\b(market|stock|stocks|economy|economic|business|trade|trading|dollar|euro|inflation|bank|banking|finance|financial|gdp|recession|earnings|investor|wall street|nasdaq|dow|jobs report|unemployment)\b/.test(t)) return 'BUSINESS';
+            if (/\b(climate|environment|environmental|energy|emission|emissions|carbon|warming|renewable|solar|wind|fossil|oil spill|pollution|sustainability|green|temperature|drought|flood|wildfire)\b/.test(t)) return 'CLIMATE';
+            if (/\b(war|conflict|military|attack|attacks|troops|invasion|strike|strikes|ceasefire|cease-fire|bombing|missile|drone|soldiers|combat|offensive|front line|shelling|hostage|insurgent|terror)\b/.test(t)) return 'CONFLICT';
+            if (/\b(health|healthcare|virus|disease|hospital|medical|medicine|vaccine|vaccination|outbreak|pandemic|epidemic|doctor|patient|cancer|flu|covid|who|mental health|surgery)\b/.test(t)) return 'HEALTH';
+            if (/\b(tech|technology|ai|artificial intelligence|cyber|digital|software|data|algorithm|robot|robotics|silicon valley|startup|chip|semiconductor|internet|app|smartphone|5g|quantum)\b/.test(t)) return 'TECHNOLOGY';
+            if (/\b(sport|sports|match|matches|league|championship|olympic|olympics|tournament|football|soccer|basketball|baseball|tennis|golf|nba|nfl|mlb|nhl|fifa|world cup|coach|player|team|game|score)\b/.test(t)) return 'SPORTS';
+            if (/\b(united nations|nato|eu|european union|treaty|summit|diplomat|diplomacy|g7|g20|brics|ambassador|foreign minister|state visit|sanctions|bilateral|multilateral)\b/.test(t)) return 'DIPLOMACY';
             return 'WORLD NEWS';
         }
         function detectNewsCategoryFR(text) {
             const t = (text || '').toLowerCase();
-            if (/\b(élection|président|sénat|congrès|parlement|vote|politique|ministre|loi|gouvernement)\b/.test(t)) return 'POLITIQUE';
-            if (/\b(marché|bourse|économie|économique|affaires|commerce|dollar|inflation|banque|finance)\b/.test(t)) return 'ÉCONOMIE';
-            if (/\b(climat|environnement|énergie|émission|carbone|réchauffement|renouvelable)\b/.test(t)) return 'CLIMAT';
-            if (/\b(guerre|conflit|militaire|attaque|troupes|invasion|frappe|cessez-le-feu)\b/.test(t)) return 'CONFLIT';
-            if (/\b(santé|virus|maladie|hôpital|médical|vaccin|épidémie)\b/.test(t)) return 'SANTÉ';
-            if (/\b(technologie|ia|intelligence artificielle|cyber|numérique|logiciel|données)\b/.test(t)) return 'TECHNOLOGIE';
-            if (/\b(sport|match|ligue|championnat|olympique|tournoi|football)\b/.test(t)) return 'SPORTS';
-            if (/\b(nations unies|otan|ue|traité|sommet|diplomate|g7|brics)\b/.test(t)) return 'DIPLOMATIE';
+            if (/\b(élection|élections|président|présidente|présidentiel|sénat|congrès|parlement|vote|voter|scrutin|politique|ministre|premier ministre|gouvernement|loi|législation|gouverneur|maire|diplomate|référendum|impeachment|campagne|élysée|assemblée|député|sénateur|réforme)\b/.test(t)) return 'POLITIQUE';
+            if (/\b(marché|marchés|bourse|économie|économique|affaires|commerce|dollar|euro|inflation|banque|bancaire|finance|financier|pib|récession|croissance|investisseur|wall street|nasdaq|chômage|emploi|budget|dette)\b/.test(t)) return 'ÉCONOMIE';
+            if (/\b(climat|climatique|environnement|environnemental|énergie|émission|émissions|carbone|réchauffement|renouvelable|solaire|éolien|fossile|pollution|durabilité|vert|température|sécheresse|inondation|incendie)\b/.test(t)) return 'CLIMAT';
+            if (/\b(guerre|conflit|militaire|attaque|attaques|troupes|invasion|frappe|frappes|cessez-le-feu|bombardement|missile|drone|soldats|combat|offensive|ligne de front|bombardements|otage|insurgé|terroriste)\b/.test(t)) return 'CONFLIT';
+            if (/\b(santé|soins|virus|maladie|hôpital|médical|médecine|vaccin|vaccination|épidémie|pandémie|épidémique|docteur|patient|cancer|grippe|covid|oms|santé mentale|chirurgie|médicament)\b/.test(t)) return 'SANTÉ';
+            if (/\b(technologie|technologique|ia|intelligence artificielle|cyber|numérique|logiciel|données|algorithme|robot|robotique|silicon valley|startup|puce|semi-conducteur|internet|application|smartphone|5g|quantique|ordinateur)\b/.test(t)) return 'TECHNOLOGIE';
+            if (/\b(sport|sports|match|matches|ligue|championnat|olympique|olympiques|tournoi|football|soccer|basket|basketball|baseball|tennis|golf|nba|nfl|mlb|nhl|fifa|coupe du monde|entraîneur|joueur|équipe|jeu|score|champion)\b/.test(t)) return 'SPORTS';
+            if (/\b(nations unies|otan|ue|union européenne|traité|sommet|diplomate|diplomatie|g7|g20|brics|ambassadeur|ministre des affaires étrangères|visite d'état|sanctions|bilatéral|multilatéral|onu)\b/.test(t)) return 'DIPLOMATIE';
             return 'ACTUALITÉS MONDIALES';
         }
-        function frCategoryToImageKey(fr) { return {'POLITIQUE':'POLITICS','ÉCONOMIE':'BUSINESS','CLIMAT':'CLIMATE','CONFLIT':'CONFLICT','SANTÉ':'HEALTH','TECHNOLOGIE':'TECHNOLOGY','SPORTS':'SPORTS','DIPLOMATIE':'DIPLOMACY','ACTUALITÉS MONDIALES':'WORLD NEWS'}[fr] || 'WORLD NEWS'; }
+        function frCategoryToImageKey(fr) {
+            return {
+                'POLITIQUE':'POLITICS',
+                'ÉCONOMIE':'BUSINESS',
+                'CLIMAT':'CLIMATE',
+                'CONFLIT':'CONFLICT',
+                'SANTÉ':'HEALTH',
+                'TECHNOLOGIE':'TECHNOLOGY',
+                'SPORTS':'SPORTS',
+                'DIPLOMATIE':'DIPLOMACY',
+                'ACTUALITÉS MONDIALES':'WORLD NEWS'
+            }[fr] || 'WORLD NEWS';
+        }
 
         function buildAnchorScript(item) {
             const title = item.title || '';
@@ -1263,15 +1375,16 @@
             return script;
         }
 
-        function getNewsImage(item, category) {
-            if (item.image && item.image.length > 10 && /^https?:\/\//i.test(item.image)) return item.image;
-            return getCategoryImage(category);
+        // Get image for the headline: prefer the article's own image, then category pool
+        function getNewsImage(item, category, lang) {
+            if (item.image && item.image.length > 10 && /^https?:\/\//i.test(item.image)) {
+                return item.image;
+            }
+            return getCategoryImage(category, lang || 'en');
         }
 
         // ============================================================
-        // Sharp, blur-free image crossfade.
-        // Preloads → decodes → only then reveals the new frame, so the
-        // viewer never sees a half-decoded (soft) image.
+        // Sharp, blur-free crossfade using native <img> + decode()
         // ============================================================
         function setAINewsImage(imageUrl) {
             const imgA = document.getElementById('aiNewsImageA');
@@ -1334,7 +1447,7 @@
             document.getElementById('aiNewsCategory').textContent = category;
             const headlineEl = document.getElementById('aiNewsHeadline');
             headlineEl.classList.add('fade-out');
-            const imageUrl = getNewsImage(item, category);
+            const imageUrl = getNewsImage(item, category, 'en');
             setAINewsImage(imageUrl);
             setTimeout(() => {
                 headlineEl.textContent = item.title;
@@ -1345,12 +1458,12 @@
             if (next) document.getElementById('aiNewsNextHeadline').textContent = next.title;
         }
         function displayAIHeadlineFR(item) {
-            const category = detectNewsCategoryFR(item.title);
+            const category = detectNewsCategoryFR(item.title + ' ' + (item.description || ''));
             document.getElementById('aiNewsFrCategory').textContent = category;
             const headlineEl = document.getElementById('aiNewsFrHeadline');
             headlineEl.classList.add('fade-out');
             const imageKey = frCategoryToImageKey(category);
-            const imageUrl = getNewsImage(item, imageKey);
+            const imageUrl = getNewsImage(item, imageKey, 'fr');
             setAINewsFrImage(imageUrl);
             setTimeout(() => {
                 headlineEl.textContent = item.title;
@@ -1936,8 +2049,9 @@
         createVisualizer();
         updateScheduleHighlight();
         document.getElementById('cityInput').value = 'Boston, MA';
-        console.log('%c📸 JP AI Radio · v22 · Native <img> layers — razor-sharp AI News Flash TV backgrounds', 'color:#c9a961;font-weight:bold;');
-        console.log('%c🎵 New cinematic broadcast news theme with lush delay FX', 'color:#c9a961;font-weight:bold;');
+        console.log('%c📸 JP AI Radio · v23 · FR images now match headlines (dedicated FR pools + richer detection)', 'color:#c9a961;font-weight:bold;');
+        console.log('%c🎵 ABC-News-style orchestral broadcast theme: strings, brass, timpani, delay FX', 'color:#c9a961;font-weight:bold;');
+        console.log('%c✨ Clean image CSS — native <img> + decode() before reveal → razor sharp', 'color:#c9a961;font-weight:bold;');
     </script>
 </body>
 </html>
