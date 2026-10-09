@@ -45,10 +45,7 @@
         .ai-news-studio{display:none;position:relative;margin-bottom:24px;border-radius:3px;border:1px solid var(--hairline-strong);background:#000;overflow:hidden;aspect-ratio:16/9;max-height:540px;font-family:'Inter',sans-serif;}
         .ai-news-studio.active{display:block;}
 
-        /* ============ HIGH-RES IMAGE LAYER — MAXIMUM SHARPNESS ============
-           Clean, hardware-friendly CSS: no will-change, no backface tricks,
-           no image-rendering hints. The browser rasterizes the <img> at its
-           native resolution and the gentle scale keeps every pixel crisp. */
+        /* ============ HIGH-RES IMAGE LAYER — MAXIMUM SHARPNESS ============ */
         .ai-news-image-layer{position:absolute;inset:0;z-index:1;overflow:hidden;background:#050508;}
         .ai-news-image{
             position:absolute;inset:0;
@@ -352,7 +349,8 @@
 
             <div class="section-label">Channels</div>
             <div class="channels" id="channelsGrid">
-                <button class="channel-btn active" onclick="switchChannel('rnb')"><span class="channel-icon">🎤</span>R&amp;B / Hip-Hop</button>
+                <button class="channel-btn active" onclick="switchChannel('mix')"><span class="channel-icon">🇬🇧</span>AI News Flash EN</button>
+                <button class="channel-btn" onclick="switchChannel('rnb')"><span class="channel-icon">🎤</span>R&amp;B / Hip-Hop</button>
                 <button class="channel-btn" onclick="switchChannel('rock')"><span class="channel-icon">🎸</span>Classic Rock</button>
                 <button class="channel-btn" onclick="switchChannel('classical')"><span class="channel-icon">🎻</span>Classical</button>
                 <button class="channel-btn" onclick="switchChannel('electronic')"><span class="channel-icon">⚡</span>Electronic</button>
@@ -362,7 +360,6 @@
                 <button class="channel-btn" onclick="switchChannel('aireligious')"><span class="channel-icon">✝️</span>AI Religious</button>
                 <button class="channel-btn" onclick="switchChannel('bible')"><span class="channel-icon">📖</span>Bible Reading</button>
                 <button class="channel-btn" onclick="switchChannel('prayer')"><span class="channel-icon">🙏</span>Prayer</button>
-                <button class="channel-btn" onclick="switchChannel('mix')"><span class="channel-icon">🇬🇧</span>AI News Flash EN</button>
                 <button class="channel-btn" onclick="switchChannel('mix_fr')"><span class="channel-icon">🇫🇷</span>Info Flash FR</button>
                 <button class="channel-btn" onclick="switchChannel('debate')"><span class="channel-icon">🗣️</span>Debate</button>
                 <button class="channel-btn" onclick="switchChannel('sportflash')"><span class="channel-icon">🏈</span>Sport Flash</button>
@@ -453,13 +450,15 @@
 
     <script>
         // ============================================
-        // JP AI RADIO — PREMIUM EDITION v23
-        // - FR images now match headlines: robust FR category detection
-        //   + dedicated FR image pools + article-image priority
-        // - Brand-new ABC-News-style orchestral broadcast theme:
-        //   pulsing staccato strings, majestic brass, timpani, delay FX
-        // - Cleaned image CSS: removed will-change / backface / image-rendering
-        //   hints that were causing soft rendering. Native <img> = razor sharp.
+        // JP AI RADIO — PREMIUM EDITION v24
+        // - AI News Flash TV (EN) is now the default first channel
+        // - Massively faster news loading:
+        //     • parallel feed fetching (all feeds at once)
+        //     • per-feed 4s timeout via AbortController
+        //     • first-successful-feed wins → instant first headline
+        //     • progressive streaming into the pool as more feeds arrive
+        //     • instant fallback headlines so the studio NEVER sits idle
+        //     • deduplication + lightweight HTML stripping
         // ============================================
 
         const HAITIAN_VOICE_MASTER_PROMPT = {enabled:true,tone:'dous, cho, natif natal',pronunciation:'kreyòl ayisyen klè',nasalRule:'an, en, on, oun byen make — n pa yon konsòn separe',substitutions:{'ou':'oo','è':'eh','ò':'aw','ay':'eye','im':'eem'},constraints:['pa tradui','pa chanje mo yo','li egzak jan li ekri','ritm natirèl yon Ayisyen'],delivery:{rate:0.72,pitch:0.92,volume:1.0,pauseBetweenSentences:900,pauseBetweenChunks:1400}};
@@ -523,7 +522,6 @@
         // ============================================================
         // 📸 HIGH-RESOLUTION IMAGE POOLS
         // All URLs: w=3200, q=95, auto=format, fit=crop → razor sharp
-        // even when scaled down and gently drifted.
         // ============================================================
         const CATEGORY_IMAGES = {
             'POLITICS': [
@@ -591,7 +589,6 @@
             ]
         };
 
-        // Independent rotation state per language so EN and FR never share the same index
         const categoryRotationEN = {};
         const categoryRotationFR = {};
         function getCategoryImage(category, lang) {
@@ -609,7 +606,8 @@
         // STATE
         let audioElement = null, videoElement = null, hlsInstance = null;
         let isPlaying = false, isMuted = false, volume = 0.7;
-        let currentChannel = 'rnb', currentStationIndex = 0, listeners = 1500, userLocation = null;
+        // ⬇️ DEFAULT CHANNEL IS NOW THE ENGLISH AI NEWS FLASH
+        let currentChannel = 'mix', currentStationIndex = 0, listeners = 1500, userLocation = null;
         let newsPool = [], newsPoolFR = [], newsIndex = 0, anchorNewsIndex = 0;
         let speechSynth = window.speechSynthesis;
         let maleVoice = null, femaleVoice = null, frenchVoice = null, haitianVoice = null;
@@ -877,20 +875,16 @@
 
         // ============================================================
         // 🎵 NEWS THEME MUSIC — ABC-News-style orchestral broadcast bed
-        // Driving staccato string ostinato + majestic brass + timpani
-        // + memorable melody over a lush feedback delay. 8s loop.
         // ============================================================
         let newsThemeCtx = null, newsThemeMaster = null, newsThemeTimeoutId = null;
         function updateNewsThemeGain() { if (newsThemeMaster) newsThemeMaster.gain.value = isMuted ? 0 : Math.max(0.35, volume * 0.6); }
 
-        // i - VI - III - VII in D minor: Dm, Bb, F, C  (classic news urgency)
         const NEWS_CHORDS = [
             { bass: 73.42,  strings: [146.83, 174.61, 220.00], brass: [293.66, 349.23, 440.00] }, // Dm
             { bass: 58.27,  strings: [116.54, 146.83, 174.61], brass: [233.08, 293.66, 349.23] }, // Bb
             { bass: 87.31,  strings: [174.61, 220.00, 261.63], brass: [349.23, 440.00, 523.25] }, // F
             { bass: 65.41,  strings: [130.81, 164.81, 196.00], brass: [261.63, 329.63, 392.00] }  // C
         ];
-        // Memorable melody phrase (Hz, one entry per half-beat over 8s)
         const NEWS_MELODY = [
             587.33, 587.33, 523.25, 587.33, 698.46, 0,      587.33, 523.25,
             466.16, 466.16, 440.00, 466.16, 587.33, 0,      523.25, 440.00,
@@ -910,7 +904,6 @@
                 master.gain.value = isMuted ? 0 : Math.max(0.35, volume * 0.6);
                 master.connect(ctx.destination);
 
-                // FX bus — warm feedback delay for the melody & bells
                 const fxSend = ctx.createGain();
                 fxSend.gain.value = 0.32;
                 const delay = ctx.createDelay(1.0);
@@ -949,16 +942,15 @@
         }
 
         function scheduleNewsLoopSegment(ctx, dest, fxSend, t0, dur) {
-            const beat = 0.5;              // 120 BPM
-            const barLen = 2.0;            // 4 beats
-            const sixteenth = beat / 4;    // 0.125s
+            const beat = 0.5;
+            const barLen = 2.0;
+            const sixteenth = beat / 4;
 
             for (let bar = 0; bar < 4; bar++) {
                 const barStart = t0 + bar * barLen;
                 if (barStart >= t0 + dur) break;
                 const chord = NEWS_CHORDS[bar];
 
-                // ---- Staccato string ostinato: 16th notes alternating root/fifth/octave ----
                 for (let i = 0; i < 16; i++) {
                     const t = barStart + i * sixteenth;
                     if (t >= t0 + dur) break;
@@ -967,39 +959,32 @@
                     playStringNote(ctx, dest, chord.strings[noteIdx] * octaveMul, t, 0.09, 0.055);
                 }
 
-                // ---- Brass chord: sustained throughout the bar ----
                 chord.brass.forEach((freq, i) => {
                     playBrassNote(ctx, dest, freq, barStart, barLen * 0.85, 0.055, i);
                 });
 
-                // ---- Timpani on beats 1 and 3 ----
                 playTimpani(ctx, dest, barStart, 0.28);
                 playTimpani(ctx, dest, barStart + beat * 2, 0.20);
 
-                // ---- Sub-bass pulse on every beat ----
                 for (let b = 0; b < 4; b++) {
                     playSubBass(ctx, dest, chord.bass, barStart + b * beat, beat, 0.14);
                 }
 
-                // ---- Hi-hat shimmer on offbeats ----
                 for (let s = 0.25; s < barLen; s += 0.5) {
                     const t = barStart + s;
                     if (t < t0 + dur) playHat(ctx, dest, t, 0.014);
                 }
             }
 
-            // ---- Melody: 32 half-beats over 8s ----
             const halfBeat = beat / 2;
             NEWS_MELODY.forEach((freq, i) => {
                 if (!freq) return;
                 const t = t0 + i * halfBeat;
                 if (t >= t0 + dur) return;
                 playMelody(ctx, dest, fxSend, freq, t, 0.42, 0.085);
-                // Add a soft harmonic an octave up for air
                 playMelody(ctx, dest, fxSend, freq * 2, t + 0.005, 0.32, 0.018);
             });
 
-            // ---- Big cymbal swell at the start of the loop ----
             playCymbalSwell(ctx, dest, fxSend, t0, Math.min(1.6, dur), 0.09);
         }
 
@@ -1053,7 +1038,6 @@
             osc.connect(g).connect(dest);
             osc.start(t);
             osc.stop(t + 0.6);
-            // Add a subtle body hit
             const noise = ctx.createBufferSource();
             const len = Math.floor(ctx.sampleRate * 0.04);
             const buf = ctx.createBuffer(1, len, ctx.sampleRate);
@@ -1143,79 +1127,209 @@
             if (newsThemeCtx) { try { newsThemeCtx.close(); } catch(e) {} newsThemeCtx = null; newsThemeMaster = null; }
         }
 
-        // NEWS FETCHING
-        async function fetchNewsFromFeeds(feedList, backupList) {
-            let allItems = [];
-            for (const feedUrl of feedList) {
-                try {
-                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
-                    const response = await fetch(proxyUrl);
-                    const data = await response.json();
-                    const parser = new DOMParser();
-                    const xml = parser.parseFromString(data.contents, 'text/xml');
-                    const items = xml.querySelectorAll('item');
-                    items.forEach(item => {
-                        const title = item.querySelector('title')?.textContent || '';
-                        const description = item.querySelector('description')?.textContent || '';
-                        const pubDate = item.querySelector('pubDate')?.textContent || '';
-                        let imageUrl = '';
-                        const mt = item.querySelector('thumbnail') || item.getElementsByTagName('media:thumbnail')[0];
-                        if (mt) imageUrl = mt.getAttribute('url') || '';
-                        if (!imageUrl) { const mc = item.getElementsByTagName('media:content')[0]; if (mc) imageUrl = mc.getAttribute('url') || ''; }
-                        if (!imageUrl) { const enc = item.querySelector('enclosure'); if (enc) { const type = enc.getAttribute('type') || ''; if (type.startsWith('image/')) imageUrl = enc.getAttribute('url') || ''; } }
-                        if (!imageUrl && description) { const m = description.match(/<img[^>]+src=["']([^"']+)["']/i); if (m) imageUrl = m[1]; }
-                        if (title) allItems.push({title, description: description.replace(/<[^>]*>/g, ''), pubDate, image: imageUrl});
-                    });
-                } catch(e) {}
+        // ============================================================
+        // ⚡ FAST NEWS FETCHING ENGINE
+        // Key techniques:
+        //   1. fetch() with AbortController timeout of 4s per feed
+        //   2. All feeds fetch in parallel (Promise.allSettled)
+        //   3. First successful feed immediately populates the pool
+        //      and kicks off the news loop — no waiting for slow feeds
+        //   4. Progressive streaming: more feeds keep appending results
+        //   5. Persistent "resolved" guard so we don't double-add items
+        // ============================================================
+        const FEED_TIMEOUT_MS = 4000;
+        const PROXIES = [
+            (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+            (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
+        ];
+
+        async function fetchWithTimeout(url, timeoutMs) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                return res;
+            } finally {
+                clearTimeout(timer);
             }
-            if (allItems.length > 0) return allItems.sort(() => Math.random() - 0.5).slice(0, 100);
-            return backupList.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: ''}));
+        }
+
+        function parseRssItems(xmlText) {
+            const out = [];
+            try {
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(xmlText, 'text/xml');
+                const items = xml.querySelectorAll('item');
+                items.forEach(item => {
+                    const title = item.querySelector('title')?.textContent?.trim() || '';
+                    if (!title) return;
+                    const rawDesc = item.querySelector('description')?.textContent || '';
+                    const description = rawDesc.replace(/<[^>]*>/g, '').trim().substring(0, 240);
+                    const pubDate = item.querySelector('pubDate')?.textContent || '';
+                    let imageUrl = '';
+                    const mt = item.querySelector('thumbnail') || item.getElementsByTagName('media:thumbnail')[0];
+                    if (mt) imageUrl = mt.getAttribute('url') || '';
+                    if (!imageUrl) { const mc = item.getElementsByTagName('media:content')[0]; if (mc) imageUrl = mc.getAttribute('url') || ''; }
+                    if (!imageUrl) { const enc = item.querySelector('enclosure'); if (enc) { const type = enc.getAttribute('type') || ''; if (type.startsWith('image/')) imageUrl = enc.getAttribute('url') || ''; } }
+                    if (!imageUrl && rawDesc) { const m = rawDesc.match(/<img[^>]+src=["']([^"']+)["']/i); if (m) imageUrl = m[1]; }
+                    out.push({ title, description, pubDate, image: imageUrl });
+                });
+            } catch(e) {}
+            return out;
+        }
+
+        // Fetch a single feed: try all proxies in sequence, resolving with items or []
+        async function fetchSingleFeed(feedUrl) {
+            for (const proxyFn of PROXIES) {
+                try {
+                    const res = await fetchWithTimeout(proxyFn(feedUrl), FEED_TIMEOUT_MS);
+                    if (!res.ok) continue;
+                    const text = await res.text();
+                    let xmlText = text;
+                    // allorigins wraps in JSON
+                    if (proxyFn === PROXIES[0]) {
+                        try {
+                            const json = JSON.parse(text);
+                            xmlText = json.contents || '';
+                        } catch(e) { xmlText = text; }
+                    }
+                    if (!xmlText || xmlText.length < 100) continue;
+                    const items = parseRssItems(xmlText);
+                    if (items.length > 0) return items;
+                } catch(e) { /* try next proxy */ }
+            }
+            return [];
+        }
+
+        // Fast parallel fetching with early first-success callback
+        async function fastFetchNews(feedList, backupList, onFirstBatch, onComplete) {
+            const seenTitles = new Set();
+            const collected = [];
+            let firstBatchFired = false;
+            let pendingCount = feedList.length;
+
+            function pushItems(items) {
+                let added = 0;
+                for (const it of items) {
+                    const key = it.title.toLowerCase().substring(0, 80);
+                    if (seenTitles.has(key)) continue;
+                    seenTitles.add(key);
+                    collected.push(it);
+                    added++;
+                }
+                return added;
+            }
+
+            feedList.forEach(feedUrl => {
+                fetchSingleFeed(feedUrl).then(items => {
+                    const added = pushItems(items);
+                    // Fire the first-batch callback as soon as ANY feed returns items
+                    if (!firstBatchFired && added > 0) {
+                        firstBatchFired = true;
+                        if (onFirstBatch) onFirstBatch(collected.slice());
+                    }
+                    pendingCount--;
+                    if (pendingCount === 0) {
+                        const finalItems = collected.length > 0
+                            ? collected.sort(() => Math.random() - 0.5).slice(0, 100)
+                            : backupList.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: ''}));
+                        if (onComplete) onComplete(finalItems);
+                    }
+                }).catch(() => {
+                    pendingCount--;
+                    if (pendingCount === 0) {
+                        const finalItems = collected.length > 0
+                            ? collected.sort(() => Math.random() - 0.5).slice(0, 100)
+                            : backupList.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: ''}));
+                        if (onComplete) onComplete(finalItems);
+                    }
+                });
+            });
+
+            // Hard safety net: after 5s, force-resolve with whatever we have
+            setTimeout(() => {
+                if (!firstBatchFired && collected.length === 0) {
+                    const fallback = backupList.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: ''}));
+                    if (onFirstBatch) onFirstBatch(fallback);
+                    if (onComplete) onComplete(fallback);
+                }
+            }, 5000);
+        }
+
+        // ============================================================
+        // NEWS POOL POPULATION — EN
+        // ============================================================
+        function populateNewsPool(newItems, lang) {
+            if (lang === 'fr') {
+                newsPoolFR = newItems;
+                if (aiNewsFrActive && aiNewsFrHeadlinesInCycle === 0) {
+                    // restart the FR loop if it was already active
+                }
+                updateAINewsTickerFR();
+            } else {
+                newsPool = newItems;
+                updateAINewsTicker();
+                // If AI News EN is active and hasn't started a cycle yet, kick it off
+                if (aiNewsActive && aiNewsHeadlinesInCycle === 0 && aiNewsLoopTimeoutId === null) {
+                    // Loop already running, just let it pick up the new pool
+                }
+            }
         }
 
         async function fetchWorldNews() {
-            try {
-                newsPool = await fetchNewsFromFeeds(worldFeeds, backupWorldNews);
-                newsIndex = 0; anchorNewsIndex = 0;
-                displayNextNews();
-                updateAINewsTicker();
-                document.getElementById('dataStatus').textContent = `✅ World news updated`;
-            } catch(e) {
-                newsPool = backupWorldNews.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: ''}));
-                displayNextNews();
-                updateAINewsTicker();
+            const firstHeadlineEl = document.getElementById('aiNewsHeadline');
+            if (firstHeadlineEl && aiNewsActive) {
+                firstHeadlineEl.textContent = 'Retrieving the latest global headlines...';
             }
+            await fastFetchNews(
+                worldFeeds,
+                backupWorldNews,
+                // First-batch callback: as soon as ANY feed arrives, seed the pool
+                (firstItems) => {
+                    newsPool = firstItems;
+                    newsIndex = 0;
+                    displayNextNews();
+                    updateAINewsTicker();
+                    document.getElementById('dataStatus').textContent = `✅ Live headlines streaming (${firstItems.length} items)`;
+                    // If AI News is active but waiting for the first headline, kick it now
+                    if (aiNewsActive && aiNewsHeadlineIndex === 0 && aiNewsLoopTimeoutId === null && !isSpeaking) {
+                        startAINewsTVLoop();
+                    }
+                },
+                // Complete callback: replace with the fuller shuffled set
+                (finalItems) => {
+                    newsPool = finalItems;
+                    newsIndex = 0;
+                    updateAINewsTicker();
+                    document.getElementById('dataStatus').textContent = `✅ World news ready (${finalItems.length} items)`;
+                }
+            );
         }
 
         async function fetchWorldNewsFR() {
-            try {
-                newsPoolFR = await fetchNewsFromFeeds(worldFeedsFR, backupWorldNewsFR);
-                updateAINewsTickerFR();
-            } catch(e) {
-                newsPoolFR = backupWorldNewsFR.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: ''}));
-                updateAINewsTickerFR();
-            }
+            await fastFetchNews(
+                worldFeedsFR,
+                backupWorldNewsFR,
+                (firstItems) => {
+                    newsPoolFR = firstItems;
+                    updateAINewsTickerFR();
+                    if (aiNewsFrActive && aiNewsFrHeadlineIndex === 0 && aiNewsFrLoopTimeoutId === null && !isSpeaking) {
+                        startAINewsTVLoopFR();
+                    }
+                },
+                (finalItems) => {
+                    newsPoolFR = finalItems;
+                    updateAINewsTickerFR();
+                }
+            );
         }
 
         async function fetchSportsNews() {
             try {
-                let allItems = [];
-                for (const feedUrl of sportsFeeds) {
-                    try {
-                        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
-                        const response = await fetch(proxyUrl);
-                        const data = await response.json();
-                        const parser = new DOMParser();
-                        const xml = parser.parseFromString(data.contents, 'text/xml');
-                        const items = xml.querySelectorAll('item');
-                        items.forEach(item => {
-                            const title = item.querySelector('title')?.textContent || '';
-                            const description = item.querySelector('description')?.textContent || '';
-                            const pubDate = item.querySelector('pubDate')?.textContent || '';
-                            if (title) allItems.push({title, description: description.replace(/<[^>]*>/g, ''), pubDate});
-                        });
-                    } catch(e) {}
-                }
-                if (allItems.length > 0) sportNewsPool = allItems.sort(() => Math.random() - 0.5).slice(0, 50);
+                const allItems = await new Promise((resolve) => {
+                    fastFetchNews(sportsFeeds, [], null, resolve);
+                });
+                if (allItems && allItems.length > 0) sportNewsPool = allItems.slice(0, 50);
                 else sportNewsPool = backupSportsNews.map(title => ({title, description: '', pubDate: new Date().toISOString()}));
                 sportNewsIndex = 0;
             } catch(e) {
@@ -1313,9 +1427,6 @@
             readNext();
         }
 
-        // ============================================================
-        // CATEGORY DETECTION — much richer for both EN and FR
-        // ============================================================
         function detectNewsCategory(text) {
             const t = (text || '').toLowerCase();
             if (/\b(election|president|presidential|senate|congress|parliament|vote|voting|ballot|political|politician|minister|prime minister|policy|law|legislation|government|governor|mayor|diplomat|referendum|impeachment|campaign|white house|kremlin)\b/.test(t)) return 'POLITICS';
@@ -1375,7 +1486,6 @@
             return script;
         }
 
-        // Get image for the headline: prefer the article's own image, then category pool
         function getNewsImage(item, category, lang) {
             if (item.image && item.image.length > 10 && /^https?:\/\//i.test(item.image)) {
                 return item.image;
@@ -1383,9 +1493,6 @@
             return getCategoryImage(category, lang || 'en');
         }
 
-        // ============================================================
-        // Sharp, blur-free crossfade using native <img> + decode()
-        // ============================================================
         function setAINewsImage(imageUrl) {
             const imgA = document.getElementById('aiNewsImageA');
             const imgB = document.getElementById('aiNewsImageB');
@@ -1522,8 +1629,9 @@
         function startAINewsTVLoop() {
             if (!aiNewsActive) return;
             if (newsPool.length === 0) {
-                document.getElementById('aiNewsHeadline').textContent = 'Connecting to the JP AI Newsroom · Retrieving the latest global headlines and imagery...';
-                fetchWorldNews().then(() => { if (aiNewsActive) aiNewsLoopTimeoutId = setTimeout(startAINewsTVLoop, 2000); });
+                document.getElementById('aiNewsHeadline').textContent = 'Connecting to the JP AI Newsroom · Retrieving the latest global headlines...';
+                // Instead of fetching again, rely on the already-running fetchWorldNews
+                aiNewsLoopTimeoutId = setTimeout(startAINewsTVLoop, 1500);
                 return;
             }
             if (aiNewsHeadlinesInCycle >= AI_NEWS_CYCLE_LENGTH) {
@@ -1556,8 +1664,8 @@
         function startAINewsTVLoopFR() {
             if (!aiNewsFrActive) return;
             if (newsPoolFR.length === 0) {
-                document.getElementById('aiNewsFrHeadline').textContent = 'Connexion à la salle de presse JP IA · Chargement des derniers titres mondiaux et images...';
-                fetchWorldNewsFR().then(() => { if (aiNewsFrActive) aiNewsFrLoopTimeoutId = setTimeout(startAINewsTVLoopFR, 2000); });
+                document.getElementById('aiNewsFrHeadline').textContent = 'Connexion à la salle de presse JP IA · Chargement des derniers titres mondiaux...';
+                aiNewsFrLoopTimeoutId = setTimeout(startAINewsTVLoopFR, 1500);
                 return;
             }
             if (aiNewsFrHeadlinesInCycle >= AI_NEWS_CYCLE_LENGTH) {
@@ -1602,8 +1710,9 @@
             startAINewsClock();
             aiNewsHeadlinesInCycle = 0;
             aiNewsActive = true;
-            if (newsPool.length === 0) fetchWorldNews().then(() => { if (aiNewsActive) startAINewsTVLoop(); });
-            else startAINewsTVLoop();
+            // The initial fetch is already kicked off by startRadio(); just start the loop.
+            // If the pool is still empty, the loop will spin harmlessly until items arrive.
+            startAINewsTVLoop();
         }
 
         function startAINewsTVFR() {
@@ -1621,8 +1730,7 @@
             startAINewsClockFR();
             aiNewsFrHeadlinesInCycle = 0;
             aiNewsFrActive = true;
-            if (newsPoolFR.length === 0) fetchWorldNewsFR().then(() => { if (aiNewsFrActive) startAINewsTVLoopFR(); });
-            else startAINewsTVLoopFR();
+            startAINewsTVLoopFR();
         }
 
         function stopAINewsTV() {
@@ -1736,15 +1844,15 @@
                 updateRoleBadge('mod');
                 setTimeout(() => {
                     debateTransitionPending = false;
-                    currentChannel = 'rnb';
+                    currentChannel = 'mix';
                     currentStationIndex = 0;
                     document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
-                    const map = ['rnb','rock','classical','electronic','french','haitian','aimusic','aireligious','bible','prayer','mix','mix_fr','debate','sportflash'];
-                    const idx = map.indexOf('rnb');
+                    const map = ['mix','rnb','rock','classical','electronic','french','haitian','aimusic','aireligious','bible','prayer','mix_fr','debate','sportflash'];
+                    const idx = map.indexOf('mix');
                     const btns = document.querySelectorAll('.channel-btn');
                     if (btns[idx]) btns[idx].classList.add('active');
                     playStream();
-                    document.getElementById('audioStatus').textContent = '🎵 Now playing: R&B / Soul';
+                    document.getElementById('audioStatus').textContent = '🤖 Returning to AI News Flash TV';
                 }, 2500);
                 if (debateLoopActive) {
                     const now = new Date();
@@ -1871,7 +1979,7 @@
             currentStationIndex = 0;
             readingIndex = 0; readingPhase = 'prayer';
             document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
-            const map = ['rnb','rock','classical','electronic','french','haitian','aimusic','aireligious','bible','prayer','mix','mix_fr','debate','sportflash'];
+            const map = ['mix','rnb','rock','classical','electronic','french','haitian','aimusic','aireligious','bible','prayer','mix_fr','debate','sportflash'];
             const idx = map.indexOf(channel);
             const btns = document.querySelectorAll('.channel-btn');
             if (btns[idx]) btns[idx].classList.add('active');
@@ -2023,12 +2131,24 @@
                 setTimeout(() => { setupVoices(); pickDebateVoices(); }, 1500);
                 setTimeout(() => { setupVoices(); pickDebateVoices(); }, 3000);
             }
-            playStream();
+
+            // 🔥 KICK OFF ALL FETCHES IMMEDIATELY (parallel, non-blocking)
             fetchWorldNews();
             fetchWorldNewsFR();
             fetchSportsNews();
             fetchWeather();
             fetchSportsScores();
+
+            // 🎬 Start on AI News Flash TV (EN) — the new default channel
+            currentChannel = 'mix';
+            currentStationIndex = 0;
+            document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
+            const map = ['mix','rnb','rock','classical','electronic','french','haitian','aimusic','aireligious','bible','prayer','mix_fr','debate','sportflash'];
+            const idx = map.indexOf('mix');
+            const btns = document.querySelectorAll('.channel-btn');
+            if (btns[idx]) btns[idx].classList.add('active');
+            playStream();
+
             updateClock();
             adjustVolume(document.getElementById('volumeSlider').value);
             setInterval(updateClock, 1000);
@@ -2049,9 +2169,9 @@
         createVisualizer();
         updateScheduleHighlight();
         document.getElementById('cityInput').value = 'Boston, MA';
-        console.log('%c📸 JP AI Radio · v23 · FR images now match headlines (dedicated FR pools + richer detection)', 'color:#c9a961;font-weight:bold;');
-        console.log('%c🎵 ABC-News-style orchestral broadcast theme: strings, brass, timpani, delay FX', 'color:#c9a961;font-weight:bold;');
-        console.log('%c✨ Clean image CSS — native <img> + decode() before reveal → razor sharp', 'color:#c9a961;font-weight:bold;');
+        console.log('%c🤖 JP AI Radio · v24 · AI News Flash TV (EN) is now the default first channel', 'color:#c9a961;font-weight:bold;');
+        console.log('%c⚡ Fast news loading: parallel fetches, 4s timeouts, first-batch streaming', 'color:#c9a961;font-weight:bold;');
+        console.log('%c📸 FR images match headlines · sharp imagery · ABC-style broadcast theme', 'color:#c9a961;font-weight:bold;');
     </script>
 </body>
 </html>
