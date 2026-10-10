@@ -45,7 +45,6 @@
         .ai-news-studio{display:none;position:relative;margin-bottom:24px;border-radius:3px;border:1px solid var(--hairline-strong);background:#000;overflow:hidden;aspect-ratio:16/9;max-height:540px;font-family:'Inter',sans-serif;}
         .ai-news-studio.active{display:block;}
 
-        /* ============ HIGH-RES IMAGE LAYER — MAXIMUM SHARPNESS ============ */
         .ai-news-image-layer{position:absolute;inset:0;z-index:1;overflow:hidden;background:#050508;}
         .ai-news-image{
             position:absolute;inset:0;
@@ -82,8 +81,9 @@
         .ai-news-clock{color:var(--platinum);font-weight:600;font-size:14px;letter-spacing:0.1em;}
         .ai-news-body{position:absolute;top:70px;left:0;right:0;bottom:90px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:20px 60px;z-index:4;pointer-events:none;}
         .ai-news-category{display:inline-block;font-size:11px;font-weight:800;letter-spacing:0.35em;color:var(--gold);padding:6px 14px;border:1px solid var(--hairline-strong);background:rgba(10,10,13,0.75);backdrop-filter:blur(6px);border-radius:2px;margin-bottom:22px;text-transform:uppercase;}
-        .ai-news-headline{font-family:'Cormorant Garamond',Georgia,serif;font-size:42px;font-weight:600;line-height:1.15;color:var(--platinum);max-width:92%;margin-bottom:24px;text-shadow:0 4px 30px rgba(0,0,0,0.95),0 2px 8px rgba(0,0,0,0.9);transition:opacity 0.5s ease,transform 0.5s ease;}
+        .ai-news-headline{font-family:'Cormorant Garamond',Georgia,serif;font-size:38px;font-weight:600;line-height:1.15;color:var(--platinum);max-width:92%;margin-bottom:18px;text-shadow:0 4px 30px rgba(0,0,0,0.95),0 2px 8px rgba(0,0,0,0.9);transition:opacity 0.5s ease,transform 0.5s ease;}
         .ai-news-headline.fade-out{opacity:0;transform:translateY(-10px);}
+        .ai-news-details{font-size:15px;line-height:1.55;color:#d8d4cc;max-width:88%;margin-bottom:18px;text-shadow:0 2px 10px rgba(0,0,0,0.9);font-weight:400;max-height:170px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;}
         .ai-news-meta{display:flex;align-items:center;gap:28px;font-size:11px;color:var(--mist);letter-spacing:0.15em;text-transform:uppercase;text-shadow:0 2px 10px rgba(0,0,0,0.9);}
         .ai-news-meta span{display:inline-flex;align-items:center;gap:8px;}
         .ai-news-meta span::before{content:'';width:6px;height:6px;background:var(--gold);border-radius:50%;opacity:0.8;box-shadow:0 0 8px var(--gold);}
@@ -189,9 +189,9 @@
         .start-button:hover{transform:translateY(-2px);}
         .start-info{color:var(--mist);text-align:center;font-size:12px;line-height:2;}
         @media (max-width:980px){.channels{grid-template-columns:repeat(5,1fr);}}
-        @media (max-width:900px){.info-section{grid-template-columns:1fr;}.ai-news-headline{font-size:30px;}.ai-news-body{padding:20px 40px;}.ai-news-anchor-avatar{width:48px;height:48px;font-size:22px;}}
+        @media (max-width:900px){.info-section{grid-template-columns:1fr;}.ai-news-headline{font-size:28px;}.ai-news-details{font-size:13px;-webkit-line-clamp:4;}.ai-news-body{padding:20px 40px;}.ai-news-anchor-avatar{width:48px;height:48px;font-size:22px;}}
         @media (max-width:700px){body{padding:12px 8px;}.header{padding:20px 22px;flex-direction:column;align-items:flex-start;gap:14px;}.header-meta{display:none;}.brand-title{font-size:24px;}.content-pad{padding:20px 22px;}.status-bar{padding:12px 22px;gap:16px;}.channels{grid-template-columns:repeat(3,1fr);gap:6px;}.channel-btn{padding:10px 3px 8px;font-size:8px;letter-spacing:0.06em;}.channel-btn .channel-icon{font-size:17px;}.track-title{font-size:24px;}.control-btn{width:40px;height:40px;font-size:12px;}.control-btn.play{width:52px;height:52px;font-size:15px;}.now-playing{padding:24px 20px;}.anchor-container{padding:24px 20px;}.anchor-avatar{width:56px;height:56px;font-size:24px;}.anchor-info h2{font-size:18px;}.anchor-news-text{font-size:16px;padding:18px 20px;}.weather-temp{font-size:34px;}.start-title{font-size:32px;}.start-button{padding:16px 32px;font-size:11px;}.volume-slider{width:140px;}}
-        @media (max-width:600px){.ai-news-headline{font-size:22px;max-width:100%;}.ai-news-body{padding:20px 24px;top:60px;bottom:80px;}.ai-news-brandbar{padding:12px 16px;}.ai-news-brand-right{display:none;}.ai-news-anchor{bottom:80px;right:12px;}.ai-news-bottomticker{height:80px;}.ai-news-corner.bl,.ai-news-corner.br{bottom:90px;}}
+        @media (max-width:600px){.ai-news-headline{font-size:20px;max-width:100%;}.ai-news-details{font-size:12px;-webkit-line-clamp:3;max-height:80px;}.ai-news-body{padding:16px 24px;top:60px;bottom:80px;}.ai-news-brandbar{padding:12px 16px;}.ai-news-brand-right{display:none;}.ai-news-anchor{bottom:80px;right:12px;}.ai-news-bottomticker{height:80px;}.ai-news-corner.bl,.ai-news-corner.br{bottom:90px;}}
     </style>
 </head>
 <body>
@@ -263,7 +263,8 @@
                 </div>
                 <div class="ai-news-body">
                     <div class="ai-news-category" id="aiNewsCategory">WORLD NEWS</div>
-                    <div class="ai-news-headline" id="aiNewsHeadline">Initializing JP AI News Flash TV · Loading live headlines with imagery from around the world...</div>
+                    <div class="ai-news-headline" id="aiNewsHeadline">Initializing JP AI News Flash TV · Loading live headlines with full reports from around the world...</div>
+                    <div class="ai-news-details" id="aiNewsDetails"></div>
                     <div class="ai-news-meta">
                         <span id="aiNewsSource">JP AI Newsroom · Automated Broadcast</span>
                         <span id="aiNewsCounter">Headline 0 of 0</span>
@@ -307,7 +308,8 @@
                 </div>
                 <div class="ai-news-body">
                     <div class="ai-news-category" id="aiNewsFrCategory">ACTUALITÉS MONDIALES</div>
-                    <div class="ai-news-headline" id="aiNewsFrHeadline">Initialisation de JP IA Info Flash TV · Chargement des titres en direct avec images du monde entier...</div>
+                    <div class="ai-news-headline" id="aiNewsFrHeadline">Initialisation de JP IA Info Flash TV · Chargement des titres en direct avec rapports complets...</div>
+                    <div class="ai-news-details" id="aiNewsFrDetails"></div>
                     <div class="ai-news-meta">
                         <span id="aiNewsFrSource">Salle de presse JP IA · Diffusion automatisée</span>
                         <span id="aiNewsFrCounter">Titre 0 sur 0</span>
@@ -393,7 +395,7 @@
                     <span class="marquee-divider">◆</span>
                     ⏭ <span class="marquee-em">Tip:</span> Click the forward (⏭) button to listen to a different station within the same category channel
                     <span class="marquee-divider">◆</span>
-                    🤖 <span class="marquee-em">AI News Flash TV (EN/FR):</span> 100% AI-generated broadcast with high-resolution imagery — bulletins every 60 seconds
+                    🤖 <span class="marquee-em">AI News Flash TV (EN/FR):</span> 100% AI-generated broadcast with full article reports and article imagery
                     <span class="marquee-divider">◆</span>
                     🗣️ <span class="marquee-em">Debate Channel:</span> Three distinct voices — Moderator, Affirmative guest, Opposition guest
                     <span class="marquee-divider">◆</span>
@@ -450,14 +452,14 @@
 
     <script>
         // ============================================
-        // JP AI RADIO — PREMIUM EDITION v25
-        // — AUTO-UPDATING ALL CHANNELS —
-        // • AI News Flash EN/FR refresh headlines every 4 minutes
-        // • News pool updates stream in without interrupting playback
-        // • Music streams auto-recover from errors
-        // • Watchdog ensures AI news loops never stall
-        // • Sports scores every 60s · Weather every 5 min
-        // • AI news bulletins continue forever
+        // JP AI RADIO — PREMIUM EDITION v27
+        // — FULL ARTICLE REPORTS FROM SOURCE —
+        // • Fetches the ACTUAL ARTICLE PAGE from BBC/NPR/NYT/France24/RFI/etc.
+        // • Extracts the full article body text (multiple fallback selectors)
+        // • Extracts the article's og:image hero photo for authentic visuals
+        // • Anchor reads complete reports with details, quotes, and figures
+        // • Prefetches next items so bulletins are never delayed
+        // • Everything from v26 preserved (auto-update, watchdog, streams)
         // ============================================
 
         const HAITIAN_VOICE_MASTER_PROMPT = {enabled:true,tone:'dous, cho, natif natal',pronunciation:'kreyòl ayisyen klè',nasalRule:'an, en, on, oun byen make — n pa yon konsòn separe',substitutions:{'ou':'oo','è':'eh','ò':'aw','ay':'eye','im':'eem'},constraints:['pa tradui','pa chanje mo yo','li egzak jan li ekri','ritm natirèl yon Ayisyen'],delivery:{rate:0.72,pitch:0.92,volume:1.0,pauseBetweenSentences:900,pauseBetweenChunks:1400}};
@@ -519,76 +521,20 @@
         }
 
         // ============================================================
-        // 📸 HIGH-RESOLUTION IMAGE POOLS
+        // 📸 CATEGORY IMAGE POOLS (fallback when article has no og:image)
         // ============================================================
         const CATEGORY_IMAGES = {
-            'POLITICS': [
-                'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1555848962-6e79363ec58f?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1569243115784-cf4e8d1b1d5e?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1575320181282-9afab399332c?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1604594849809-dfedbc827105?w=3200&q=95&auto=format&fit=crop&fm=jpg'
-            ],
-            'BUSINESS': [
-                'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1560221328-12fe60f83ab8?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1554260570-e9689a3418b8?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?w=3200&q=95&auto=format&fit=crop&fm=jpg'
-            ],
-            'CLIMATE': [
-                'https://images.unsplash.com/photo-1502920514313-52581002a659?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1569163139394-de4e4f43e4e3?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1569163139599-0f4517e36f51?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=3200&q=95&auto=format&fit=crop&fm=jpg'
-            ],
-            'CONFLICT': [
-                'https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1601813219462-f2bbd41cd7b1?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1580744723289-cd04cc1a17cf?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1547483238-2cbf881a559f?w=3200&q=95&auto=format&fit=crop&fm=jpg'
-            ],
-            'HEALTH': [
-                'https://images.unsplash.com/photo-1584515933487-779824d29309?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1583912268183-0547ff1b0b2c?w=3200&q=95&auto=format&fit=crop&fm=jpg'
-            ],
-            'TECHNOLOGY': [
-                'https://images.unsplash.com/photo-1518770660439-4636190af475?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=3200&q=95&auto=format&fit=crop&fm=jpg'
-            ],
-            'SPORTS': [
-                'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1547347298-4074fc3086f0?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=3200&q=95&auto=format&fit=crop&fm=jpg'
-            ],
-            'DIPLOMACY': [
-                'https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=3200&q=95&auto=format&fit=crop&fm=jpg'
-            ],
-            'WORLD NEWS': [
-                'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=3200&q=95&auto=format&fit=crop&fm=jpg',
-                'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=3200&q=95&auto=format&fit=crop&fm=jpg'
-            ]
+            'POLITICS': ['https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1555848962-6e79363ec58f?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1569243115784-cf4e8d1b1d5e?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1575320181282-9afab399332c?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1604594849809-dfedbc827105?w=3200&q=95&auto=format&fit=crop&fm=jpg'],
+            'BUSINESS': ['https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1560221328-12fe60f83ab8?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1554260570-e9689a3418b8?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?w=3200&q=95&auto=format&fit=crop&fm=jpg'],
+            'CLIMATE': ['https://images.unsplash.com/photo-1502920514313-52581002a659?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1569163139394-de4e4f43e4e3?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1569163139599-0f4517e36f51?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=3200&q=95&auto=format&fit=crop&fm=jpg'],
+            'CONFLICT': ['https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1601813219462-f2bbd41cd7b1?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1580744723289-cd04cc1a17cf?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1547483238-2cbf881a559f?w=3200&q=95&auto=format&fit=crop&fm=jpg'],
+            'HEALTH': ['https://images.unsplash.com/photo-1584515933487-779824d29309?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=3200&q=95&auto=format&fit=crop&fm=jpg'],
+            'TECHNOLOGY': ['https://images.unsplash.com/photo-1518770660439-4636190af475?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=3200&q=95&auto=format&fit=crop&fm=jpg'],
+            'SPORTS': ['https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1547347298-4074fc3086f0?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=3200&q=95&auto=format&fit=crop&fm=jpg'],
+            'DIPLOMACY': ['https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1573164713988-8665fc963095?w=3200&q=95&auto=format&fit=crop&fm=jpg'],
+            'WORLD NEWS': ['https://images.unsplash.com/photo-1495020689067-958852a7765e?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=3200&q=95&auto=format&fit=crop&fm=jpg','https://images.unsplash.com/photo-1524661135-423995f22d0b?w=3200&q=95&auto=format&fit=crop&fm=jpg']
         };
-
-        const categoryRotationEN = {};
-        const categoryRotationFR = {};
+        const categoryRotationEN = {}, categoryRotationFR = {};
         function getCategoryImage(category, lang) {
             const pool = CATEGORY_IMAGES[category] || CATEGORY_IMAGES['WORLD NEWS'];
             const bucket = (lang === 'fr') ? categoryRotationFR : categoryRotationEN;
@@ -599,6 +545,56 @@
         function getFallbackImage(headline) {
             const seed = encodeURIComponent((headline || 'news').substring(0, 40).replace(/[^a-z0-9]/gi, ''));
             return `https://picsum.photos/seed/${seed}/3200/1800`;
+        }
+
+        // ============================================================
+        // 🎙️ ANCHOR SCRIPT TEMPLATES
+        // ============================================================
+        const ANCHOR_INTROS_EN = ["Here is the latest from the JP AI Newsroom.","We begin with breaking news from around the world.","Bringing you the top story this hour.","This just in from our global news desk.","Now to our developing story.","Our top headline at this hour."];
+        const ANCHOR_TRANSITIONS_EN = ["We will continue to follow this story and bring you updates as they develop.","Our newsroom is monitoring this situation closely.","Stay with us. More details are expected in the hours ahead.","We will bring you the latest as this story continues to unfold.","More on this developing story shortly."];
+        const CATEGORY_DEVELOPMENTS_EN = {
+            'POLITICS':["Political analysts are weighing in on what this could mean for upcoming elections and policy debates.","Officials on both sides of the aisle have responded, and the story is still developing.","This marks a significant moment in the ongoing political landscape, with reactions pouring in from across the spectrum.","The political implications of this development are already being felt across the capital."],
+            'BUSINESS':["Market analysts say this could have ripple effects across global markets in the coming weeks.","Investors are closely watching the situation, with early indicators suggesting volatility ahead.","Industry experts note this could reshape the competitive landscape for years to come.","The economic fallout is already being felt by businesses and consumers alike."],
+            'CLIMATE':["Environmental scientists warn that this development underscores the urgency of climate action.","Activists and policymakers alike are calling for stronger measures in response.","The story highlights the growing tension between economic growth and environmental protection.","Communities on the front lines of climate change are watching this news with deep concern."],
+            'CONFLICT':["The situation on the ground remains fluid, with reports still coming in from the region.","International observers are calling for restraint as tensions escalate.","Humanitarian organizations are mobilizing in response to the crisis.","Diplomatic efforts are underway to de-escalate the situation and protect civilians."],
+            'HEALTH':["Health officials are urging the public to remain informed and follow the latest guidance.","Medical experts continue to study the situation, with more information expected in the coming days.","This latest development adds new urgency to the ongoing public health conversation.","Hospitals and healthcare workers are bracing for the potential impact."],
+            'TECHNOLOGY':["Industry watchers say this could accelerate the pace of innovation in the sector.","Privacy advocates and regulators are paying close attention to the implications.","The announcement is already generating significant buzz across the tech community.","Analysts expect this to influence the broader technology landscape in the months ahead."],
+            'SPORTS':["Fans and analysts are reacting to the news, with the sports world buzzing.","The outcome could shape the standings and playoff picture going forward.","Coaches and players are already looking ahead to the next challenge.","This marks a pivotal moment in the season, with major implications for the road ahead."],
+            'DIPLOMACY':["Diplomats on all sides are working behind the scenes to navigate the situation.","The international community is watching closely, with high stakes for regional stability.","This marks a pivotal moment in the ongoing diplomatic negotiations.","World leaders are expected to respond in the coming hours."],
+            'WORLD NEWS':["We will continue to follow this story and bring you updates as they develop.","The situation is evolving, and our newsroom is monitoring it closely.","More details are expected to emerge in the hours ahead.","International observers are paying close attention to how this unfolds."]
+        };
+        const ANCHOR_INTROS_FR = ["Voici les dernières nouvelles de la salle de presse JP IA.","Nous commençons par les titres de l'actualité mondiale.","Voici notre principal titre de cette heure.","Dernière minute de notre rédaction internationale.","Nous revenons sur cette affaire en développement.","À la une ce soir."];
+        const ANCHOR_TRANSITIONS_FR = ["Nous continuerons de suivre cette histoire et de vous apporter les mises à jour au fur et à mesure.","Notre rédaction surveille cette situation de près.","Restez avec nous. D'autres détails sont attendus dans les heures à venir.","Nous vous apporterons les dernières informations au fur et à mesure que cette histoire se développe.","Plus de détails sur cette affaire en développement sous peu."];
+        const CATEGORY_DEVELOPMENTS_FR = {
+            'POLITIQUE':["Les analystes politiques évaluent les conséquences possibles pour les prochaines élections et les débats de politique publique.","Les responsables des deux camps ont réagi, et l'affaire est toujours en cours de développement.","Cela marque un moment important dans le paysage politique, avec des réactions venues de tous horizons.","Les implications politiques de ce développement se font déjà sentir dans tout le pays."],
+            'ÉCONOMIE':["Les analystes de marché estiment que cela pourrait avoir des répercussions sur les marchés mondiaux dans les semaines à venir.","Les investisseurs surveillent la situation de près, avec des indicateurs précoces suggérant une volatilité à venir.","Les experts du secteur notent que cela pourrait redessiner le paysage concurrentiel pour les années à venir.","Les retombées économiques se font déjà sentir chez les entreprises et les consommateurs."],
+            'CLIMAT':["Les scientifiques de l'environnement avertissent que ce développement souligne l'urgence d'agir pour le climat.","Activistes et décideurs appellent à des mesures plus fortes en réponse.","Cette histoire met en évidence la tension croissante entre croissance économique et protection de l'environnement.","Les communautés en première ligne du changement climatique suivent cette nouvelle avec une profonde inquiétude."],
+            'CONFLIT':["La situation sur le terrain reste fluide, avec des informations encore en cours de vérification dans la région.","Les observateurs internationaux appellent à la retenue alors que les tensions montent.","Les organisations humanitaires se mobilisent en réponse à la crise.","Des efforts diplomatiques sont en cours pour désamorcer la situation et protéger les civils."],
+            'SANTÉ':["Les responsables de la santé exhortent le public à rester informé et à suivre les dernières consignes.","Les experts médicaux continuent d'étudier la situation, avec plus d'informations attendues dans les jours à venir.","Ce dernier développement ajoute une urgence nouvelle au débat sur la santé publique.","Les hôpitaux et les soignants se préparent à l'impact potentiel."],
+            'TECHNOLOGIE':["Les observateurs du secteur estiment que cela pourrait accélérer le rythme de l'innovation.","Les défenseurs de la vie privée et les régulateurs suivent les implications de près.","L'annonce génère déjà beaucoup de bruit dans la communauté technologique.","Les analystes s'attendent à ce que cela influence le paysage technologique dans les mois à venir."],
+            'SPORTS':["Les fans et les analystes réagissent à la nouvelle, et le monde du sport est en effervescence.","Le résultat pourrait façonner le classement et la course aux séries éliminatoires.","Entraîneurs et joueurs se tournent déjà vers le prochain défi.","Cela marque un moment charnière de la saison, avec des implications majeures pour la suite."],
+            'DIPLOMATIE':["Les diplomates de tous bords travaillent en coulisses pour naviguer la situation.","La communauté internationale suit cela de près, avec des enjeux élevés pour la stabilité régionale.","Cela marque un moment charnière dans les négociations diplomatiques en cours.","Les dirigeants mondiaux devraient réagir dans les heures à venir."],
+            'ACTUALITÉS MONDIALES':["Nous continuerons de suivre cette histoire et de vous apporter les mises à jour au fur et à mesure.","La situation évolue, et notre rédaction la surveille de près.","D'autres détails devraient émerger dans les heures à venir.","Les observateurs internationaux suivent de près la tournure des événements."]
+        };
+
+        let anchorIntroIdxEN = 0, anchorTransIdxEN = 0, anchorIntroIdxFR = 0, anchorTransIdxFR = 0;
+        const developmentIdxEN = {}, developmentIdxFR = {};
+
+        function pickAnchorIntro(lang) {
+            if (lang === 'fr') { const s = ANCHOR_INTROS_FR[anchorIntroIdxFR % ANCHOR_INTROS_FR.length]; anchorIntroIdxFR++; return s; }
+            const s = ANCHOR_INTROS_EN[anchorIntroIdxEN % ANCHOR_INTROS_EN.length]; anchorIntroIdxEN++; return s;
+        }
+        function pickAnchorTransition(lang) {
+            if (lang === 'fr') { const s = ANCHOR_TRANSITIONS_FR[anchorTransIdxFR % ANCHOR_TRANSITIONS_FR.length]; anchorTransIdxFR++; return s; }
+            const s = ANCHOR_TRANSITIONS_EN[anchorTransIdxEN % ANCHOR_TRANSITIONS_EN.length]; anchorTransIdxEN++; return s;
+        }
+        function pickDevelopment(category, lang) {
+            const table = (lang === 'fr') ? CATEGORY_DEVELOPMENTS_FR : CATEGORY_DEVELOPMENTS_EN;
+            const bucket = (lang === 'fr') ? developmentIdxFR : developmentIdxEN;
+            const pool = table[category] || table[lang === 'fr' ? 'ACTUALITÉS MONDIALES' : 'WORLD NEWS'];
+            const idx = bucket[category] || 0;
+            bucket[category] = (idx + 1) % pool.length;
+            return pool[idx];
         }
 
         // STATE
@@ -626,19 +622,23 @@
         let aiNewsFrHeadlinesInCycle = 0;
 
         const THEME_DURATION_MS = 60000;
+        const NEWS_REFRESH_INTERVAL_MS = 240000;
+        const SPORTS_REFRESH_INTERVAL_MS = 900000;
+        const WEATHER_REFRESH_INTERVAL_MS = 300000;
+        const SCORES_REFRESH_INTERVAL_MS = 60000;
+        const NEWS_TICKER_ROTATE_MS = 9000;
+        const WATCHDOG_INTERVAL_MS = 20000;
 
-        // 🆕 Auto-update intervals
-        const NEWS_REFRESH_INTERVAL_MS = 240000;      // refresh global headlines every 4 minutes
-        const SPORTS_REFRESH_INTERVAL_MS = 900000;    // sports headlines every 15 minutes
-        const WEATHER_REFRESH_INTERVAL_MS = 300000;   // weather every 5 minutes
-        const SCORES_REFRESH_INTERVAL_MS = 60000;     // live scores every 60 seconds
-        const NEWS_TICKER_ROTATE_MS = 9000;           // rotate ticker every 9 seconds
-        const WATCHDOG_INTERVAL_MS = 20000;           // watchdog check every 20 seconds
-
-        // Stream auto-retry state
         let streamRetryCount = 0;
         const MAX_STREAM_RETRIES = 5;
         let streamRetryTimer = null;
+
+        // ============================================================
+        // 📰 ARTICLE FULL-TEXT CACHE
+        // ============================================================
+        const ARTICLE_CACHE = {};              // url -> {fullText, heroImage, images}
+        const ARTICLE_CACHE_MAX = 200;
+        let articleCacheKeys = [];
 
         const musicChannels = ['rnb','rock','classical','electronic','french','haitian','aimusic','aireligious'];
         const voiceChannels = ['bible','prayer'];
@@ -684,7 +684,7 @@
                 {name:"Prayer · English",description:"English Prayer + Meditation",url:"__prayer_en__"},
                 {name:"Prière · Français",description:"Prières Chrétiennes + Méditation",url:"__prayer_fr__"}]},
             mix:{name:"AI News Flash TV · English",genre:"100% AI-Generated News Broadcast",icon:"🇬🇧",streams:[
-                {name:"JP AI Newsroom",description:"Continuous AI world news with visuals",url:"__ai_newsflash_en__"}]},
+                {name:"JP AI Newsroom",description:"Continuous AI world news with full reports",url:"__ai_newsflash_en__"}]},
             mix_fr:{name:"Info Flash TV · Français",genre:"Diffusion d'information 100% IA",icon:"🇫🇷",streams:[
                 {name:"Salle de presse JP IA",description:"Actualités mondiales continues",url:"__ai_newsflash_fr__"}]},
             debate:{name:"Debate Channel",genre:"Political Debate",icon:"🗣️",streams:[]},
@@ -728,7 +728,7 @@
             ]
         };
 
-        // PRAYER LIBRARY — full meditations
+        // PRAYER LIBRARY
         const prayerLibrary = (function() {
             const en1 = {title:"The Lord's Prayer",prayer:"Our Father, which art in heaven, hallowed be thy name. Thy kingdom come, thy will be done, in earth as it is in heaven. Give us this day our daily bread. And forgive us our trespasses, as we forgive those who trespass against us. And lead us not into temptation, but deliver us from evil. For thine is the kingdom, and the power, and the glory, for ever and ever. Amen.",meditation:"This prayer is the model Jesus Himself gave us. When we call God 'Our Father', we acknowledge that we are not alone — we belong to a family that spans every nation and generation. When we pray 'hallowed be thy name', we recognize that God's name is holy, and we are called to honor it with our lives. 'Thy kingdom come' is a plea for God's reign of love, justice, and peace to take root in our hearts and in our world. 'Give us this day our daily bread' reminds us that we depend on God for everything — not just food, but every breath we take. When we forgive others, we open the door for God's forgiveness to flow through us. And when we ask to be delivered from evil, we acknowledge that we cannot walk this road alone. Pray this prayer slowly. Let every word sink into your heart. Let it become the pattern of your entire life. Amen."};
             const en2 = {title:"Prayer for Peace",prayer:"Lord, we pray for peace in our hearts, in our homes, in our cities, and in our world. Calm the storms around us and within us. Let your peace that passes all understanding guard our hearts and minds. Amen.",meditation:"Peace is not the absence of conflict. It is the presence of God. When we pray for peace, we are not asking for a world without problems — we are inviting God to be the center of every situation. The peace that God gives is not like the peace the world offers. It is a deep, unshakable calm that remains even when everything around us is shaking. This peace begins in the individual heart. Before we can bring peace to our homes and our communities, we must first allow God to quiet our own inner storms. As you pray this prayer, invite the Holy Spirit to search your heart. Are there fears, anxieties, or resentments that need to be surrendered? Let them go. Let the peace of Christ rule in your heart, and it will overflow into everything you touch. Amen."};
@@ -740,7 +740,6 @@
             const en8 = {title:"Prayer for Wisdom",prayer:"Lord, grant us wisdom beyond our years and understanding beyond our knowledge. Guide our decisions, direct our paths, and let us walk in your truth all the days of our lives. Amen.",meditation:"Wisdom is different from knowledge. Knowledge tells you what to do. Wisdom tells you when to do it, how to do it, and whether to do it at all. The fear of the Lord is the beginning of wisdom. When we pray for wisdom, we are asking God to give us His perspective on our lives. We are asking Him to help us see as He sees — not with limited human understanding but with eternal vision. James tells us that if we lack wisdom, we should ask God, and He will give generously to all without finding fault. So ask. Ask boldly. Ask persistently. Wisdom is not reserved for a select few. It is available to every child of God who humbly seeks it. As you pray this prayer, open your heart to what God wants to reveal to you. Amen."};
             const en9 = {title:"Prayer for Family",prayer:"Father, we lift up our families to you. Bless every marriage, every child, every home. Heal broken relationships, strengthen bonds of love, and let our homes be places of peace. Amen.",meditation:"Family is one of God's greatest gifts. It is the first place where we learn to love, to forgive, to sacrifice. But family can also be the place of our deepest wounds. When we pray for our families, we bring our pain and our hope to the One who created the family. God's design for family is one of love, safety, and spiritual nurture. A home where God is honored becomes a light to the whole neighborhood. The psalmist said, 'Unless the Lord builds the house, the builders labor in vain.' We cannot build healthy families on our own strength. We need God at the center. As you pray this prayer, lift up each member of your family by name. Ask God to bless them, to protect them, and to draw them closer to Himself. Amen."};
             const en10 = {title:"Prayer for the World",prayer:"Lord, we pray for the nations. Bring comfort to the suffering, hope to the hopeless, and light to those in darkness. Raise up leaders of integrity, and let your kingdom come on earth as it is in heaven. Amen.",meditation:"The world is bigger than our own immediate circle. When we pray for the world, we are joining our hearts with the heart of God, who loves every nation, every tribe, every tongue. God is not a God of one country or one culture. He is the God of all peoples. When we pray for the world, we intercede for those who are suffering — the hungry, the displaced, the persecuted, the forgotten. We pray for leaders, that they would govern with integrity and justice. We pray for peace in regions torn by conflict. We pray for revival in nations that have turned away from God. And we remember that we ourselves are part of the world that God so loved that He gave His only Son. As you pray this prayer, let your heart expand. Ask God to break your heart for what breaks His. Amen."};
-
             const fr1 = {title:"Notre Père",prayer:"Notre Père qui es aux cieux, que ton nom soit sanctifié, que ton règne vienne, que ta volonté soit faite sur la terre comme au ciel. Donne-nous aujourd'hui notre pain quotidien. Pardonne-nous nos offenses, comme nous pardonnons aussi à ceux qui nous ont offensés. Et ne nous soumets pas à la tentation, mais délivre-nous du mal. Car c'est à toi qu'appartiennent le règne, la puissance et la gloire, aux siècles des siècles. Amen.",meditation:"Cette prière est le modèle que Jésus Lui-même nous a donné. Quand nous appelons Dieu 'Notre Père', nous reconnaissons que nous ne sommes pas seuls — nous appartenons à une famille qui s'étend à toutes les nations et à toutes les générations. Quand nous prions 'que ton nom soit sanctifié', nous reconnaissons que le nom de Dieu est saint et que nous sommes appelés à l'honorer par notre vie. 'Que ton règne vienne' est un appel pour que le règne d'amour, de justice et de paix de Dieu prenne racine dans nos coeurs et dans notre monde. 'Donne-nous aujourd'hui notre pain quotidien' nous rappelle que nous dépendons de Dieu pour tout. Quand nous pardonnons aux autres, nous ouvrons la porte à ce que le pardon de Dieu coule à travers nous. Priez cette prière lentement. Laissez chaque mot pénétrer votre coeur. Laissez-la devenir le modèle de toute votre vie. Amen."};
             const fr2 = {title:"Prière pour la Paix",prayer:"Seigneur, nous prions pour la paix dans nos coeurs, dans nos maisons, dans nos villes et dans notre monde. Calme les tempêtes autour de nous et en nous. Que ta paix qui surpasse toute intelligence garde nos coeurs et nos pensées. Amen.",meditation:"La paix n'est pas l'absence de conflit. C'est la présence de Dieu. Quand nous prions pour la paix, nous ne demandons pas un monde sans problèmes — nous invitons Dieu à être au centre de chaque situation. La paix que Dieu donne n'est pas comme celle que le monde offre. C'est un calme profond et inébranlable qui demeure même quand tout autour de nous tremble. Cette paix commence dans le coeur individuel. Avant d'apporter la paix dans nos maisons et nos communautés, nous devons d'abord permettre à Dieu d'apaiser nos propres tempêtes intérieures. En priant cette prière, invitez le Saint-Esprit à sonder votre coeur. Y a-t-il des peurs, des angoisses ou des ressentiments qui doivent être abandonnés? Laissez-les aller. Laissez la paix du Christ régner dans votre coeur, et elle débordera sur tout ce que vous touchez. Amen."};
             const fr3 = {title:"Prière pour la Guérison",prayer:"Père céleste, nous te présentons tous ceux qui sont malades, blessés ou souffrants. Pose ta main guérissante sur eux. Restaure leur force, renouvelle leur espérance, et apporte le réconfort à leurs familles. Au nom de Jésus, amen.",meditation:"La guérison est plus qu'une restauration physique. C'est le toucher doux de Dieu atteignant chaque endroit brisé de notre vie. Quand nous prions pour la guérison, nous reconnaissons que nous ne sommes pas autosuffisants. Nous avons besoin de Dieu. Nous avons besoin de Sa grâce. Nous avons besoin de Sa miséricorde. Certaines guérisons viennent instantanément. D'autres viennent lentement. D'autres viennent de manière inattendue. La vraie guérison est toujours liée à la foi. Jésus disait souvent: 'Ta foi t'a guéri.' Priez cette prière avec un coeur ouvert. Croyez que Dieu vous entend et qu'Il agit — même dans l'attente. Amen."};
@@ -751,7 +750,6 @@
             const fr8 = {title:"Prière pour la Sagesse",prayer:"Seigneur, accorde-nous une sagesse au-delà de nos années et une intelligence au-delà de nos connaissances. Guide nos décisions, dirige nos sentiers, et fais-nous marcher dans ta vérité tous les jours de notre vie. Amen.",meditation:"La sagesse est différente de la connaissance. La connaissance vous dit quoi faire. La sagesse vous dit quand le faire, comment le faire, et si oui ou non il faut le faire. La crainte du Seigneur est le commencement de la sagesse. Jacques nous dit que si nous manquons de sagesse, nous devons demander à Dieu, et Il donnera généreusement à tous sans faire de reproche. Alors demandez. Demandez avec audace. La sagesse est disponible pour chaque enfant de Dieu qui la cherche humblement. Amen."};
             const fr9 = {title:"Prière pour la Famille",prayer:"Père, nous te présentons nos familles. Bénis chaque mariage, chaque enfant, chaque foyer. Guéris les relations brisées, renforce les liens d'amour, et fais de nos maisons des lieux de paix. Amen.",meditation:"La famille est l'un des plus grands dons de Dieu. C'est le premier endroit où nous apprenons à aimer, à pardonner, à nous sacrifier. Mais la famille peut aussi être le lieu de nos blessures les plus profondes. Le dessein de Dieu pour la famille est un dessein d'amour, de sécurité et de nourriture spirituelle. Une maison où Dieu est honoré devient une lumière pour tout le quartier. En priant cette prière, élevez chaque membre de votre famille par son nom. Demandez à Dieu de les bénir, de les protéger et de les attirer plus près de Lui. Amen."};
             const fr10 = {title:"Prière pour le Monde",prayer:"Seigneur, nous prions pour les nations. Apporte la consolation aux souffrants, l'espérance aux désespérés, et la lumière à ceux qui sont dans les ténèbres. Suscite des dirigeants intègres, et que ton règne vienne sur la terre comme au ciel. Amen.",meditation:"Le monde est plus grand que notre cercle immédiat. Quand nous prions pour le monde, nous unissons nos coeurs au coeur de Dieu, qui aime chaque nation, chaque tribu, chaque langue. Nous intercédons pour ceux qui souffrent. Nous prions pour les dirigeants, qu'ils gouvernent avec intégrité et justice. Nous prions pour la paix dans les régions déchirées par le conflit. Et nous nous rappelons que nous sommes nous-mêmes une partie du monde que Dieu a tant aimé qu'Il a donné Son Fils unique. En priant cette prière, laissez votre coeur s'élargir. Amen."};
-
             return {en:[en1,en2,en3,en4,en5,en6,en7,en8,en9,en10], fr:[fr1,fr2,fr3,fr4,fr5,fr6,fr7,fr8,fr9,fr10]};
         })();
 
@@ -836,7 +834,7 @@
         function speakLongText(text, isFemale = false, onComplete = null, langCode = 'en') {
             stopSpeech();
             speechQueue = [];
-            const chunks = splitTextIntoChunks(text, 220);
+            const chunks = splitTextIntoChunks(text, 300);
             chunks.forEach(chunk => { speechQueue.push({ text: chunk, isFemale, langCode }); });
             if (onComplete) window.speechQueueComplete = onComplete;
             processSpeechQueue();
@@ -883,24 +881,16 @@
             }
         }
 
-        // ============================================================
-        // 🎵 NEWS THEME MUSIC — ABC-News-style orchestral broadcast bed
-        // ============================================================
+        // NEWS THEME MUSIC
         let newsThemeCtx = null, newsThemeMaster = null, newsThemeTimeoutId = null;
         function updateNewsThemeGain() { if (newsThemeMaster) newsThemeMaster.gain.value = isMuted ? 0 : Math.max(0.35, volume * 0.6); }
-
         const NEWS_CHORDS = [
             { bass: 73.42,  strings: [146.83, 174.61, 220.00], brass: [293.66, 349.23, 440.00] },
             { bass: 58.27,  strings: [116.54, 146.83, 174.61], brass: [233.08, 293.66, 349.23] },
             { bass: 87.31,  strings: [174.61, 220.00, 261.63], brass: [349.23, 440.00, 523.25] },
             { bass: 65.41,  strings: [130.81, 164.81, 196.00], brass: [261.63, 329.63, 392.00] }
         ];
-        const NEWS_MELODY = [
-            587.33, 587.33, 523.25, 587.33, 698.46, 0,      587.33, 523.25,
-            466.16, 466.16, 440.00, 466.16, 587.33, 0,      523.25, 440.00,
-            523.25, 587.33, 698.46, 880.00, 698.46, 587.33, 523.25, 0,
-            440.00, 466.16, 523.25, 466.16, 440.00, 0,      0,      0
-        ];
+        const NEWS_MELODY = [587.33,587.33,523.25,587.33,698.46,0,587.33,523.25,466.16,466.16,440.00,466.16,587.33,0,523.25,440.00,523.25,587.33,698.46,880.00,698.46,587.33,523.25,0,440.00,466.16,523.25,466.16,440.00,0,0,0];
 
         function playNewsTheme(durationMs, onComplete) {
             try {
@@ -909,11 +899,9 @@
                 if (!AudioCtx) { if (onComplete) setTimeout(onComplete, durationMs); return; }
                 const ctx = new AudioCtx();
                 if (ctx.state === 'suspended') ctx.resume();
-
                 const master = ctx.createGain();
                 master.gain.value = isMuted ? 0 : Math.max(0.35, volume * 0.6);
                 master.connect(ctx.destination);
-
                 const fxSend = ctx.createGain();
                 fxSend.gain.value = 0.32;
                 const delay = ctx.createDelay(1.0);
@@ -931,7 +919,6 @@
                 fb.connect(delay);
                 delay.connect(fxReturn);
                 fxReturn.connect(master);
-
                 const start = ctx.currentTime;
                 const totalSec = durationMs / 1000;
                 const loopLen = 8;
@@ -942,25 +929,16 @@
                 }
                 newsThemeCtx = ctx;
                 newsThemeMaster = master;
-                newsThemeTimeoutId = setTimeout(() => {
-                    stopNewsTheme();
-                    if (onComplete) onComplete();
-                }, durationMs);
-            } catch (e) {
-                if (onComplete) setTimeout(onComplete, durationMs);
-            }
+                newsThemeTimeoutId = setTimeout(() => { stopNewsTheme(); if (onComplete) onComplete(); }, durationMs);
+            } catch (e) { if (onComplete) setTimeout(onComplete, durationMs); }
         }
 
         function scheduleNewsLoopSegment(ctx, dest, fxSend, t0, dur) {
-            const beat = 0.5;
-            const barLen = 2.0;
-            const sixteenth = beat / 4;
-
+            const beat = 0.5, barLen = 2.0, sixteenth = beat / 4;
             for (let bar = 0; bar < 4; bar++) {
                 const barStart = t0 + bar * barLen;
                 if (barStart >= t0 + dur) break;
                 const chord = NEWS_CHORDS[bar];
-
                 for (let i = 0; i < 16; i++) {
                     const t = barStart + i * sixteenth;
                     if (t >= t0 + dur) break;
@@ -968,24 +946,12 @@
                     const octaveMul = (i % 8 < 4) ? 1 : 2;
                     playStringNote(ctx, dest, chord.strings[noteIdx] * octaveMul, t, 0.09, 0.055);
                 }
-
-                chord.brass.forEach((freq, i) => {
-                    playBrassNote(ctx, dest, freq, barStart, barLen * 0.85, 0.055, i);
-                });
-
+                chord.brass.forEach((freq, i) => playBrassNote(ctx, dest, freq, barStart, barLen * 0.85, 0.055, i));
                 playTimpani(ctx, dest, barStart, 0.28);
                 playTimpani(ctx, dest, barStart + beat * 2, 0.20);
-
-                for (let b = 0; b < 4; b++) {
-                    playSubBass(ctx, dest, chord.bass, barStart + b * beat, beat, 0.14);
-                }
-
-                for (let s = 0.25; s < barLen; s += 0.5) {
-                    const t = barStart + s;
-                    if (t < t0 + dur) playHat(ctx, dest, t, 0.014);
-                }
+                for (let b = 0; b < 4; b++) playSubBass(ctx, dest, chord.bass, barStart + b * beat, beat, 0.14);
+                for (let s = 0.25; s < barLen; s += 0.5) { const t = barStart + s; if (t < t0 + dur) playHat(ctx, dest, t, 0.014); }
             }
-
             const halfBeat = beat / 2;
             NEWS_MELODY.forEach((freq, i) => {
                 if (!freq) return;
@@ -994,156 +960,27 @@
                 playMelody(ctx, dest, fxSend, freq, t, 0.42, 0.085);
                 playMelody(ctx, dest, fxSend, freq * 2, t + 0.005, 0.32, 0.018);
             });
-
             playCymbalSwell(ctx, dest, fxSend, t0, Math.min(1.6, dur), 0.09);
         }
 
-        function playStringNote(ctx, dest, freq, t, decay, amp) {
-            const osc = ctx.createOscillator();
-            osc.type = 'sawtooth';
-            osc.frequency.value = freq;
-            const filt = ctx.createBiquadFilter();
-            filt.type = 'lowpass';
-            filt.frequency.setValueAtTime(2600, t);
-            filt.frequency.exponentialRampToValueAtTime(1400, t + decay);
-            filt.Q.value = 1.2;
-            const g = ctx.createGain();
-            g.gain.setValueAtTime(0.0001, t);
-            g.gain.linearRampToValueAtTime(amp, t + 0.005);
-            g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
-            osc.connect(filt).connect(g).connect(dest);
-            osc.start(t);
-            osc.stop(t + decay + 0.03);
-        }
-
-        function playBrassNote(ctx, dest, freq, t, dur, amp, idx) {
-            const osc = ctx.createOscillator();
-            osc.type = 'sawtooth';
-            osc.frequency.value = freq;
-            osc.detune.value = (idx - 1) * 6;
-            const filt = ctx.createBiquadFilter();
-            filt.type = 'lowpass';
-            filt.frequency.setValueAtTime(900, t);
-            filt.frequency.linearRampToValueAtTime(3200, t + dur * 0.25);
-            filt.frequency.linearRampToValueAtTime(1400, t + dur);
-            filt.Q.value = 2.5;
-            const g = ctx.createGain();
-            g.gain.setValueAtTime(0.0001, t);
-            g.gain.linearRampToValueAtTime(amp, t + 0.08);
-            g.gain.setValueAtTime(amp * 0.85, t + dur * 0.5);
-            g.gain.linearRampToValueAtTime(0.0001, t + dur);
-            osc.connect(filt).connect(g).connect(dest);
-            osc.start(t);
-            osc.stop(t + dur + 0.05);
-        }
-
-        function playTimpani(ctx, dest, t, amp) {
-            const osc = ctx.createOscillator();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(140, t);
-            osc.frequency.exponentialRampToValueAtTime(55, t + 0.35);
-            const g = ctx.createGain();
-            g.gain.setValueAtTime(amp, t);
-            g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
-            osc.connect(g).connect(dest);
-            osc.start(t);
-            osc.stop(t + 0.6);
-            const noise = ctx.createBufferSource();
-            const len = Math.floor(ctx.sampleRate * 0.04);
-            const buf = ctx.createBuffer(1, len, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
-            noise.buffer = buf;
-            const bp = ctx.createBiquadFilter();
-            bp.type = 'bandpass';
-            bp.frequency.value = 180;
-            bp.Q.value = 1.2;
-            const ng = ctx.createGain();
-            ng.gain.value = amp * 0.6;
-            noise.connect(bp).connect(ng).connect(dest);
-            noise.start(t);
-            noise.stop(t + 0.05);
-        }
-
-        function playSubBass(ctx, dest, freq, t, dur, amp) {
-            const osc = ctx.createOscillator();
-            osc.type = 'sine';
-            osc.frequency.value = freq;
-            const g = ctx.createGain();
-            g.gain.setValueAtTime(0.0001, t);
-            g.gain.linearRampToValueAtTime(amp, t + 0.02);
-            g.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.9);
-            osc.connect(g).connect(dest);
-            osc.start(t);
-            osc.stop(t + dur);
-        }
-
-        function playHat(ctx, dest, t, amp) {
-            const len = Math.floor(ctx.sampleRate * 0.04);
-            const buf = ctx.createBuffer(1, len, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
-            const src = ctx.createBufferSource();
-            src.buffer = buf;
-            const hp = ctx.createBiquadFilter();
-            hp.type = 'highpass';
-            hp.frequency.value = 7500;
-            const g = ctx.createGain();
-            g.gain.value = amp;
-            src.connect(hp).connect(g).connect(dest);
-            src.start(t);
-            src.stop(t + 0.06);
-        }
-
-        function playMelody(ctx, dest, fxSend, freq, t, decay, amp) {
-            const osc = ctx.createOscillator();
-            osc.type = 'triangle';
-            osc.frequency.value = freq;
-            const g = ctx.createGain();
-            g.gain.setValueAtTime(0.0001, t);
-            g.gain.linearRampToValueAtTime(amp, t + 0.015);
-            g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
-            osc.connect(g);
-            g.connect(dest);
-            g.connect(fxSend);
-            osc.start(t);
-            osc.stop(t + decay + 0.05);
-        }
-
-        function playCymbalSwell(ctx, dest, fxSend, t, dur, amp) {
-            const len = Math.floor(ctx.sampleRate * dur);
-            const buf = ctx.createBuffer(1, len, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < len; i++) {
-                const env = Math.pow(i / len, 1.6) * Math.pow(1 - i / len, 0.6);
-                data[i] = (Math.random() * 2 - 1) * env;
-            }
-            const src = ctx.createBufferSource();
-            src.buffer = buf;
-            const hp = ctx.createBiquadFilter();
-            hp.type = 'highpass';
-            hp.frequency.value = 5500;
-            const g = ctx.createGain();
-            g.gain.value = amp;
-            src.connect(hp).connect(g);
-            g.connect(dest);
-            g.connect(fxSend);
-            src.start(t);
-            src.stop(t + dur);
-        }
-
-        function stopNewsTheme() {
-            if (newsThemeTimeoutId) { clearTimeout(newsThemeTimeoutId); newsThemeTimeoutId = null; }
-            if (newsThemeCtx) { try { newsThemeCtx.close(); } catch(e) {} newsThemeCtx = null; newsThemeMaster = null; }
-        }
+        function playStringNote(ctx, dest, freq, t, decay, amp) { const osc = ctx.createOscillator(); osc.type = 'sawtooth'; osc.frequency.value = freq; const filt = ctx.createBiquadFilter(); filt.type = 'lowpass'; filt.frequency.setValueAtTime(2600, t); filt.frequency.exponentialRampToValueAtTime(1400, t + decay); filt.Q.value = 1.2; const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(amp, t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + decay); osc.connect(filt).connect(g).connect(dest); osc.start(t); osc.stop(t + decay + 0.03); }
+        function playBrassNote(ctx, dest, freq, t, dur, amp, idx) { const osc = ctx.createOscillator(); osc.type = 'sawtooth'; osc.frequency.value = freq; osc.detune.value = (idx - 1) * 6; const filt = ctx.createBiquadFilter(); filt.type = 'lowpass'; filt.frequency.setValueAtTime(900, t); filt.frequency.linearRampToValueAtTime(3200, t + dur * 0.25); filt.frequency.linearRampToValueAtTime(1400, t + dur); filt.Q.value = 2.5; const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(amp, t + 0.08); g.gain.setValueAtTime(amp * 0.85, t + dur * 0.5); g.gain.linearRampToValueAtTime(0.0001, t + dur); osc.connect(filt).connect(g).connect(dest); osc.start(t); osc.stop(t + dur + 0.05); }
+        function playTimpani(ctx, dest, t, amp) { const osc = ctx.createOscillator(); osc.type = 'sine'; osc.frequency.setValueAtTime(140, t); osc.frequency.exponentialRampToValueAtTime(55, t + 0.35); const g = ctx.createGain(); g.gain.setValueAtTime(amp, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55); osc.connect(g).connect(dest); osc.start(t); osc.stop(t + 0.6); const noise = ctx.createBufferSource(); const len = Math.floor(ctx.sampleRate * 0.04); const buf = ctx.createBuffer(1, len, ctx.sampleRate); const data = buf.getChannelData(0); for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); noise.buffer = buf; const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 180; bp.Q.value = 1.2; const ng = ctx.createGain(); ng.gain.value = amp * 0.6; noise.connect(bp).connect(ng).connect(dest); noise.start(t); noise.stop(t + 0.05); }
+        function playSubBass(ctx, dest, freq, t, dur, amp) { const osc = ctx.createOscillator(); osc.type = 'sine'; osc.frequency.value = freq; const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(amp, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.9); osc.connect(g).connect(dest); osc.start(t); osc.stop(t + dur); }
+        function playHat(ctx, dest, t, amp) { const len = Math.floor(ctx.sampleRate * 0.04); const buf = ctx.createBuffer(1, len, ctx.sampleRate); const data = buf.getChannelData(0); for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2); const src = ctx.createBufferSource(); src.buffer = buf; const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 7500; const g = ctx.createGain(); g.gain.value = amp; src.connect(hp).connect(g).connect(dest); src.start(t); src.stop(t + 0.06); }
+        function playMelody(ctx, dest, fxSend, freq, t, decay, amp) { const osc = ctx.createOscillator(); osc.type = 'triangle'; osc.frequency.value = freq; const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(amp, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + decay); osc.connect(g); g.connect(dest); g.connect(fxSend); osc.start(t); osc.stop(t + decay + 0.05); }
+        function playCymbalSwell(ctx, dest, fxSend, t, dur, amp) { const len = Math.floor(ctx.sampleRate * dur); const buf = ctx.createBuffer(1, len, ctx.sampleRate); const data = buf.getChannelData(0); for (let i = 0; i < len; i++) { const env = Math.pow(i / len, 1.6) * Math.pow(1 - i / len, 0.6); data[i] = (Math.random() * 2 - 1) * env; } const src = ctx.createBufferSource(); src.buffer = buf; const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 5500; const g = ctx.createGain(); g.gain.value = amp; src.connect(hp).connect(g); g.connect(dest); g.connect(fxSend); src.start(t); src.stop(t + dur); }
+        function stopNewsTheme() { if (newsThemeTimeoutId) { clearTimeout(newsThemeTimeoutId); newsThemeTimeoutId = null; } if (newsThemeCtx) { try { newsThemeCtx.close(); } catch(e) {} newsThemeCtx = null; newsThemeMaster = null; } }
 
         // ============================================================
         // ⚡ FAST NEWS FETCHING ENGINE
         // ============================================================
         const FEED_TIMEOUT_MS = 4000;
+        const ARTICLE_TIMEOUT_MS = 7000;
         const PROXIES = [
             (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-            (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
+            (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+            (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
         ];
 
         async function fetchWithTimeout(url, timeoutMs) {
@@ -1157,6 +994,9 @@
             }
         }
 
+        // ============================================================
+        // 📰 RSS PARSER — captures link, description, content:encoded
+        // ============================================================
         function parseRssItems(xmlText) {
             const out = [];
             try {
@@ -1166,8 +1006,18 @@
                 items.forEach(item => {
                     const title = item.querySelector('title')?.textContent?.trim() || '';
                     if (!title) return;
+                    const linkEl = item.querySelector('link');
+                    const url = linkEl ? (linkEl.textContent || linkEl.getAttribute('href') || '').trim() : '';
                     const rawDesc = item.querySelector('description')?.textContent || '';
-                    const description = rawDesc.replace(/<[^>]*>/g, '').trim().substring(0, 240);
+                    const contentEncodedEl = item.getElementsByTagName('content:encoded')[0];
+                    const contentEncoded = contentEncodedEl ? contentEncodedEl.textContent : '';
+                    const mediaDescEl = item.getElementsByTagName('media:description')[0];
+                    const mediaDesc = mediaDescEl ? mediaDescEl.textContent : '';
+                    const candidates = [rawDesc, contentEncoded, mediaDesc]
+                        .map(s => (s || '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim())
+                        .filter(s => s.length > 0);
+                    let description = candidates.reduce((a, b) => a.length >= b.length ? a : b, '');
+                    if (description.length > 900) description = description.substring(0, 900).trim();
                     const pubDate = item.querySelector('pubDate')?.textContent || '';
                     let imageUrl = '';
                     const mt = item.querySelector('thumbnail') || item.getElementsByTagName('media:thumbnail')[0];
@@ -1175,7 +1025,7 @@
                     if (!imageUrl) { const mc = item.getElementsByTagName('media:content')[0]; if (mc) imageUrl = mc.getAttribute('url') || ''; }
                     if (!imageUrl) { const enc = item.querySelector('enclosure'); if (enc) { const type = enc.getAttribute('type') || ''; if (type.startsWith('image/')) imageUrl = enc.getAttribute('url') || ''; } }
                     if (!imageUrl && rawDesc) { const m = rawDesc.match(/<img[^>]+src=["']([^"']+)["']/i); if (m) imageUrl = m[1]; }
-                    out.push({ title, description, pubDate, image: imageUrl });
+                    out.push({ title, description, pubDate, image: imageUrl, url });
                 });
             } catch(e) {}
             return out;
@@ -1189,17 +1039,201 @@
                     const text = await res.text();
                     let xmlText = text;
                     if (proxyFn === PROXIES[0]) {
-                        try {
-                            const json = JSON.parse(text);
-                            xmlText = json.contents || '';
-                        } catch(e) { xmlText = text; }
+                        try { const json = JSON.parse(text); xmlText = json.contents || ''; } catch(e) { xmlText = text; }
                     }
                     if (!xmlText || xmlText.length < 100) continue;
                     const items = parseRssItems(xmlText);
                     if (items.length > 0) return items;
-                } catch(e) { /* try next proxy */ }
+                } catch(e) {}
             }
             return [];
+        }
+
+        // ============================================================
+        // 📄 FULL ARTICLE EXTRACTION — the core new feature
+        // ============================================================
+        function resolveUrl(src, base) {
+            if (!src) return '';
+            if (/^https?:\/\//i.test(src)) return src;
+            try { return new URL(src, base).href; } catch(e) { return src; }
+        }
+
+        function cleanArticleText(raw) {
+            return raw
+                .replace(/\s+/g, ' ')
+                .replace(/^\s*[•·\-–—]\s*/, '')
+                .trim();
+        }
+
+        function extractArticleFromHtml(html, url) {
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                if (!doc || !doc.body) return { fullText: '', heroImage: '', images: [] };
+
+                // Remove noise
+                doc.querySelectorAll('script,style,nav,footer,aside,header,form,iframe,noscript,svg,button,.ad,.ads,.advertisement,.advert,.social-share,.share,.related,.related-articles,.comments,.comment,.newsletter,.subscribe,.signup,.cookie,.promo,.sidebar,.menu,.breadcrumb,.tags,.byline,.dateline').forEach(el => { try { el.remove(); } catch(e){} });
+
+                // Try selectors in order
+                const selectors = [
+                    '[itemprop="articleBody"]',
+                    'article [data-component="text-block"]',
+                    'article .article-body',
+                    'article .story-body',
+                    'article .article__body',
+                    'article .post-content',
+                    'article .content',
+                    'article .article-content',
+                    '.article-body',
+                    '.story-body',
+                    '.article__body',
+                    '.post-content',
+                    '.entry-content',
+                    '.story-content',
+                    'main article',
+                    'main',
+                    '#article',
+                    '.content'
+                ];
+
+                let articleEl = null;
+                for (const sel of selectors) {
+                    const el = doc.querySelector(sel);
+                    if (el) {
+                        const pCount = el.querySelectorAll('p').length;
+                        if (pCount >= 3) { articleEl = el; break; }
+                    }
+                }
+
+                let paragraphs = [];
+                if (articleEl) paragraphs = Array.from(articleEl.querySelectorAll('p'));
+                else paragraphs = Array.from(doc.querySelectorAll('p'));
+
+                const blockWords = /^(share|tweet|advertisement|sign up|subscribe|read more|copyright|all rights reserved|photo|image|credit|getty|reuters|associated press|afp|follow us|download|watch|listen|newsletter|cookie|privacy|terms|contact|about us|advertise|more from|related:)/i;
+
+                const cleaned = [];
+                for (const p of paragraphs) {
+                    const t = cleanArticleText(p.textContent || '');
+                    if (t.length < 50) continue;
+                    if (blockWords.test(t)) continue;
+                    if (t.split(' ').length < 8) continue;
+                    cleaned.push(t);
+                }
+
+                let fullText = cleaned.join(' ').replace(/\s+/g, ' ').trim();
+
+                // Trim at last complete sentence if too long
+                const MAX_ARTICLE_CHARS = 2200;
+                if (fullText.length > MAX_ARTICLE_CHARS) {
+                    const cut = fullText.substring(0, MAX_ARTICLE_CHARS);
+                    const lastDot = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '), cut.lastIndexOf('? '));
+                    fullText = lastDot > 300 ? cut.substring(0, lastDot + 1) : cut;
+                }
+
+                // Extract images
+                const images = [];
+                const pushImg = (s) => {
+                    const abs = resolveUrl(s, url);
+                    if (abs && /^https?:\/\//i.test(abs) && !images.includes(abs)) images.push(abs);
+                };
+
+                const og = doc.querySelector('meta[property="og:image"]') || doc.querySelector('meta[property="og:image:secure_url"]');
+                if (og) pushImg(og.getAttribute('content'));
+                const tw = doc.querySelector('meta[name="twitter:image"]') || doc.querySelector('meta[name="twitter:image:src"]');
+                if (tw) pushImg(tw.getAttribute('content'));
+                const linkImg = doc.querySelector('link[rel="image_src"]');
+                if (linkImg) pushImg(linkImg.getAttribute('href'));
+
+                // From article body images (lazy-load aware)
+                const scope = articleEl || doc.body;
+                Array.from(scope.querySelectorAll('img')).forEach(img => {
+                    const src = img.getAttribute('src') || img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || img.getAttribute('data-original');
+                    if (!src) return;
+                    const w = parseInt(img.getAttribute('width') || '0', 10);
+                    if (w && w < 200) return;
+                    pushImg(src);
+                });
+
+                // Reject tiny images (data URIs, sprites, tracking pixels)
+                const filteredImages = images.filter(u => !/\.(svg|gif)(\?|$)/i.test(u) && !/pixel|track|1x1|spacer/i.test(u));
+
+                const heroImage = filteredImages[0] || '';
+
+                return {
+                    fullText: fullText.length > 150 ? fullText : '',
+                    heroImage,
+                    images: filteredImages.slice(0, 6)
+                };
+            } catch(e) {
+                return { fullText: '', heroImage: '', images: [] };
+            }
+        }
+
+        function trimCache() {
+            while (articleCacheKeys.length > ARTICLE_CACHE_MAX) {
+                const k = articleCacheKeys.shift();
+                delete ARTICLE_CACHE[k];
+            }
+        }
+
+        async function fetchFullArticle(url) {
+            if (!url) return null;
+            if (ARTICLE_CACHE[url]) return ARTICLE_CACHE[url];
+            for (const proxyFn of PROXIES) {
+                try {
+                    const res = await fetchWithTimeout(proxyFn(url), ARTICLE_TIMEOUT_MS);
+                    if (!res.ok) continue;
+                    const text = await res.text();
+                    let htmlText = text;
+                    if (proxyFn === PROXIES[0]) {
+                        try { const j = JSON.parse(text); htmlText = j.contents || ''; } catch(e) { htmlText = text; }
+                    } else if (proxyFn === PROXIES[2]) {
+                        // codetabs returns raw HTML
+                        htmlText = text;
+                    }
+                    if (!htmlText || htmlText.length < 500) continue;
+                    const extracted = extractArticleFromHtml(htmlText, url);
+                    if (extracted.fullText || extracted.heroImage) {
+                        ARTICLE_CACHE[url] = extracted;
+                        articleCacheKeys.push(url);
+                        trimCache();
+                        return extracted;
+                    }
+                } catch(e) {}
+            }
+            const empty = { fullText: '', heroImage: '', images: [] };
+            ARTICLE_CACHE[url] = empty;
+            articleCacheKeys.push(url);
+            trimCache();
+            return empty;
+        }
+
+        // Enrich a news item with full text + hero image
+        async function enrichArticle(item) {
+            if (!item || item._enriched) return item;
+            if (!item.url) { item._enriched = true; return item; }
+            // Skip very unlikely URLs
+            if (!/^https?:\/\//i.test(item.url)) { item._enriched = true; return item; }
+            const data = await fetchFullArticle(item.url);
+            if (data) {
+                if (data.fullText) item.fullText = data.fullText;
+                if (data.heroImage) item.heroImage = data.heroImage;
+                if (data.images && data.images.length) item.images = data.images;
+            }
+            item._enriched = true;
+            return item;
+        }
+
+        // Fire-and-forget prefetch for several items
+        function prefetchArticles(items, count) {
+            if (!items || items.length === 0) return;
+            let n = Math.min(count || 3, items.length);
+            for (let i = 0; i < n; i++) {
+                const it = items[i];
+                if (it && !it._enriched && it.url) {
+                    enrichArticle(it).catch(() => {});
+                }
+            }
         }
 
         async function fastFetchNews(feedList, backupList, onFirstBatch, onComplete) {
@@ -1231,7 +1265,7 @@
                     if (pendingCount === 0) {
                         const finalItems = collected.length > 0
                             ? collected.sort(() => Math.random() - 0.5).slice(0, 100)
-                            : backupList.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: ''}));
+                            : backupList.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: '', url: ''}));
                         if (onComplete) onComplete(finalItems);
                     }
                 }).catch(() => {
@@ -1239,7 +1273,7 @@
                     if (pendingCount === 0) {
                         const finalItems = collected.length > 0
                             ? collected.sort(() => Math.random() - 0.5).slice(0, 100)
-                            : backupList.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: ''}));
+                            : backupList.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: '', url: ''}));
                         if (onComplete) onComplete(finalItems);
                     }
                 });
@@ -1247,19 +1281,15 @@
 
             setTimeout(() => {
                 if (!firstBatchFired && collected.length === 0) {
-                    const fallback = backupList.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: ''}));
+                    const fallback = backupList.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: '', url: ''}));
                     if (onFirstBatch) onFirstBatch(fallback);
                     if (onComplete) onComplete(fallback);
                 }
             }, 5000);
         }
 
-        // ============================================================
-        // AUTO-UPDATING NEWS FETCH — EN
-        // ============================================================
         async function fetchWorldNews() {
             const firstHeadlineEl = document.getElementById('aiNewsHeadline');
-            // Only show "retrieving" message if the pool is still empty (first load)
             if (firstHeadlineEl && aiNewsActive && newsPool.length === 0) {
                 firstHeadlineEl.textContent = 'Retrieving the latest global headlines...';
             }
@@ -1267,42 +1297,39 @@
                 worldFeeds,
                 backupWorldNews,
                 (firstItems) => {
-                    // Merge new items with existing pool so playback isn't disrupted
-                    if (newsPool.length === 0) {
-                        newsPool = firstItems;
-                    } else {
+                    if (newsPool.length === 0) newsPool = firstItems;
+                    else {
                         const seen = new Set(newsPool.map(i => i.title.toLowerCase().substring(0, 80)));
                         for (const it of firstItems) {
                             const k = it.title.toLowerCase().substring(0, 80);
                             if (!seen.has(k)) { newsPool.push(it); seen.add(k); }
                         }
-                        // Keep pool size bounded to ~120 items
                         if (newsPool.length > 120) newsPool = newsPool.slice(-120);
                     }
                     newsIndex = 0;
                     displayNextNews();
                     updateAINewsTicker();
                     document.getElementById('dataStatus').textContent = `✅ Live headlines streaming (${newsPool.length} items)`;
+                    // Start prefetching full articles for the next several stories
+                    prefetchArticles(newsPool.slice(aiNewsHeadlineIndex, aiNewsHeadlineIndex + 5), 5);
                     if (aiNewsActive && aiNewsHeadlineIndex === 0 && aiNewsLoopTimeoutId === null && !isSpeaking && newsPool.length > 0) {
                         startAINewsTVLoop();
                     }
                 },
                 (finalItems) => {
-                    // Merge final set
-                    if (newsPool.length === 0) {
-                        newsPool = finalItems;
-                    } else {
+                    if (newsPool.length === 0) newsPool = finalItems;
+                    else {
                         const seen = new Set(newsPool.map(i => i.title.toLowerCase().substring(0, 80)));
-                        let added = 0;
                         for (const it of finalItems) {
                             const k = it.title.toLowerCase().substring(0, 80);
-                            if (!seen.has(k)) { newsPool.push(it); seen.add(k); added++; }
+                            if (!seen.has(k)) { newsPool.push(it); seen.add(k); }
                         }
                         if (newsPool.length > 120) newsPool = newsPool.slice(-120);
                     }
                     newsIndex = 0;
                     updateAINewsTicker();
                     document.getElementById('dataStatus').textContent = `✅ World news updated (${newsPool.length} items)`;
+                    prefetchArticles(newsPool.slice(aiNewsHeadlineIndex, aiNewsHeadlineIndex + 5), 5);
                 }
             );
         }
@@ -1312,9 +1339,8 @@
                 worldFeedsFR,
                 backupWorldNewsFR,
                 (firstItems) => {
-                    if (newsPoolFR.length === 0) {
-                        newsPoolFR = firstItems;
-                    } else {
+                    if (newsPoolFR.length === 0) newsPoolFR = firstItems;
+                    else {
                         const seen = new Set(newsPoolFR.map(i => i.title.toLowerCase().substring(0, 80)));
                         for (const it of firstItems) {
                             const k = it.title.toLowerCase().substring(0, 80);
@@ -1323,14 +1349,14 @@
                         if (newsPoolFR.length > 120) newsPoolFR = newsPoolFR.slice(-120);
                     }
                     updateAINewsTickerFR();
+                    prefetchArticles(newsPoolFR.slice(aiNewsFrHeadlineIndex, aiNewsFrHeadlineIndex + 5), 5);
                     if (aiNewsFrActive && aiNewsFrHeadlineIndex === 0 && aiNewsFrLoopTimeoutId === null && !isSpeaking && newsPoolFR.length > 0) {
                         startAINewsTVLoopFR();
                     }
                 },
                 (finalItems) => {
-                    if (newsPoolFR.length === 0) {
-                        newsPoolFR = finalItems;
-                    } else {
+                    if (newsPoolFR.length === 0) newsPoolFR = finalItems;
+                    else {
                         const seen = new Set(newsPoolFR.map(i => i.title.toLowerCase().substring(0, 80)));
                         for (const it of finalItems) {
                             const k = it.title.toLowerCase().substring(0, 80);
@@ -1339,20 +1365,19 @@
                         if (newsPoolFR.length > 120) newsPoolFR = newsPoolFR.slice(-120);
                     }
                     updateAINewsTickerFR();
+                    prefetchArticles(newsPoolFR.slice(aiNewsFrHeadlineIndex, aiNewsFrHeadlineIndex + 5), 5);
                 }
             );
         }
 
         async function fetchSportsNews() {
             try {
-                const allItems = await new Promise((resolve) => {
-                    fastFetchNews(sportsFeeds, [], null, resolve);
-                });
+                const allItems = await new Promise((resolve) => { fastFetchNews(sportsFeeds, [], null, resolve); });
                 if (allItems && allItems.length > 0) sportNewsPool = allItems.slice(0, 50);
-                else sportNewsPool = backupSportsNews.map(title => ({title, description: '', pubDate: new Date().toISOString()}));
+                else sportNewsPool = backupSportsNews.map(title => ({title, description: '', pubDate: new Date().toISOString(), url: ''}));
                 sportNewsIndex = 0;
             } catch(e) {
-                sportNewsPool = backupSportsNews.map(title => ({title, description: '', pubDate: new Date().toISOString()}));
+                sportNewsPool = backupSportsNews.map(title => ({title, description: '', pubDate: new Date().toISOString(), url: ''}));
             }
             upcomingGames = upcomingGamesData;
         }
@@ -1361,7 +1386,7 @@
             if (newsPool.length === 0) return;
             const item = newsPool[newsIndex % newsPool.length];
             const timeStr = item.pubDate ? new Date(item.pubDate).toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'}) : 'Now';
-            const desc = item.description ? ` — ${item.description}` : '';
+            const desc = item.description ? ` — ${item.description.substring(0, 140)}` : '';
             document.getElementById('newsTicker').textContent = `${item.title}${desc} (${timeStr})`;
             newsIndex++;
         }
@@ -1470,45 +1495,51 @@
             if (/\b(nations unies|otan|ue|union européenne|traité|sommet|diplomate|diplomatie|g7|g20|brics|ambassadeur|ministre des affaires étrangères|visite d'état|sanctions|bilatéral|multilatéral|onu)\b/.test(t)) return 'DIPLOMATIE';
             return 'ACTUALITÉS MONDIALES';
         }
-        function frCategoryToImageKey(fr) {
-            return {
-                'POLITIQUE':'POLITICS',
-                'ÉCONOMIE':'BUSINESS',
-                'CLIMAT':'CLIMATE',
-                'CONFLIT':'CONFLICT',
-                'SANTÉ':'HEALTH',
-                'TECHNOLOGIE':'TECHNOLOGY',
-                'SPORTS':'SPORTS',
-                'DIPLOMATIE':'DIPLOMACY',
-                'ACTUALITÉS MONDIALES':'WORLD NEWS'
-            }[fr] || 'WORLD NEWS';
-        }
+        function frCategoryToImageKey(fr) { return {'POLITIQUE':'POLITICS','ÉCONOMIE':'BUSINESS','CLIMAT':'CLIMATE','CONFLIT':'CONFLICT','SANTÉ':'HEALTH','TECHNOLOGIE':'TECHNOLOGY','SPORTS':'SPORTS','DIPLOMATIE':'DIPLOMACY','ACTUALITÉS MONDIALES':'WORLD NEWS'}[fr] || 'WORLD NEWS'; }
 
+        // ============================================================
+        // 🎙️ FULL REPORT BUILDERS — use item.fullText when available
+        // ============================================================
         function buildAnchorScript(item) {
-            const title = item.title || '';
-            const desc = item.description || '';
-            let script = `Here is the latest from the JP AI Newsroom. ${title}.`;
-            if (desc && desc.length > 0 && desc !== title) {
-                const trimmed = desc.length > 220 ? desc.substring(0, 220) + '…' : desc;
-                script += ` ${trimmed}`;
+            const title = (item.title || '').trim();
+            const detail = (item.fullText || item.description || '').trim();
+            const intro = pickAnchorIntro('en');
+            const category = detectNewsCategory(title + ' ' + detail);
+            const development = pickDevelopment(category, 'en');
+            const transition = pickAnchorTransition('en');
+
+            let script = `${intro} ${title}.`;
+            if (detail && detail.length > 0 && detail.toLowerCase() !== title.toLowerCase()) {
+                script += ` ${detail}`;
+            } else {
+                script += ` We are gathering the full details on this developing story.`;
             }
-            return script;
-        }
-        function buildAnchorScriptFR(item) {
-            const title = item.title || '';
-            const desc = item.description || '';
-            let script = `Voici les dernières nouvelles de la salle de presse JP IA. ${title}.`;
-            if (desc && desc.length > 0 && desc !== title) {
-                const trimmed = desc.length > 220 ? desc.substring(0, 220) + '…' : desc;
-                script += ` ${trimmed}`;
-            }
+            script += ` ${development} ${transition}`;
             return script;
         }
 
-        function getNewsImage(item, category, lang) {
-            if (item.image && item.image.length > 10 && /^https?:\/\//i.test(item.image)) {
-                return item.image;
+        function buildAnchorScriptFR(item) {
+            const title = (item.title || '').trim();
+            const detail = (item.fullText || item.description || '').trim();
+            const intro = pickAnchorIntro('fr');
+            const category = detectNewsCategoryFR(title + ' ' + detail);
+            const development = pickDevelopment(category, 'fr');
+            const transition = pickAnchorTransition('fr');
+
+            let script = `${intro} ${title}.`;
+            if (detail && detail.length > 0 && detail.toLowerCase() !== title.toLowerCase()) {
+                script += ` ${detail}`;
+            } else {
+                script += ` Nous recueillons tous les détails de cette affaire en développement.`;
             }
+            script += ` ${development} ${transition}`;
+            return script;
+        }
+
+        // Pick the appropriate image: article hero first, then RSS image, then category pool
+        function getNewsImage(item, category, lang) {
+            if (item.heroImage && /^https?:\/\//i.test(item.heroImage)) return item.heroImage;
+            if (item.image && item.image.length > 10 && /^https?:\/\//i.test(item.image)) return item.image;
             return getCategoryImage(category, lang || 'en');
         }
 
@@ -1517,50 +1548,31 @@
             const imgB = document.getElementById('aiNewsImageB');
             const incoming = currentImageSlot === 'A' ? imgB : imgA;
             const outgoing = currentImageSlot === 'A' ? imgA : imgB;
-
             const commit = (url) => {
                 incoming.classList.remove('active');
                 incoming.src = url;
-                const reveal = () => {
-                    incoming.classList.add('active');
-                    outgoing.classList.remove('active');
-                    currentImageSlot = currentImageSlot === 'A' ? 'B' : 'A';
-                };
-                if (incoming.decode) {
-                    incoming.decode().then(reveal).catch(reveal);
-                } else {
-                    reveal();
-                }
+                const reveal = () => { incoming.classList.add('active'); outgoing.classList.remove('active'); currentImageSlot = currentImageSlot === 'A' ? 'B' : 'A'; };
+                if (incoming.decode) incoming.decode().then(reveal).catch(reveal);
+                else reveal();
             };
-
             const preloader = new Image();
             preloader.crossOrigin = 'anonymous';
             preloader.onload = () => commit(imageUrl);
             preloader.onerror = () => commit(getFallbackImage(imageUrl));
             preloader.src = imageUrl;
         }
-
         function setAINewsFrImage(imageUrl) {
             const imgA = document.getElementById('aiNewsFrImageA');
             const imgB = document.getElementById('aiNewsFrImageB');
             const incoming = currentFrImageSlot === 'A' ? imgB : imgA;
             const outgoing = currentFrImageSlot === 'A' ? imgA : imgB;
-
             const commit = (url) => {
                 incoming.classList.remove('active');
                 incoming.src = url;
-                const reveal = () => {
-                    incoming.classList.add('active');
-                    outgoing.classList.remove('active');
-                    currentFrImageSlot = currentFrImageSlot === 'A' ? 'B' : 'A';
-                };
-                if (incoming.decode) {
-                    incoming.decode().then(reveal).catch(reveal);
-                } else {
-                    reveal();
-                }
+                const reveal = () => { incoming.classList.add('active'); outgoing.classList.remove('active'); currentFrImageSlot = currentFrImageSlot === 'A' ? 'B' : 'A'; };
+                if (incoming.decode) incoming.decode().then(reveal).catch(reveal);
+                else reveal();
             };
-
             const preloader = new Image();
             preloader.crossOrigin = 'anonymous';
             preloader.onload = () => commit(imageUrl);
@@ -1569,31 +1581,53 @@
         }
 
         function displayAIHeadline(item) {
-            const category = detectNewsCategory(item.title);
+            const category = detectNewsCategory(item.title + ' ' + (item.fullText || item.description || ''));
             document.getElementById('aiNewsCategory').textContent = category;
             const headlineEl = document.getElementById('aiNewsHeadline');
+            const detailsEl = document.getElementById('aiNewsDetails');
             headlineEl.classList.add('fade-out');
+            detailsEl.classList.add('fade-out');
             const imageUrl = getNewsImage(item, category, 'en');
             setAINewsImage(imageUrl);
             setTimeout(() => {
                 headlineEl.textContent = item.title;
                 headlineEl.classList.remove('fade-out');
+                const detail = (item.fullText || item.description || '').trim();
+                if (detail && detail.toLowerCase() !== item.title.toLowerCase()) {
+                    detailsEl.textContent = detail;
+                    detailsEl.style.display = '-webkit-box';
+                } else {
+                    detailsEl.textContent = 'We are gathering the full details on this developing story.';
+                    detailsEl.style.display = '-webkit-box';
+                }
+                detailsEl.classList.remove('fade-out');
             }, 220);
             document.getElementById('aiNewsCounter').textContent = `Headline ${((aiNewsHeadlineIndex - 1) % Math.max(newsPool.length, 1)) + 1} of ${newsPool.length}`;
             const next = newsPool[aiNewsHeadlineIndex % newsPool.length];
             if (next) document.getElementById('aiNewsNextHeadline').textContent = next.title;
         }
         function displayAIHeadlineFR(item) {
-            const category = detectNewsCategoryFR(item.title + ' ' + (item.description || ''));
+            const category = detectNewsCategoryFR(item.title + ' ' + (item.fullText || item.description || ''));
             document.getElementById('aiNewsFrCategory').textContent = category;
             const headlineEl = document.getElementById('aiNewsFrHeadline');
+            const detailsEl = document.getElementById('aiNewsFrDetails');
             headlineEl.classList.add('fade-out');
+            detailsEl.classList.add('fade-out');
             const imageKey = frCategoryToImageKey(category);
             const imageUrl = getNewsImage(item, imageKey, 'fr');
             setAINewsFrImage(imageUrl);
             setTimeout(() => {
                 headlineEl.textContent = item.title;
                 headlineEl.classList.remove('fade-out');
+                const detail = (item.fullText || item.description || '').trim();
+                if (detail && detail.toLowerCase() !== item.title.toLowerCase()) {
+                    detailsEl.textContent = detail;
+                    detailsEl.style.display = '-webkit-box';
+                } else {
+                    detailsEl.textContent = 'Nous recueillons tous les détails de cette affaire en développement.';
+                    detailsEl.style.display = '-webkit-box';
+                }
+                detailsEl.classList.remove('fade-out');
             }, 220);
             document.getElementById('aiNewsFrCounter').textContent = `Titre ${((aiNewsFrHeadlineIndex - 1) % Math.max(newsPoolFR.length, 1)) + 1} sur ${newsPoolFR.length}`;
             const next = newsPoolFR[aiNewsFrHeadlineIndex % newsPoolFR.length];
@@ -1645,7 +1679,10 @@
             aiNewsFrClockInterval = setInterval(update, 1000);
         }
 
-        function startAINewsTVLoop() {
+        // ============================================================
+        // 🎬 AI NEWS LOOPS — now enrich article BEFORE reading
+        // ============================================================
+        async function startAINewsTVLoop() {
             if (!aiNewsActive) return;
             if (newsPool.length === 0) {
                 document.getElementById('aiNewsHeadline').textContent = 'Connecting to the JP AI Newsroom · Retrieving the latest global headlines...';
@@ -1656,6 +1693,8 @@
                 const closingMsg = "This was the latest news flash from JP AI Studio. Stay tuned for your next news flash in 60 seconds.";
                 document.getElementById('aiNewsCategory').textContent = 'STAY TUNED';
                 document.getElementById('aiNewsHeadline').textContent = 'Stay tuned — next news flash in 60 seconds...';
+                document.getElementById('aiNewsDetails').textContent = '';
+                document.getElementById('aiNewsDetails').style.display = 'none';
                 document.getElementById('aiNewsCounter').textContent = 'Next news flash in 60 seconds';
                 speakSingle(closingMsg, {isFemale: false, pitch: 0.82, rate: 0.93, langCode: 'en', onEndCallback: () => {
                     if (!aiNewsActive) return;
@@ -1670,6 +1709,18 @@
             const item = newsPool[aiNewsHeadlineIndex % newsPool.length];
             aiNewsHeadlineIndex++;
             aiNewsHeadlinesInCycle++;
+
+            // Prefetch the next 3 stories in background so they're ready
+            const upcoming = [];
+            for (let k = 0; k < 3; k++) {
+                const it = newsPool[(aiNewsHeadlineIndex + k) % newsPool.length];
+                if (it) upcoming.push(it);
+            }
+            prefetchArticles(upcoming, 3);
+
+            // Wait for THIS item's full article before reading
+            await enrichArticle(item);
+
             displayAIHeadline(item);
             updateAINewsTicker();
             const script = buildAnchorScript(item);
@@ -1679,7 +1730,7 @@
             }});
         }
 
-        function startAINewsTVLoopFR() {
+        async function startAINewsTVLoopFR() {
             if (!aiNewsFrActive) return;
             if (newsPoolFR.length === 0) {
                 document.getElementById('aiNewsFrHeadline').textContent = 'Connexion à la salle de presse JP IA · Chargement des derniers titres mondiaux...';
@@ -1690,6 +1741,8 @@
                 const closingMsgFR = "Ceci était le dernier flash d'information de JP IA Studio. Restez à l'écoute pour votre prochain flash d'information dans 60 secondes.";
                 document.getElementById('aiNewsFrCategory').textContent = 'RESTEZ À L\'ÉCOUTE';
                 document.getElementById('aiNewsFrHeadline').textContent = 'Restez à l\'écoute — prochain flash dans 60 secondes...';
+                document.getElementById('aiNewsFrDetails').textContent = '';
+                document.getElementById('aiNewsFrDetails').style.display = 'none';
                 document.getElementById('aiNewsFrCounter').textContent = 'Prochain flash dans 60 secondes';
                 speakSingle(closingMsgFR, {isFemale: false, pitch: 0.88, rate: 0.94, langCode: 'fr', onEndCallback: () => {
                     if (!aiNewsFrActive) return;
@@ -1704,6 +1757,16 @@
             const item = newsPoolFR[aiNewsFrHeadlineIndex % newsPoolFR.length];
             aiNewsFrHeadlineIndex++;
             aiNewsFrHeadlinesInCycle++;
+
+            const upcoming = [];
+            for (let k = 0; k < 3; k++) {
+                const it = newsPoolFR[(aiNewsFrHeadlineIndex + k) % newsPoolFR.length];
+                if (it) upcoming.push(it);
+            }
+            prefetchArticles(upcoming, 3);
+
+            await enrichArticle(item);
+
             displayAIHeadlineFR(item);
             updateAINewsTickerFR();
             const script = buildAnchorScriptFR(item);
@@ -1721,7 +1784,7 @@
             document.getElementById('audioStatus').textContent = '🤖 AI News Flash TV · Broadcasting Live';
             document.getElementById('trackTitle').textContent = 'JP AI News Flash TV';
             document.getElementById('trackArtist').textContent = '100% AI-Generated Broadcast';
-            document.getElementById('trackGenre').textContent = 'Live headlines · Bulletins every 60 seconds';
+            document.getElementById('trackGenre').textContent = 'Full reports · Bulletins every 60 seconds';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -1739,7 +1802,7 @@
             document.getElementById('audioStatus').textContent = '🤖 Info Flash TV · Diffusion en direct';
             document.getElementById('trackTitle').textContent = 'JP IA Info Flash TV';
             document.getElementById('trackArtist').textContent = 'Diffusion 100% générée par IA';
-            document.getElementById('trackGenre').textContent = 'Titres en direct · Bulletins toutes les 60 secondes';
+            document.getElementById('trackGenre').textContent = 'Rapports complets · Bulletins toutes les 60 secondes';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -1768,58 +1831,31 @@
             if (s) s.classList.remove('active');
         }
 
-        // ============================================================
-        // 🐕 WATCHDOG — Restart AI news loops if they ever stall
-        // ============================================================
         function startWatchdog() {
             setInterval(() => {
                 const speechActive = speechSynth && (speechSynth.speaking || speechSynth.pending);
-                // EN watchdog
-                if (currentChannel === 'mix' && aiNewsActive
-                    && !aiNewsLoopTimeoutId
-                    && !newsThemeTimeoutId
-                    && !speechActive
-                    && newsPool.length > 0) {
+                if (currentChannel === 'mix' && aiNewsActive && !aiNewsLoopTimeoutId && !newsThemeTimeoutId && !speechActive && newsPool.length > 0) {
                     console.log('🐕 Watchdog: restarting AI News EN loop');
                     aiNewsHeadlinesInCycle = 0;
                     startAINewsTVLoop();
                 }
-                // FR watchdog
-                if (currentChannel === 'mix_fr' && aiNewsFrActive
-                    && !aiNewsFrLoopTimeoutId
-                    && !newsThemeTimeoutId
-                    && !speechActive
-                    && newsPoolFR.length > 0) {
+                if (currentChannel === 'mix_fr' && aiNewsFrActive && !aiNewsFrLoopTimeoutId && !newsThemeTimeoutId && !speechActive && newsPoolFR.length > 0) {
                     console.log('🐕 Watchdog: restarting AI News FR loop');
                     aiNewsFrHeadlinesInCycle = 0;
                     startAINewsTVLoopFR();
                 }
-                // Music stream watchdog — if audio died and we should be playing music
-                if (musicChannels.includes(currentChannel)
-                    && audioElement
-                    && !isMuted
-                    && !adInProgress
-                    && !audioElement.paused
-                    && audioElement.readyState === 0
-                    && audioElement.networkState === 3) {
-                    // networkState 3 = NETWORK_NO_SOURCE — stream failed
+                if (musicChannels.includes(currentChannel) && audioElement && !isMuted && !adInProgress && !audioElement.paused && audioElement.readyState === 0 && audioElement.networkState === 3) {
                     attemptStreamRecovery();
                 }
             }, WATCHDOG_INTERVAL_MS);
         }
 
-        // ============================================================
-        // 🔄 STREAM AUTO-RECOVERY — Retry failed music streams
-        // ============================================================
         function attemptStreamRecovery() {
             if (!musicChannels.includes(currentChannel)) return;
             if (streamRetryCount >= MAX_STREAM_RETRIES) {
-                // Give up for now, move to next stream in the category
                 streamRetryCount = 0;
                 const streams = radioStations[currentChannel].streams;
-                if (streams.length > 1) {
-                    currentStationIndex = (currentStationIndex + 1) % streams.length;
-                }
+                if (streams.length > 1) currentStationIndex = (currentStationIndex + 1) % streams.length;
                 playStream();
                 return;
             }
@@ -1833,7 +1869,6 @@
                 }
             }, 2000);
         }
-
         function resetStreamRetry() { streamRetryCount = 0; }
 
         // DEBATE
@@ -1858,7 +1893,7 @@
         function startDebateLoop() { if (debateLoopActive) return; debateLoopActive = true; pickAndStartDebate(); }
         function pickAndStartDebate() {
             if (!debateLoopActive) return;
-            if (newsPool.length === 0) newsPool = backupWorldNews.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: ''}));
+            if (newsPool.length === 0) newsPool = backupWorldNews.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: '', url: ''}));
             const politicalKeywords = ['election','president','government','senate','congress','policy','law','vote','minister','prime minister','political','parliament','bill','tax','health','immigration','climate','energy','defense','education','trade','gun','border','budget'];
             const politicalItems = newsPool.filter(item => politicalKeywords.some(keyword => (item.title + ' ' + item.description).toLowerCase().includes(keyword)));
             const topic = politicalItems.length > 0 ? politicalItems[0] : newsPool[0];
@@ -2048,7 +2083,7 @@
         }
 
         function speakSportsFlash(onComplete = null) {
-            if (sportNewsPool.length === 0) sportNewsPool = backupSportsNews.map(title => ({title, description: '', pubDate: new Date().toISOString()}));
+            if (sportNewsPool.length === 0) sportNewsPool = backupSportsNews.map(title => ({title, description: '', pubDate: new Date().toISOString(), url: ''}));
             let flashText = "This is JP AI Radio Sports Flash. Scores: ";
             for (let i = 0; i < 3; i++) flashText += `${sportNewsPool[(sportNewsIndex + i) % sportNewsPool.length].title}. `;
             sportNewsIndex = (sportNewsIndex + 3) % sportNewsPool.length;
@@ -2194,18 +2229,9 @@
             audioElement.addEventListener('play', () => { isPlaying = true; document.getElementById('playBtn').textContent='⏸'; document.getElementById('audioStatus').textContent='🔊 Streaming Live'; resetStreamRetry(); });
             audioElement.addEventListener('pause', () => { isPlaying = false; document.getElementById('playBtn').textContent='▶'; document.getElementById('audioStatus').textContent='⏸ Paused'; });
             audioElement.addEventListener('playing', () => { document.getElementById('audioStatus').textContent='✅ Playing'; resetStreamRetry(); });
-            audioElement.addEventListener('error', () => {
-                document.getElementById('audioStatus').textContent='⚠️ Stream error — recovering...';
-                attemptStreamRecovery();
-            });
-            audioElement.addEventListener('stalled', () => {
-                document.getElementById('audioStatus').textContent='⚠️ Stream stalled — recovering...';
-                attemptStreamRecovery();
-            });
-            audioElement.addEventListener('ended', () => {
-                // Some live streams may end unexpectedly; try to recover
-                if (musicChannels.includes(currentChannel)) attemptStreamRecovery();
-            });
+            audioElement.addEventListener('error', () => { document.getElementById('audioStatus').textContent='⚠️ Stream error — recovering...'; attemptStreamRecovery(); });
+            audioElement.addEventListener('stalled', () => { document.getElementById('audioStatus').textContent='⚠️ Stream stalled — recovering...'; attemptStreamRecovery(); });
+            audioElement.addEventListener('ended', () => { if (musicChannels.includes(currentChannel)) attemptStreamRecovery(); });
         }
         function updateClock() { document.getElementById('currentTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
         function updateListeners() { listeners += Math.floor(Math.random()*20)-5; listeners = Math.max(1500, Math.min(5000, listeners)); document.getElementById('listeners').textContent = listeners.toLocaleString(); }
@@ -2228,14 +2254,12 @@
                 setTimeout(() => { setupVoices(); pickDebateVoices(); }, 3000);
             }
 
-            // ⚡ Kick off ALL fetches immediately (parallel, non-blocking)
             fetchWorldNews();
             fetchWorldNewsFR();
             fetchSportsNews();
             fetchWeather();
             fetchSportsScores();
 
-            // 🎬 Start on AI News Flash TV (EN)
             currentChannel = 'mix';
             currentStationIndex = 0;
             document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
@@ -2245,7 +2269,6 @@
             if (btns[idx]) btns[idx].classList.add('active');
             playStream();
 
-            // ⏰ Clock & listeners
             updateClock();
             adjustVolume(document.getElementById('volumeSlider').value);
             setInterval(updateClock, 1000);
@@ -2254,20 +2277,19 @@
             updateScheduleHighlight();
             setInterval(updateScheduleHighlight, 60000);
 
-            // 🔄 AUTO-UPDATE ALL CHANNELS
-            setInterval(fetchWorldNews, NEWS_REFRESH_INTERVAL_MS);          // Global news EN every 4 min
-            setInterval(fetchWorldNewsFR, NEWS_REFRESH_INTERVAL_MS);        // Global news FR every 4 min
-            setInterval(fetchSportsNews, SPORTS_REFRESH_INTERVAL_MS);       // Sports headlines every 15 min
-            setInterval(fetchWeather, WEATHER_REFRESH_INTERVAL_MS);         // Weather every 5 min
-            setInterval(fetchSportsScores, SCORES_REFRESH_INTERVAL_MS);     // Live scores every 60 sec
-            setInterval(displayNextNews, NEWS_TICKER_ROTATE_MS);            // Rotate wire ticker every 9 sec
+            setInterval(fetchWorldNews, NEWS_REFRESH_INTERVAL_MS);
+            setInterval(fetchWorldNewsFR, NEWS_REFRESH_INTERVAL_MS);
+            setInterval(fetchSportsNews, SPORTS_REFRESH_INTERVAL_MS);
+            setInterval(fetchWeather, WEATHER_REFRESH_INTERVAL_MS);
+            setInterval(fetchSportsScores, SCORES_REFRESH_INTERVAL_MS);
+            setInterval(displayNextNews, NEWS_TICKER_ROTATE_MS);
 
-            // 🐕 Start the watchdog to keep AI news loops alive
             startWatchdog();
 
-            console.log('%c🤖 JP AI Radio · v25 · AUTO-UPDATING ALL CHANNELS', 'color:#c9a961;font-weight:bold;font-size:14px;');
-            console.log('%c📰 News refreshes every 4 min (EN & FR) · Sports every 15 min · Weather every 5 min · Live scores every 60 sec', 'color:#c9a961;');
-            console.log('%c🐕 Watchdog keeps AI News loops alive · Music streams auto-recover from errors', 'color:#c9a961;');
+            console.log('%c📰 JP AI Radio · v27 · FULL ARTICLE REPORTS FROM SOURCE', 'color:#c9a961;font-weight:bold;font-size:14px;');
+            console.log('%c🌐 Fetches the ACTUAL article page from BBC/NPR/NYT/France24/RFI/Le Monde', 'color:#c9a961;');
+            console.log('%c📸 Uses the article\'s own og:image for authentic visuals', 'color:#c9a961;');
+            console.log('%c⏩ Prefetches the next 3 stories so bulletins never stall', 'color:#c9a961;');
         }
 
         window.refreshWorldNews = refreshWorldNews;
@@ -2275,7 +2297,7 @@
         createVisualizer();
         updateScheduleHighlight();
         document.getElementById('cityInput').value = 'Boston, MA';
-        console.log('%c✅ JP AI Radio ready — press Tune In to start the auto-updating broadcast', 'color:#c9a961;font-weight:bold;');
+        console.log('%c✅ JP AI Radio ready — press Tune In to start', 'color:#c9a961;font-weight:bold;');
     </script>
 </body>
 </html>
