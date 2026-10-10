@@ -450,15 +450,14 @@
 
     <script>
         // ============================================
-        // JP AI RADIO — PREMIUM EDITION v24
-        // - AI News Flash TV (EN) is now the default first channel
-        // - Massively faster news loading:
-        //     • parallel feed fetching (all feeds at once)
-        //     • per-feed 4s timeout via AbortController
-        //     • first-successful-feed wins → instant first headline
-        //     • progressive streaming into the pool as more feeds arrive
-        //     • instant fallback headlines so the studio NEVER sits idle
-        //     • deduplication + lightweight HTML stripping
+        // JP AI RADIO — PREMIUM EDITION v25
+        // — AUTO-UPDATING ALL CHANNELS —
+        // • AI News Flash EN/FR refresh headlines every 4 minutes
+        // • News pool updates stream in without interrupting playback
+        // • Music streams auto-recover from errors
+        // • Watchdog ensures AI news loops never stall
+        // • Sports scores every 60s · Weather every 5 min
+        // • AI news bulletins continue forever
         // ============================================
 
         const HAITIAN_VOICE_MASTER_PROMPT = {enabled:true,tone:'dous, cho, natif natal',pronunciation:'kreyòl ayisyen klè',nasalRule:'an, en, on, oun byen make — n pa yon konsòn separe',substitutions:{'ou':'oo','è':'eh','ò':'aw','ay':'eye','im':'eem'},constraints:['pa tradui','pa chanje mo yo','li egzak jan li ekri','ritm natirèl yon Ayisyen'],delivery:{rate:0.72,pitch:0.92,volume:1.0,pauseBetweenSentences:900,pauseBetweenChunks:1400}};
@@ -521,7 +520,6 @@
 
         // ============================================================
         // 📸 HIGH-RESOLUTION IMAGE POOLS
-        // All URLs: w=3200, q=95, auto=format, fit=crop → razor sharp
         // ============================================================
         const CATEGORY_IMAGES = {
             'POLITICS': [
@@ -606,7 +604,6 @@
         // STATE
         let audioElement = null, videoElement = null, hlsInstance = null;
         let isPlaying = false, isMuted = false, volume = 0.7;
-        // ⬇️ DEFAULT CHANNEL IS NOW THE ENGLISH AI NEWS FLASH
         let currentChannel = 'mix', currentStationIndex = 0, listeners = 1500, userLocation = null;
         let newsPool = [], newsPoolFR = [], newsIndex = 0, anchorNewsIndex = 0;
         let speechSynth = window.speechSynthesis;
@@ -629,6 +626,19 @@
         let aiNewsFrHeadlinesInCycle = 0;
 
         const THEME_DURATION_MS = 60000;
+
+        // 🆕 Auto-update intervals
+        const NEWS_REFRESH_INTERVAL_MS = 240000;      // refresh global headlines every 4 minutes
+        const SPORTS_REFRESH_INTERVAL_MS = 900000;    // sports headlines every 15 minutes
+        const WEATHER_REFRESH_INTERVAL_MS = 300000;   // weather every 5 minutes
+        const SCORES_REFRESH_INTERVAL_MS = 60000;     // live scores every 60 seconds
+        const NEWS_TICKER_ROTATE_MS = 9000;           // rotate ticker every 9 seconds
+        const WATCHDOG_INTERVAL_MS = 20000;           // watchdog check every 20 seconds
+
+        // Stream auto-retry state
+        let streamRetryCount = 0;
+        const MAX_STREAM_RETRIES = 5;
+        let streamRetryTimer = null;
 
         const musicChannels = ['rnb','rock','classical','electronic','french','haitian','aimusic','aireligious'];
         const voiceChannels = ['bible','prayer'];
@@ -763,10 +773,10 @@
             'https://www.francetvinfo.fr/titres.rss',
             'https://www.radio-canada.ca/rss/0,0000,09.xml'
         ];
-        const backupWorldNews = ["UN Security Council holds emergency session","European Union announces new climate accord","Asian markets surge amid trade agreement","Middle East peace talks progress","Latin American countries sign historic treaty"];
-        const backupWorldNewsFR = ["Le Conseil de sécurité de l'ONU tient une session d'urgence","L'Union européenne annonce un nouvel accord climatique","Les marchés asiatiques bondissent après un accord commercial","Progrès des pourparlers de paix au Moyen-Orient","Les pays d'Amérique latine signent un traité historique"];
+        const backupWorldNews = ["UN Security Council holds emergency session","European Union announces new climate accord","Asian markets surge amid trade agreement","Middle East peace talks progress","Latin American countries sign historic treaty","Global leaders convene for climate summit","New breakthrough in renewable energy technology","International space station marks milestone","World health organization reports progress","Tech giants announce AI safety partnership"];
+        const backupWorldNewsFR = ["Le Conseil de sécurité de l'ONU tient une session d'urgence","L'Union européenne annonce un nouvel accord climatique","Les marchés asiatiques bondissent après un accord commercial","Progrès des pourparlers de paix au Moyen-Orient","Les pays d'Amérique latine signent un traité historique","Les dirigeants mondiaux se réunissent pour le sommet climatique","Nouvelle percée dans la technologie des énergies renouvelables","La station spatiale internationale marque un jalon","L'organisation mondiale de la santé rapporte des progrès","Les géants de la tech annoncent un partenariat sur la sécurité de l'IA"];
         const sportsFeeds = ['https://feeds.bbci.co.uk/sport/rss.xml','https://www.espn.com/espn/rss/news','https://rss.nytimes.com/services/xml/rss/nyt/Sports.xml'];
-        const backupSportsNews = ["Lakers defeat Warriors in overtime","Patriots win against Jets","Red Sox beat Yankees","Champions League final set"];
+        const backupSportsNews = ["Lakers defeat Warriors in overtime","Patriots win against Jets","Red Sox beat Yankees","Champions League final set","World Cup qualifiers underway","NBA trade deadline updates","Premier League title race tightens","Olympic trials conclude"];
         const upcomingGamesData = [{home:"Lakers",away:"Warriors",date:"Tomorrow",time:"7:30 PM"},{home:"Patriots",away:"Jets",date:"Sunday",time:"1:00 PM"},{home:"Red Sox",away:"Yankees",date:"Saturday",time:"4:05 PM"},{home:"Manchester City",away:"Liverpool",date:"Next Wednesday",time:"3:00 PM"}];
 
         function setupVoices() {
@@ -880,10 +890,10 @@
         function updateNewsThemeGain() { if (newsThemeMaster) newsThemeMaster.gain.value = isMuted ? 0 : Math.max(0.35, volume * 0.6); }
 
         const NEWS_CHORDS = [
-            { bass: 73.42,  strings: [146.83, 174.61, 220.00], brass: [293.66, 349.23, 440.00] }, // Dm
-            { bass: 58.27,  strings: [116.54, 146.83, 174.61], brass: [233.08, 293.66, 349.23] }, // Bb
-            { bass: 87.31,  strings: [174.61, 220.00, 261.63], brass: [349.23, 440.00, 523.25] }, // F
-            { bass: 65.41,  strings: [130.81, 164.81, 196.00], brass: [261.63, 329.63, 392.00] }  // C
+            { bass: 73.42,  strings: [146.83, 174.61, 220.00], brass: [293.66, 349.23, 440.00] },
+            { bass: 58.27,  strings: [116.54, 146.83, 174.61], brass: [233.08, 293.66, 349.23] },
+            { bass: 87.31,  strings: [174.61, 220.00, 261.63], brass: [349.23, 440.00, 523.25] },
+            { bass: 65.41,  strings: [130.81, 164.81, 196.00], brass: [261.63, 329.63, 392.00] }
         ];
         const NEWS_MELODY = [
             587.33, 587.33, 523.25, 587.33, 698.46, 0,      587.33, 523.25,
@@ -1129,13 +1139,6 @@
 
         // ============================================================
         // ⚡ FAST NEWS FETCHING ENGINE
-        // Key techniques:
-        //   1. fetch() with AbortController timeout of 4s per feed
-        //   2. All feeds fetch in parallel (Promise.allSettled)
-        //   3. First successful feed immediately populates the pool
-        //      and kicks off the news loop — no waiting for slow feeds
-        //   4. Progressive streaming: more feeds keep appending results
-        //   5. Persistent "resolved" guard so we don't double-add items
         // ============================================================
         const FEED_TIMEOUT_MS = 4000;
         const PROXIES = [
@@ -1178,7 +1181,6 @@
             return out;
         }
 
-        // Fetch a single feed: try all proxies in sequence, resolving with items or []
         async function fetchSingleFeed(feedUrl) {
             for (const proxyFn of PROXIES) {
                 try {
@@ -1186,7 +1188,6 @@
                     if (!res.ok) continue;
                     const text = await res.text();
                     let xmlText = text;
-                    // allorigins wraps in JSON
                     if (proxyFn === PROXIES[0]) {
                         try {
                             const json = JSON.parse(text);
@@ -1201,7 +1202,6 @@
             return [];
         }
 
-        // Fast parallel fetching with early first-success callback
         async function fastFetchNews(feedList, backupList, onFirstBatch, onComplete) {
             const seenTitles = new Set();
             const collected = [];
@@ -1223,7 +1223,6 @@
             feedList.forEach(feedUrl => {
                 fetchSingleFeed(feedUrl).then(items => {
                     const added = pushItems(items);
-                    // Fire the first-batch callback as soon as ANY feed returns items
                     if (!firstBatchFired && added > 0) {
                         firstBatchFired = true;
                         if (onFirstBatch) onFirstBatch(collected.slice());
@@ -1246,7 +1245,6 @@
                 });
             });
 
-            // Hard safety net: after 5s, force-resolve with whatever we have
             setTimeout(() => {
                 if (!firstBatchFired && collected.length === 0) {
                     const fallback = backupList.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: ''}));
@@ -1257,51 +1255,54 @@
         }
 
         // ============================================================
-        // NEWS POOL POPULATION — EN
+        // AUTO-UPDATING NEWS FETCH — EN
         // ============================================================
-        function populateNewsPool(newItems, lang) {
-            if (lang === 'fr') {
-                newsPoolFR = newItems;
-                if (aiNewsFrActive && aiNewsFrHeadlinesInCycle === 0) {
-                    // restart the FR loop if it was already active
-                }
-                updateAINewsTickerFR();
-            } else {
-                newsPool = newItems;
-                updateAINewsTicker();
-                // If AI News EN is active and hasn't started a cycle yet, kick it off
-                if (aiNewsActive && aiNewsHeadlinesInCycle === 0 && aiNewsLoopTimeoutId === null) {
-                    // Loop already running, just let it pick up the new pool
-                }
-            }
-        }
-
         async function fetchWorldNews() {
             const firstHeadlineEl = document.getElementById('aiNewsHeadline');
-            if (firstHeadlineEl && aiNewsActive) {
+            // Only show "retrieving" message if the pool is still empty (first load)
+            if (firstHeadlineEl && aiNewsActive && newsPool.length === 0) {
                 firstHeadlineEl.textContent = 'Retrieving the latest global headlines...';
             }
             await fastFetchNews(
                 worldFeeds,
                 backupWorldNews,
-                // First-batch callback: as soon as ANY feed arrives, seed the pool
                 (firstItems) => {
-                    newsPool = firstItems;
+                    // Merge new items with existing pool so playback isn't disrupted
+                    if (newsPool.length === 0) {
+                        newsPool = firstItems;
+                    } else {
+                        const seen = new Set(newsPool.map(i => i.title.toLowerCase().substring(0, 80)));
+                        for (const it of firstItems) {
+                            const k = it.title.toLowerCase().substring(0, 80);
+                            if (!seen.has(k)) { newsPool.push(it); seen.add(k); }
+                        }
+                        // Keep pool size bounded to ~120 items
+                        if (newsPool.length > 120) newsPool = newsPool.slice(-120);
+                    }
                     newsIndex = 0;
                     displayNextNews();
                     updateAINewsTicker();
-                    document.getElementById('dataStatus').textContent = `✅ Live headlines streaming (${firstItems.length} items)`;
-                    // If AI News is active but waiting for the first headline, kick it now
-                    if (aiNewsActive && aiNewsHeadlineIndex === 0 && aiNewsLoopTimeoutId === null && !isSpeaking) {
+                    document.getElementById('dataStatus').textContent = `✅ Live headlines streaming (${newsPool.length} items)`;
+                    if (aiNewsActive && aiNewsHeadlineIndex === 0 && aiNewsLoopTimeoutId === null && !isSpeaking && newsPool.length > 0) {
                         startAINewsTVLoop();
                     }
                 },
-                // Complete callback: replace with the fuller shuffled set
                 (finalItems) => {
-                    newsPool = finalItems;
+                    // Merge final set
+                    if (newsPool.length === 0) {
+                        newsPool = finalItems;
+                    } else {
+                        const seen = new Set(newsPool.map(i => i.title.toLowerCase().substring(0, 80)));
+                        let added = 0;
+                        for (const it of finalItems) {
+                            const k = it.title.toLowerCase().substring(0, 80);
+                            if (!seen.has(k)) { newsPool.push(it); seen.add(k); added++; }
+                        }
+                        if (newsPool.length > 120) newsPool = newsPool.slice(-120);
+                    }
                     newsIndex = 0;
                     updateAINewsTicker();
-                    document.getElementById('dataStatus').textContent = `✅ World news ready (${finalItems.length} items)`;
+                    document.getElementById('dataStatus').textContent = `✅ World news updated (${newsPool.length} items)`;
                 }
             );
         }
@@ -1311,14 +1312,32 @@
                 worldFeedsFR,
                 backupWorldNewsFR,
                 (firstItems) => {
-                    newsPoolFR = firstItems;
+                    if (newsPoolFR.length === 0) {
+                        newsPoolFR = firstItems;
+                    } else {
+                        const seen = new Set(newsPoolFR.map(i => i.title.toLowerCase().substring(0, 80)));
+                        for (const it of firstItems) {
+                            const k = it.title.toLowerCase().substring(0, 80);
+                            if (!seen.has(k)) { newsPoolFR.push(it); seen.add(k); }
+                        }
+                        if (newsPoolFR.length > 120) newsPoolFR = newsPoolFR.slice(-120);
+                    }
                     updateAINewsTickerFR();
-                    if (aiNewsFrActive && aiNewsFrHeadlineIndex === 0 && aiNewsFrLoopTimeoutId === null && !isSpeaking) {
+                    if (aiNewsFrActive && aiNewsFrHeadlineIndex === 0 && aiNewsFrLoopTimeoutId === null && !isSpeaking && newsPoolFR.length > 0) {
                         startAINewsTVLoopFR();
                     }
                 },
                 (finalItems) => {
-                    newsPoolFR = finalItems;
+                    if (newsPoolFR.length === 0) {
+                        newsPoolFR = finalItems;
+                    } else {
+                        const seen = new Set(newsPoolFR.map(i => i.title.toLowerCase().substring(0, 80)));
+                        for (const it of finalItems) {
+                            const k = it.title.toLowerCase().substring(0, 80);
+                            if (!seen.has(k)) { newsPoolFR.push(it); seen.add(k); }
+                        }
+                        if (newsPoolFR.length > 120) newsPoolFR = newsPoolFR.slice(-120);
+                    }
                     updateAINewsTickerFR();
                 }
             );
@@ -1630,7 +1649,6 @@
             if (!aiNewsActive) return;
             if (newsPool.length === 0) {
                 document.getElementById('aiNewsHeadline').textContent = 'Connecting to the JP AI Newsroom · Retrieving the latest global headlines...';
-                // Instead of fetching again, rely on the already-running fetchWorldNews
                 aiNewsLoopTimeoutId = setTimeout(startAINewsTVLoop, 1500);
                 return;
             }
@@ -1710,8 +1728,6 @@
             startAINewsClock();
             aiNewsHeadlinesInCycle = 0;
             aiNewsActive = true;
-            // The initial fetch is already kicked off by startRadio(); just start the loop.
-            // If the pool is still empty, the loop will spin harmlessly until items arrive.
             startAINewsTVLoop();
         }
 
@@ -1751,6 +1767,74 @@
             const s = document.getElementById('aiNewsStudioFr');
             if (s) s.classList.remove('active');
         }
+
+        // ============================================================
+        // 🐕 WATCHDOG — Restart AI news loops if they ever stall
+        // ============================================================
+        function startWatchdog() {
+            setInterval(() => {
+                const speechActive = speechSynth && (speechSynth.speaking || speechSynth.pending);
+                // EN watchdog
+                if (currentChannel === 'mix' && aiNewsActive
+                    && !aiNewsLoopTimeoutId
+                    && !newsThemeTimeoutId
+                    && !speechActive
+                    && newsPool.length > 0) {
+                    console.log('🐕 Watchdog: restarting AI News EN loop');
+                    aiNewsHeadlinesInCycle = 0;
+                    startAINewsTVLoop();
+                }
+                // FR watchdog
+                if (currentChannel === 'mix_fr' && aiNewsFrActive
+                    && !aiNewsFrLoopTimeoutId
+                    && !newsThemeTimeoutId
+                    && !speechActive
+                    && newsPoolFR.length > 0) {
+                    console.log('🐕 Watchdog: restarting AI News FR loop');
+                    aiNewsFrHeadlinesInCycle = 0;
+                    startAINewsTVLoopFR();
+                }
+                // Music stream watchdog — if audio died and we should be playing music
+                if (musicChannels.includes(currentChannel)
+                    && audioElement
+                    && !isMuted
+                    && !adInProgress
+                    && !audioElement.paused
+                    && audioElement.readyState === 0
+                    && audioElement.networkState === 3) {
+                    // networkState 3 = NETWORK_NO_SOURCE — stream failed
+                    attemptStreamRecovery();
+                }
+            }, WATCHDOG_INTERVAL_MS);
+        }
+
+        // ============================================================
+        // 🔄 STREAM AUTO-RECOVERY — Retry failed music streams
+        // ============================================================
+        function attemptStreamRecovery() {
+            if (!musicChannels.includes(currentChannel)) return;
+            if (streamRetryCount >= MAX_STREAM_RETRIES) {
+                // Give up for now, move to next stream in the category
+                streamRetryCount = 0;
+                const streams = radioStations[currentChannel].streams;
+                if (streams.length > 1) {
+                    currentStationIndex = (currentStationIndex + 1) % streams.length;
+                }
+                playStream();
+                return;
+            }
+            streamRetryCount++;
+            console.log(`🔄 Stream recovery attempt ${streamRetryCount}/${MAX_STREAM_RETRIES}`);
+            if (streamRetryTimer) clearTimeout(streamRetryTimer);
+            streamRetryTimer = setTimeout(() => {
+                if (audioElement && musicChannels.includes(currentChannel)) {
+                    audioElement.load();
+                    audioElement.play().catch(() => {});
+                }
+            }, 2000);
+        }
+
+        function resetStreamRetry() { streamRetryCount = 0; }
 
         // DEBATE
         const debatePlaybook = {
@@ -1813,7 +1897,7 @@
                 {role:'mod',voiceRole:'moderator',text:`Closing statements.`},
                 {role:'aff',voiceRole:'affirmative',text:playbook.aff.closing(topicTitle)},
                 {role:'neg',voiceRole:'negative',text:playbook.neg.closing(topicTitle)},
-                {role:'mod',voiceRole:'moderator',text:`That concludes our debate on "${topicTitle}". Thank you to both guests and to our audience. We would love to hear your thoughts — please send your opinions and feedback to jpierre722@yahoo.com. We now return you to our R&B and Soul channel. Enjoy the music.`}
+                {role:'mod',voiceRole:'moderator',text:`That concludes our debate on "${topicTitle}". Thank you to both guests and to our audience. We would love to hear your thoughts — please send your opinions and feedback to jpierre722@yahoo.com. We now return you to our AI News Flash channel. Enjoy the broadcast.`}
             ];
             let step = 0;
             const roleEl = document.getElementById('currentSpeakerRole');
@@ -1897,6 +1981,7 @@
             if (sportMusicInterval) { clearInterval(sportMusicInterval); sportMusicInterval = null; }
             stopAINewsTV(); stopAINewsTVFR();
             clearAdScheduler(); stopReadingLoop();
+            resetStreamRetry();
 
             if (currentChannel === 'mix') { if (audioElement) audioElement.pause(); startAINewsTV(); return; }
             if (currentChannel === 'mix_fr') { if (audioElement) audioElement.pause(); startAINewsTVFR(); return; }
@@ -2106,10 +2191,21 @@
             audioElement = new Audio();
             audioElement.crossOrigin = "anonymous";
             audioElement.volume = isMuted ? 0 : volume;
-            audioElement.addEventListener('play', () => { isPlaying = true; document.getElementById('playBtn').textContent='⏸'; document.getElementById('audioStatus').textContent='🔊 Streaming Live'; });
+            audioElement.addEventListener('play', () => { isPlaying = true; document.getElementById('playBtn').textContent='⏸'; document.getElementById('audioStatus').textContent='🔊 Streaming Live'; resetStreamRetry(); });
             audioElement.addEventListener('pause', () => { isPlaying = false; document.getElementById('playBtn').textContent='▶'; document.getElementById('audioStatus').textContent='⏸ Paused'; });
-            audioElement.addEventListener('playing', () => { document.getElementById('audioStatus').textContent='✅ Playing'; });
-            audioElement.addEventListener('error', () => { document.getElementById('audioStatus').textContent='⚠️ Stream error'; });
+            audioElement.addEventListener('playing', () => { document.getElementById('audioStatus').textContent='✅ Playing'; resetStreamRetry(); });
+            audioElement.addEventListener('error', () => {
+                document.getElementById('audioStatus').textContent='⚠️ Stream error — recovering...';
+                attemptStreamRecovery();
+            });
+            audioElement.addEventListener('stalled', () => {
+                document.getElementById('audioStatus').textContent='⚠️ Stream stalled — recovering...';
+                attemptStreamRecovery();
+            });
+            audioElement.addEventListener('ended', () => {
+                // Some live streams may end unexpectedly; try to recover
+                if (musicChannels.includes(currentChannel)) attemptStreamRecovery();
+            });
         }
         function updateClock() { document.getElementById('currentTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
         function updateListeners() { listeners += Math.floor(Math.random()*20)-5; listeners = Math.max(1500, Math.min(5000, listeners)); document.getElementById('listeners').textContent = listeners.toLocaleString(); }
@@ -2132,14 +2228,14 @@
                 setTimeout(() => { setupVoices(); pickDebateVoices(); }, 3000);
             }
 
-            // 🔥 KICK OFF ALL FETCHES IMMEDIATELY (parallel, non-blocking)
+            // ⚡ Kick off ALL fetches immediately (parallel, non-blocking)
             fetchWorldNews();
             fetchWorldNewsFR();
             fetchSportsNews();
             fetchWeather();
             fetchSportsScores();
 
-            // 🎬 Start on AI News Flash TV (EN) — the new default channel
+            // 🎬 Start on AI News Flash TV (EN)
             currentChannel = 'mix';
             currentStationIndex = 0;
             document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
@@ -2149,19 +2245,29 @@
             if (btns[idx]) btns[idx].classList.add('active');
             playStream();
 
+            // ⏰ Clock & listeners
             updateClock();
             adjustVolume(document.getElementById('volumeSlider').value);
             setInterval(updateClock, 1000);
-            setInterval(fetchWorldNews, 3600000);
-            setInterval(fetchWorldNewsFR, 3600000);
-            setInterval(fetchSportsNews, 3600000);
-            setInterval(fetchWeather, 600000);
-            setInterval(fetchSportsScores, 60000);
-            setInterval(displayNextNews, 10000);
             updateListeners();
             setInterval(updateListeners, 15000);
             updateScheduleHighlight();
             setInterval(updateScheduleHighlight, 60000);
+
+            // 🔄 AUTO-UPDATE ALL CHANNELS
+            setInterval(fetchWorldNews, NEWS_REFRESH_INTERVAL_MS);          // Global news EN every 4 min
+            setInterval(fetchWorldNewsFR, NEWS_REFRESH_INTERVAL_MS);        // Global news FR every 4 min
+            setInterval(fetchSportsNews, SPORTS_REFRESH_INTERVAL_MS);       // Sports headlines every 15 min
+            setInterval(fetchWeather, WEATHER_REFRESH_INTERVAL_MS);         // Weather every 5 min
+            setInterval(fetchSportsScores, SCORES_REFRESH_INTERVAL_MS);     // Live scores every 60 sec
+            setInterval(displayNextNews, NEWS_TICKER_ROTATE_MS);            // Rotate wire ticker every 9 sec
+
+            // 🐕 Start the watchdog to keep AI news loops alive
+            startWatchdog();
+
+            console.log('%c🤖 JP AI Radio · v25 · AUTO-UPDATING ALL CHANNELS', 'color:#c9a961;font-weight:bold;font-size:14px;');
+            console.log('%c📰 News refreshes every 4 min (EN & FR) · Sports every 15 min · Weather every 5 min · Live scores every 60 sec', 'color:#c9a961;');
+            console.log('%c🐕 Watchdog keeps AI News loops alive · Music streams auto-recover from errors', 'color:#c9a961;');
         }
 
         window.refreshWorldNews = refreshWorldNews;
@@ -2169,9 +2275,7 @@
         createVisualizer();
         updateScheduleHighlight();
         document.getElementById('cityInput').value = 'Boston, MA';
-        console.log('%c🤖 JP AI Radio · v24 · AI News Flash TV (EN) is now the default first channel', 'color:#c9a961;font-weight:bold;');
-        console.log('%c⚡ Fast news loading: parallel fetches, 4s timeouts, first-batch streaming', 'color:#c9a961;font-weight:bold;');
-        console.log('%c📸 FR images match headlines · sharp imagery · ABC-style broadcast theme', 'color:#c9a961;font-weight:bold;');
+        console.log('%c✅ JP AI Radio ready — press Tune In to start the auto-updating broadcast', 'color:#c9a961;font-weight:bold;');
     </script>
 </body>
 </html>
