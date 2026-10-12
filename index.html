@@ -429,11 +429,11 @@
                 <div class="contact-marquee">
                     📧 <span class="marquee-em">For suggestions or support:</span> <a href="mailto:jpierre722@yahoo.com">jpierre722@yahoo.com</a>
                     <span class="marquee-divider">◆</span>
-                    🗞️ <span class="marquee-em">Full-cycle broadcast:</span> every available headline (0 to 100+) is read before the 60-second pause
+                    🗞️ <span class="marquee-em">Single-play broadcast:</span> each headline airs once per session, then the system waits for fresh stories
                     <span class="marquee-divider">◆</span>
-                    🔄 <span class="marquee-em">No repeats:</span> stories already broadcast are skipped for 6 hours unless updated
+                    🚫 <span class="marquee-em">No repeats:</span> the session never loops back to a story that already played
                     <span class="marquee-divider">◆</span>
-                    ⏱️ <span class="marquee-em">Auto-refresh:</span> feeds are pulled every 15 minutes to keep coverage current
+                    ⏱️ <span class="marquee-em">Auto-refresh:</span> feeds are pulled every 15 minutes (and every 60 s while waiting for fresh content)
                     <span class="marquee-divider">◆</span>
                     🌍 <span class="marquee-em">Balanced coverage:</span> Ukraine · Middle East · Africa · Caribbean · Vatican · Finance · Tech · Health · Climate · Education · Humanitarian
                     <span class="marquee-divider">◆</span>
@@ -488,16 +488,16 @@
 
     <script>
         // ============================================================
-        // JP AI RADIO — v28.1 · FULL-CYCLE BROADCAST + 15-MIN REFRESH
+        // JP AI RADIO — v29 · TRUE SINGLE-PLAY BROADCAST
         // ------------------------------------------------------------
-        // • Reads EVERY available headline (0 to 100+) before pausing
-        // • Only then takes a 60-second break and starts a fresh cycle
-        // • Deduplicates stories across flashes (6-hour memory)
-        // • Balanced queue: categories interleaved for topic diversity
-        // • Massive regional feed list: Ukraine · Middle East · Africa
-        //   Caribbean · Vatican · Finance · Tech/AI · Health · Climate
-        //   Education · Humanitarian · Military · Asia · LatAm
-        // • 🆕 Feeds auto-refresh every 15 minutes (was 4 minutes)
+        // CORE FIX (the bug you reported):
+        //   • Removed Tier-3 auto-reset from beginNewCycle.
+        //   • beginNewCycle returns TRUE if a fresh cycle is available,
+        //     FALSE otherwise. It NEVER wipes the session memory.
+        //   • When the queue is exhausted AND no fresh stories exist,
+        //     the system enters WAITING MODE: theme music loops,
+        //     feed refreshes every 60 s, and a new cycle starts the
+        //     moment genuinely new headlines arrive.
         // ============================================================
 
         const HAITIAN_VOICE_MASTER_PROMPT = {enabled:true,tone:'dous, cho, natif natal',pronunciation:'kreyòl ayisyen klè',nasalRule:'an, en, on, oun byen make — n pa yon konsòn separe',substitutions:{'ou':'oo','è':'eh','ò':'aw','ay':'eye','im':'eem'},constraints:['pa tradui','pa chanje mo yo','li egzak jan li ekri','ritm natirèl yon Ayisyen'],delivery:{rate:0.72,pitch:0.92,volume:1.0,pauseBetweenSentences:900,pauseBetweenChunks:1400}};
@@ -688,6 +688,20 @@
         function pruneSeenStories() {
             const cutoff = Date.now() - SEEN_STORY_TTL_MS;
             for (const [key, rec] of SEEN_STORY_REGISTRY.entries()) if (rec.lastSeen < cutoff) SEEN_STORY_REGISTRY.delete(key);
+        }
+
+        // Session-played registries — persist for the duration of the broadcast session.
+        // They are NEVER reset by any cycle logic. Only a full page reload clears them.
+        let aiNewsSessionPlayed = new Set();
+        let aiNewsFrSessionPlayed = new Set();
+        const SESSION_PLAYED_MAX = 5000;
+        function capSessionPlayed(set) {
+            if (set.size > SESSION_PLAYED_MAX) {
+                const arr = Array.from(set);
+                set.clear();
+                const keep = Math.floor(SESSION_PLAYED_MAX / 2);
+                for (let i = arr.length - keep; i < arr.length; i++) set.add(arr[i]);
+            }
         }
 
         function buildBalancedQueue(pool, lang) {
@@ -940,10 +954,6 @@
                     displayNextNews();
                     updateAINewsTicker();
                     document.getElementById('dataStatus').textContent = `✅ Live headlines streaming (${newsPool.length} items)`;
-                    if (aiNewsActive && aiNewsCycleIdx === 0 && aiNewsLoopTimeoutId === null && !isSpeaking && newsPool.length > 0) {
-                        beginNewCycle('en');
-                        startAINewsTVLoop();
-                    }
                 },
                 (finalItems) => {
                     if (newsPool.length === 0) newsPool = finalItems;
@@ -968,10 +978,6 @@
                         if (newsPoolFR.length > 400) newsPoolFR = newsPoolFR.slice(-400);
                     }
                     updateAINewsTickerFR();
-                    if (aiNewsFrActive && aiNewsFrCycleIdx === 0 && aiNewsFrLoopTimeoutId === null && !isSpeaking && newsPoolFR.length > 0) {
-                        beginNewCycle('fr');
-                        startAINewsTVLoopFR();
-                    }
                 },
                 (finalItems) => {
                     if (newsPoolFR.length === 0) newsPoolFR = finalItems;
@@ -1302,14 +1308,15 @@
         let aiNewsActive = false, aiNewsLoopTimeoutId = null, aiNewsClockInterval = null;
         let aiNewsHeadlineIndex = 0, currentImageSlot = 'A';
         let aiNewsCycleQueue = [], aiNewsCycleIdx = 0;
+        let aiNewsWaitingMode = false;
 
         let aiNewsFrActive = false, aiNewsFrLoopTimeoutId = null, aiNewsFrClockInterval = null;
         let aiNewsFrHeadlineIndex = 0, currentFrImageSlot = 'A';
         let aiNewsFrCycleQueue = [], aiNewsFrCycleIdx = 0;
+        let aiNewsFrWaitingMode = false;
 
         const THEME_DURATION_MS = 60000;
-        // 🆕 15-minute feed auto-refresh (was 4 minutes)
-        const NEWS_REFRESH_INTERVAL_MS = 15 * 60 * 1000;   // 900000 ms = 15 minutes
+        const NEWS_REFRESH_INTERVAL_MS = 15 * 60 * 1000;
         const SPORTS_REFRESH_INTERVAL_MS = 900000;
         const WEATHER_REFRESH_INTERVAL_MS = 300000;
         const SCORES_REFRESH_INTERVAL_MS = 60000;
@@ -1317,6 +1324,7 @@
         const WATCHDOG_INTERVAL_MS = 20000;
         const STORY_IMAGE_ROTATE_MS = 8000;
         const STORY_MEDIA_FETCH_TIMEOUT_MS = 6000;
+        const WAIT_RETRY_INTERVAL_MS = 60000;
 
         let streamRetryCount = 0;
         const MAX_STREAM_RETRIES = 5;
@@ -1396,7 +1404,7 @@
                 detailsEl.textContent = detail || (CATEGORY_EXPANSIONS_EN[category] || CATEGORY_EXPANSIONS_EN['WORLD NEWS']);
                 detailsEl.classList.remove('fade-out');
             }, 220);
-            document.getElementById('aiNewsCounter').textContent = `Headline ${aiNewsCycleIdx} of ${aiNewsCycleQueue.length}`;
+            document.getElementById('aiNewsCounter').textContent = `Headline ${aiNewsCycleIdx} of ${aiNewsCycleQueue.length} · ${aiNewsSessionPlayed.size} aired this session`;
             const next = aiNewsCycleQueue[aiNewsCycleIdx];
             if (next) document.getElementById('aiNewsNextHeadline').textContent = next.title;
             try { const pkg = buildProductionPackage(item, 'en'); renderProductionPackage(pkg, document.getElementById('productionBodyEN')); logProductionPackage(pkg, 'EN'); } catch (e) { console.warn('Production package (EN) error:', e); }
@@ -1430,7 +1438,7 @@
                 detailsEl.textContent = detail || (CATEGORY_EXPANSIONS_FR[category] || CATEGORY_EXPANSIONS_FR['ACTUALITÉS MONDIALES']);
                 detailsEl.classList.remove('fade-out');
             }, 220);
-            document.getElementById('aiNewsFrCounter').textContent = `Titre ${aiNewsFrCycleIdx} sur ${aiNewsFrCycleQueue.length}`;
+            document.getElementById('aiNewsFrCounter').textContent = `Titre ${aiNewsFrCycleIdx} sur ${aiNewsFrCycleQueue.length} · ${aiNewsFrSessionPlayed.size} diffusés cette session`;
             const next = aiNewsFrCycleQueue[aiNewsFrCycleIdx];
             if (next) document.getElementById('aiNewsFrNextHeadline').textContent = next.title;
             try { const pkg = buildProductionPackage(item, 'fr'); renderProductionPackage(pkg, document.getElementById('productionBodyFR')); logProductionPackage(pkg, 'FR'); } catch (e) { console.warn('Production package (FR) error:', e); }
@@ -1477,48 +1485,140 @@
             update(); aiNewsFrClockInterval = setInterval(update, 1000);
         }
 
+        // ============================================================
+        // 🔒 BEGIN NEW CYCLE — returns TRUE if a new cycle was built,
+        // FALSE if there are no unplayed stories left. It NEVER resets
+        // the session registry automatically.
+        // ============================================================
         function beginNewCycle(lang) {
             pruneSeenStories();
             const pool = lang === 'fr' ? newsPoolFR : newsPool;
-            if (pool.length === 0) return;
-            const fresh = pool.filter(item => isStoryFresh(item));
-            const usePool = fresh.length >= 15 ? fresh : pool;
-            const balanced = buildBalancedQueue(usePool, lang);
+            if (pool.length === 0) return false;
+            const sessionPlayed = lang === 'fr' ? aiNewsFrSessionPlayed : aiNewsSessionPlayed;
+            capSessionPlayed(sessionPlayed);
+
+            // Only stories NOT played this session
+            const fresh = pool.filter(item => !sessionPlayed.has(storyFingerprint(item)));
+
+            if (fresh.length === 0) {
+                console.log(`⏳ ${lang.toUpperCase()}: no unplayed stories remaining — will wait for fresh content`);
+                return false;
+            }
+
+            const balanced = buildBalancedQueue(fresh, lang);
             if (lang === 'fr') { aiNewsFrCycleQueue = balanced; aiNewsFrCycleIdx = 0; }
             else { aiNewsCycleQueue = balanced; aiNewsCycleIdx = 0; }
-            console.log(`🔁 New ${lang.toUpperCase()} cycle: ${balanced.length} headlines queued (${fresh.length} fresh of ${pool.length})`);
+            console.log(`🔁 New ${lang.toUpperCase()} cycle: ${balanced.length} headlines (${sessionPlayed.size} already played this session)`);
+            return true;
+        }
+
+        // ============================================================
+        // ⏳ WAITING MODE — theme music loops, feed refreshes, and a
+        // new cycle starts the moment new headlines arrive.
+        // ============================================================
+        function waitForFreshStories(lang) {
+            const isActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
+            if (!isActive) return;
+
+            if (lang === 'fr') aiNewsFrWaitingMode = true; else aiNewsWaitingMode = true;
+
+            // Trigger a fresh feed pull
+            if (lang === 'fr') fetchWorldNewsFR(); else fetchWorldNews();
+
+            // Try to build a cycle with whatever is currently in the pool
+            if (beginNewCycle(lang)) {
+                console.log(`✅ Fresh content arrived for ${lang.toUpperCase()} — starting new cycle`);
+                if (lang === 'fr') aiNewsFrWaitingMode = false; else aiNewsWaitingMode = false;
+                playNewsTheme(THEME_DURATION_MS, () => {
+                    const stillActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
+                    if (!stillActive) return;
+                    if (lang === 'fr') startAINewsTVLoopFR(); else startAINewsTVLoop();
+                });
+                return;
+            }
+
+            // Still nothing — update the on-screen message and loop the theme
+            const catEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCategory' : 'aiNewsCategory');
+            const headEl = document.getElementById(lang === 'fr' ? 'aiNewsFrHeadline' : 'aiNewsHeadline');
+            const detEl = document.getElementById(lang === 'fr' ? 'aiNewsFrDetails' : 'aiNewsDetails');
+            const cntEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCounter' : 'aiNewsCounter');
+            if (catEl) catEl.textContent = lang === 'fr' ? 'EN ATTENTE DE NOUVELLES' : 'AWAITING NEW STORIES';
+            if (headEl) headEl.textContent = lang === 'fr' ? 'En attente de nouveaux titres de la salle de presse JP IA...' : 'Awaiting fresh stories from the JP AI News Room...';
+            if (detEl) detEl.textContent = lang === 'fr'
+                ? `Les ${aiNewsFrSessionPlayed.size} titres disponibles ont été diffusés. De nouvelles histoires commenceront dès leur arrivée.`
+                : `All ${aiNewsSessionPlayed.size} available headlines have aired. New stories will begin the moment they arrive.`;
+            if (cntEl) cntEl.textContent = lang === 'fr'
+                ? `Total session : ${aiNewsFrSessionPlayed.size} titres · Surveillance du flux`
+                : `Session total: ${aiNewsSessionPlayed.size} headlines · Monitoring feed`;
+
+            console.log(`⏳ ${lang.toUpperCase()} waiting for fresh content — retry in ${WAIT_RETRY_INTERVAL_MS/1000}s`);
+
+            // Keep the theme playing; on completion we loop back here
+            playNewsTheme(THEME_DURATION_MS, () => {
+                const stillActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
+                if (!stillActive) return;
+                waitForFreshStories(lang);
+            });
         }
 
         function startAINewsTVLoop() {
             if (!aiNewsActive) return;
+            if (aiNewsWaitingMode) return;   // waitForFreshStories owns the loop
+
             if (aiNewsCycleQueue.length === 0) {
                 if (newsPool.length === 0) {
                     document.getElementById('aiNewsHeadline').textContent = 'Connecting to the JP AI News Room · Retrieving the latest global headlines...';
                     aiNewsLoopTimeoutId = setTimeout(startAINewsTVLoop, 1500);
                     return;
                 }
-                beginNewCycle('en');
-                if (aiNewsCycleQueue.length === 0) { aiNewsLoopTimeoutId = setTimeout(startAINewsTVLoop, 1500); return; }
+                if (!beginNewCycle('en')) {
+                    // No unplayed stories at all — enter waiting mode
+                    waitForFreshStories('en');
+                    return;
+                }
             }
+
+            // Skip any story that has already played this session
+            while (aiNewsCycleIdx < aiNewsCycleQueue.length) {
+                const fp = storyFingerprint(aiNewsCycleQueue[aiNewsCycleIdx]);
+                if (!aiNewsSessionPlayed.has(fp)) break;
+                aiNewsCycleIdx++;
+            }
+
             if (aiNewsCycleIdx >= aiNewsCycleQueue.length) {
-                const closingMsg = `That completes this news flash — ${aiNewsCycleQueue.length} stories from the JP AI News Room. Stay tuned. A new news flash begins in 60 seconds.`;
-                document.getElementById('aiNewsCategory').textContent = 'STAY TUNED';
-                document.getElementById('aiNewsHeadline').textContent = 'Stay tuned — next news flash in 60 seconds...';
-                document.getElementById('aiNewsDetails').textContent = '';
-                document.getElementById('aiNewsCounter').textContent = 'Cycle complete · Next flash in 60 seconds';
-                speakSingle(closingMsg, {isFemale: false, pitch: 0.82, rate: 0.93, langCode: 'en', onEndCallback: () => {
-                    if (!aiNewsActive) return;
-                    playNewsTheme(THEME_DURATION_MS, () => {
+                // Cycle exhausted. Try to build a new cycle from unplayed stories.
+                if (beginNewCycle('en')) {
+                    const closingMsg = "That completes this news flash from the JP AI News Room. Stay tuned. A new news flash begins in 60 seconds.";
+                    document.getElementById('aiNewsCategory').textContent = 'STAY TUNED';
+                    document.getElementById('aiNewsHeadline').textContent = 'Stay tuned — next news flash in 60 seconds...';
+                    document.getElementById('aiNewsDetails').textContent = '';
+                    document.getElementById('aiNewsCounter').textContent = `Cycle complete · ${aiNewsSessionPlayed.size} headlines aired this session · Next flash in 60 seconds`;
+                    speakSingle(closingMsg, {isFemale: false, pitch: 0.82, rate: 0.93, langCode: 'en', onEndCallback: () => {
                         if (!aiNewsActive) return;
-                        fetchWorldNews();
-                        beginNewCycle('en');
-                        startAINewsTVLoop();
-                    });
+                        playNewsTheme(THEME_DURATION_MS, () => {
+                            if (!aiNewsActive) return;
+                            startAINewsTVLoop();
+                        });
+                    }});
+                    return;
+                }
+
+                // No fresh content — enter waiting mode
+                const waitMsg = "That completes this news flash. Every available headline from the JP AI News Room has now been broadcast. We are waiting for fresh updates. A new news flash will begin as soon as new stories arrive.";
+                document.getElementById('aiNewsCategory').textContent = 'AWAITING NEW STORIES';
+                document.getElementById('aiNewsHeadline').textContent = 'Awaiting fresh stories from the JP AI News Room...';
+                document.getElementById('aiNewsDetails').textContent = `All ${aiNewsSessionPlayed.size} available headlines have aired. New stories will begin the moment they arrive.`;
+                document.getElementById('aiNewsCounter').textContent = `Session total: ${aiNewsSessionPlayed.size} headlines · Monitoring feed`;
+                speakSingle(waitMsg, {isFemale: false, pitch: 0.82, rate: 0.93, langCode: 'en', onEndCallback: () => {
+                    if (!aiNewsActive) return;
+                    waitForFreshStories('en');
                 }});
                 return;
             }
+
             const item = aiNewsCycleQueue[aiNewsCycleIdx];
             aiNewsCycleIdx++;
+            aiNewsSessionPlayed.add(storyFingerprint(item));
             markStoryAsSeen(item);
             displayAIHeadline(item);
             updateAINewsTicker();
@@ -1531,34 +1631,58 @@
 
         function startAINewsTVLoopFR() {
             if (!aiNewsFrActive) return;
+            if (aiNewsFrWaitingMode) return;
+
             if (aiNewsFrCycleQueue.length === 0) {
                 if (newsPoolFR.length === 0) {
                     document.getElementById('aiNewsFrHeadline').textContent = 'Connexion à la salle de presse JP IA · Chargement des derniers titres mondiaux...';
                     aiNewsFrLoopTimeoutId = setTimeout(startAINewsTVLoopFR, 1500);
                     return;
                 }
-                beginNewCycle('fr');
-                if (aiNewsFrCycleQueue.length === 0) { aiNewsFrLoopTimeoutId = setTimeout(startAINewsTVLoopFR, 1500); return; }
+                if (!beginNewCycle('fr')) {
+                    waitForFreshStories('fr');
+                    return;
+                }
             }
+
+            while (aiNewsFrCycleIdx < aiNewsFrCycleQueue.length) {
+                const fp = storyFingerprint(aiNewsFrCycleQueue[aiNewsFrCycleIdx]);
+                if (!aiNewsFrSessionPlayed.has(fp)) break;
+                aiNewsFrCycleIdx++;
+            }
+
             if (aiNewsFrCycleIdx >= aiNewsFrCycleQueue.length) {
-                const closingMsgFR = `Ceci conclut ce flash d'information — ${aiNewsFrCycleQueue.length} titres de la salle de presse JP IA. Restez à l'écoute. Un nouveau flash commence dans 60 secondes.`;
-                document.getElementById('aiNewsFrCategory').textContent = 'RESTEZ À L\'ÉCOUTE';
-                document.getElementById('aiNewsFrHeadline').textContent = 'Restez à l\'écoute — prochain flash dans 60 secondes...';
-                document.getElementById('aiNewsFrDetails').textContent = '';
-                document.getElementById('aiNewsFrCounter').textContent = 'Cycle terminé · Prochain flash dans 60 secondes';
-                speakSingle(closingMsgFR, {isFemale: false, pitch: 0.88, rate: 0.94, langCode: 'fr', onEndCallback: () => {
-                    if (!aiNewsFrActive) return;
-                    playNewsTheme(THEME_DURATION_MS, () => {
+                if (beginNewCycle('fr')) {
+                    const closingMsgFR = "Ceci conclut ce flash d'information de la salle de presse JP IA. Restez à l'écoute. Un nouveau flash commence dans 60 secondes.";
+                    document.getElementById('aiNewsFrCategory').textContent = 'RESTEZ À L\'ÉCOUTE';
+                    document.getElementById('aiNewsFrHeadline').textContent = 'Restez à l\'écoute — prochain flash dans 60 secondes...';
+                    document.getElementById('aiNewsFrDetails').textContent = '';
+                    document.getElementById('aiNewsFrCounter').textContent = `Cycle terminé · ${aiNewsFrSessionPlayed.size} titres diffusés · Prochain flash dans 60 secondes`;
+                    speakSingle(closingMsgFR, {isFemale: false, pitch: 0.88, rate: 0.94, langCode: 'fr', onEndCallback: () => {
                         if (!aiNewsFrActive) return;
-                        fetchWorldNewsFR();
-                        beginNewCycle('fr');
-                        startAINewsTVLoopFR();
-                    });
+                        playNewsTheme(THEME_DURATION_MS, () => {
+                            if (!aiNewsFrActive) return;
+                            startAINewsTVLoopFR();
+                        });
+                    }});
+                    return;
+                }
+
+                const waitMsgFR = "Ceci conclut ce flash d'information. Tous les titres disponibles de la salle de presse JP IA ont été diffusés. Nous attendons de nouvelles mises à jour. Un nouveau flash commencera dès l'arrivée de nouvelles histoires.";
+                document.getElementById('aiNewsFrCategory').textContent = 'EN ATTENTE DE NOUVELLES';
+                document.getElementById('aiNewsFrHeadline').textContent = 'En attente de nouveaux titres de la salle de presse JP IA...';
+                document.getElementById('aiNewsFrDetails').textContent = `Les ${aiNewsFrSessionPlayed.size} titres disponibles ont été diffusés. De nouvelles histoires commenceront dès leur arrivée.`;
+                document.getElementById('aiNewsFrCounter').textContent = `Total session : ${aiNewsFrSessionPlayed.size} titres · Surveillance du flux`;
+                speakSingle(waitMsgFR, {isFemale: false, pitch: 0.88, rate: 0.94, langCode: 'fr', onEndCallback: () => {
+                    if (!aiNewsFrActive) return;
+                    waitForFreshStories('fr');
                 }});
                 return;
             }
+
             const item = aiNewsFrCycleQueue[aiNewsFrCycleIdx];
             aiNewsFrCycleIdx++;
+            aiNewsFrSessionPlayed.add(storyFingerprint(item));
             markStoryAsSeen(item);
             displayAIHeadlineFR(item);
             updateAINewsTickerFR();
@@ -1577,12 +1701,13 @@
             document.getElementById('audioStatus').textContent = '🤖 AI News Flash TV · Broadcasting Live';
             document.getElementById('trackTitle').textContent = 'JP AI News Flash TV';
             document.getElementById('trackArtist').textContent = '100% AI-Generated Broadcast';
-            document.getElementById('trackGenre').textContent = 'Full-cycle broadcast · Every headline, no repeats · 15-min refresh';
+            document.getElementById('trackGenre').textContent = 'Single-play broadcast · Every headline once · 15-min refresh';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
             startAINewsClock();
             aiNewsActive = true;
+            aiNewsWaitingMode = false;
             if (aiNewsCycleQueue.length === 0) beginNewCycle('en');
             startAINewsTVLoop();
         }
@@ -1595,12 +1720,13 @@
             document.getElementById('audioStatus').textContent = '🤖 Info Flash TV · Diffusion en direct';
             document.getElementById('trackTitle').textContent = 'JP IA Info Flash TV';
             document.getElementById('trackArtist').textContent = 'Diffusion 100% générée par IA';
-            document.getElementById('trackGenre').textContent = 'Cycle complet · Chaque titre, sans répétition · Rafraîchissement 15 min';
+            document.getElementById('trackGenre').textContent = 'Diffusion unique · Chaque titre une fois · Rafraîchissement 15 min';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
             startAINewsClockFR();
             aiNewsFrActive = true;
+            aiNewsFrWaitingMode = false;
             if (aiNewsFrCycleQueue.length === 0) beginNewCycle('fr');
             startAINewsTVLoopFR();
         }
@@ -1609,6 +1735,7 @@
             stopStoryImageSlideshow('en');
             stopNewsVideoLoop('en');
             aiNewsActive = false;
+            aiNewsWaitingMode = false;
             if (aiNewsLoopTimeoutId) { clearTimeout(aiNewsLoopTimeoutId); aiNewsLoopTimeoutId = null; }
             if (aiNewsClockInterval) { clearInterval(aiNewsClockInterval); aiNewsClockInterval = null; }
             stopNewsTheme();
@@ -1620,6 +1747,7 @@
             stopStoryImageSlideshow('fr');
             stopNewsVideoLoop('fr');
             aiNewsFrActive = false;
+            aiNewsFrWaitingMode = false;
             if (aiNewsFrLoopTimeoutId) { clearTimeout(aiNewsFrLoopTimeoutId); aiNewsFrLoopTimeoutId = null; }
             if (aiNewsFrClockInterval) { clearInterval(aiNewsFrClockInterval); aiNewsFrClockInterval = null; }
             stopNewsTheme();
@@ -1631,10 +1759,10 @@
         function startWatchdog() {
             setInterval(() => {
                 const speechActive = speechSynth && (speechSynth.speaking || speechSynth.pending);
-                if (currentChannel === 'mix' && aiNewsActive && !aiNewsLoopTimeoutId && !newsThemeTimeoutId && !speechActive && aiNewsCycleQueue.length > 0) {
+                if (currentChannel === 'mix' && aiNewsActive && !aiNewsWaitingMode && !aiNewsLoopTimeoutId && !newsThemeTimeoutId && !speechActive && aiNewsCycleQueue.length > 0) {
                     startAINewsTVLoop();
                 }
-                if (currentChannel === 'mix_fr' && aiNewsFrActive && !aiNewsFrLoopTimeoutId && !newsThemeTimeoutId && !speechActive && aiNewsFrCycleQueue.length > 0) {
+                if (currentChannel === 'mix_fr' && aiNewsFrActive && !aiNewsFrWaitingMode && !aiNewsFrLoopTimeoutId && !newsThemeTimeoutId && !speechActive && aiNewsFrCycleQueue.length > 0) {
                     startAINewsTVLoopFR();
                 }
                 if (musicChannels.includes(currentChannel) && audioElement && !isMuted && !adInProgress && !audioElement.paused && audioElement.readyState === 0 && audioElement.networkState === 3) {
@@ -1900,7 +2028,6 @@
             setInterval(updateListeners, 15000);
             updateScheduleHighlight();
             setInterval(updateScheduleHighlight, 60000);
-            // ⏱️ Auto-refresh news feeds every 15 minutes
             setInterval(fetchWorldNews, NEWS_REFRESH_INTERVAL_MS);
             setInterval(fetchWorldNewsFR, NEWS_REFRESH_INTERVAL_MS);
             setInterval(fetchSportsNews, SPORTS_REFRESH_INTERVAL_MS);
@@ -1909,12 +2036,10 @@
             setInterval(displayNextNews, NEWS_TICKER_ROTATE_MS);
             setInterval(pruneSeenStories, 1800000);
             startWatchdog();
-            console.log('%c🎬 JP AI Radio · FULL-CYCLE BROADCAST · v28.1', 'color:#c9a961;font-weight:bold;font-size:14px;');
-            console.log('%c⏱️ NEWS AUTO-REFRESH: every 15 minutes (English + French feeds)', 'color:#c9a961;font-weight:bold;');
-            console.log('%c📻 Every available headline (0 to 100+) is read before the 60-second pause', 'color:#c9a961;');
-            console.log('%c🔄 Stories are NOT repeated for 6 hours unless the pubDate changed (update/breaking)', 'color:#c9a961;');
-            console.log('%c🌍 Balanced coverage: Ukraine, Middle East, Africa, Caribbean, Vatican, Finance, Tech, Health, Climate, Education, Humanitarian', 'color:#c9a961;');
-            console.log('%c🎯 Categories are interleaved so consecutive stories always come from different topics', 'color:#c9a961;');
+            console.log('%c🎬 JP AI Radio · TRUE SINGLE-PLAY BROADCAST · v29', 'color:#c9a961;font-weight:bold;font-size:14px;');
+            console.log('%c🔒 Each headline plays EXACTLY ONCE per session — session registry NEVER auto-resets', 'color:#c9a961;font-weight:bold;');
+            console.log('%c⏳ When the pool is exhausted, the system enters WAITING MODE — theme music loops and feed refreshes every 60 s until new stories arrive', 'color:#c9a961;font-weight:bold;');
+            console.log('%c⏱️ NEWS AUTO-REFRESH: every 15 minutes (English + French feeds)', 'color:#c9a961;');
         }
 
         window.refreshWorldNews = refreshWorldNews;
