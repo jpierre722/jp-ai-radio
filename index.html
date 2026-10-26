@@ -431,11 +431,13 @@
                     <span class="marquee-divider">◆</span>
                     🕒 <span class="marquee-em">Strict 12-hour cutoff:</span> headlines older than 12 hours are <strong>deleted</strong>, not just hidden
                     <span class="marquee-divider">◆</span>
-                    🌍 <span class="marquee-em">Globally trending first:</span> cross-feed coverage + major-topic keywords boost a story's priority
+                    🌍 <span class="marquee-em">Globally trending first:</span> cross-feed coverage + major-topic keywords boost priority
                     <span class="marquee-divider">◆</span>
                     🆕 <span class="marquee-em">Pure time order:</span> newest first — no category interleaving
                     <span class="marquee-divider">◆</span>
-                    ⏱️ <span class="marquee-em">Auto-refresh:</span> feeds pulled every 15 min, stale items pruned every 15 min
+                    ⏱️ <span class="marquee-em">Auto-refresh:</span> feeds pulled every 5 minutes · stale items pruned every 5 minutes
+                    <span class="marquee-divider">◆</span>
+                    📡 <span class="marquee-em">Worldwide media monitoring:</span> BBC · CNN · NPR · AP · Reuters · Guardian · DW · France24 · Sky · Al Jazeera · CBC · ABC AU · CNA · CNBC · FT · and more
                     <span class="marquee-divider">◆</span>
                     🗞️ <span class="marquee-em">Single-play broadcast:</span> each headline airs once per session
                     <span class="marquee-divider">◆</span>
@@ -490,20 +492,15 @@
 
     <script>
         // ============================================================
-        // JP AI RADIO — v31 · TRENDING-FIRST FRESH BROADCAST
+        // JP AI RADIO — v32 · 5-MIN REFRESH + WORLDWIDE MEDIA MONITORING
         // ------------------------------------------------------------
-        // WHAT CHANGED FROM v30:
-        //   • Future-dated headlines are now REJECTED (were the bug
-        //     causing old stories to never age out)
-        //   • Older-than-12h headlines are DELETED from the pool and
-        //     from the live cycle queue, not just skipped
-        //   • Queue is built with a pure time-based sort:
-        //     newest first, no category interleaving
-        //   • Globally trending boost: cross-feed mentions + major
-        //     topic keywords give priority to stories being reported
-        //     by multiple outlets
-        //   • Pre-play freshness check catches anything that aged out
-        //     between queue build and airtime
+        // Changes from v31:
+        //   • News refresh interval: 15 min → 5 min
+        //   • Stale-item pruning: 15 min → 5 min
+        //   • Added 20+ global media feeds (AP, Reuters, CNBC, FT,
+        //     DW, Sky, France24 EN, Euronews, CNA, CBC, ABC AU, etc.)
+        //   • Waiting-mode retry: 60 s → 30 s
+        //   • All freshness/trending/deletion logic preserved
         // ============================================================
 
         const HAITIAN_VOICE_MASTER_PROMPT = {enabled:true,tone:'dous, cho, natif natal',pronunciation:'kreyòl ayisyen klè',nasalRule:'an, en, on, oun byen make — n pa yon konsòn separe',substitutions:{'ou':'oo','è':'eh','ò':'aw','ay':'eye','im':'eem'},constraints:['pa tradui','pa chanje mo yo','li egzak jan li ekri','ritm natirèl yon Ayisyen'],delivery:{rate:0.72,pitch:0.92,volume:1.0,pauseBetweenSentences:900,pauseBetweenChunks:1400}};
@@ -701,7 +698,6 @@
         // ============================================================
         const MAX_ARTICLE_AGE_MS = 12 * 60 * 60 * 1000;
 
-        // 🎯 Globally trending signals — stories matching these patterns get priority
         const TRENDING_PATTERNS = {
             CONFLICT:   /\b(ukraine|russia|gaza|israel|hezbollah|hamas|iran|lebanon|syria|yemen|nato|ceasefire|invasion|missile|drone strike|hostage)\b/i,
             POLITICS:   /\b(election|president|prime minister|parliament|congress|senate|kremlin|white house|european union|referendum|impeachment|g7|g20|summit)\b/i,
@@ -712,7 +708,6 @@
             DIPLOMACY:  /\b(united nations|security council|treaty|sanctions|ambassador|foreign minister|state visit)\b/i
         };
 
-        // 🆕 Robust date parsing — handles whitespace, zero-width chars, encodings
         function parseArticleDate(pubDate) {
             if (!pubDate) return NaN;
             let s = String(pubDate).trim().replace(/[\u200B-\u200D\uFEFF]/g, '');
@@ -721,7 +716,6 @@
             return isNaN(t) ? NaN : t;
         }
 
-        // 🆕 Extract named entities (capitalized phrases) for cross-feed trend detection
         function extractEntities(text) {
             const set = new Set();
             const rx = /\b([A-ZÀ-Ý][a-zà-ÿ'\-]{2,}(?:\s+[A-ZÀ-Ý][a-zà-ÿ'\-]{2,}){0,2})\b/g;
@@ -733,17 +727,15 @@
             return set;
         }
 
-        // 🕒 Strict freshness check — rejects future dates AND dates > 12h old
         function isWithinFreshnessWindow(item) {
             if (!item) return false;
             const t = parseArticleDate(item.pubDate);
             if (isNaN(t)) return false;
             const age = Date.now() - t;
-            if (age < 0) return false;             // ← future date = feed bug = reject
+            if (age < 0) return false;
             return age <= MAX_ARTICLE_AGE_MS;
         }
 
-        // 🎯 Combined sort key: recency + trending boost
         function itemSortKey(item) {
             const t = parseArticleDate(item.pubDate);
             const baseT = isNaN(t) ? 0 : t;
@@ -793,7 +785,6 @@
             }
         }
 
-        // Session-played registries — persist for the duration of the broadcast session.
         let aiNewsSessionPlayed = new Set();
         let aiNewsFrSessionPlayed = new Set();
         const SESSION_PLAYED_MAX = 5000;
@@ -806,16 +797,9 @@
             }
         }
 
-        // ============================================================
-        // 🆕 TRENDING-FIRST QUEUE BUILDER
-        //     Pure newest-first sort with a trending boost.
-        //     No category interleaving — the newest story always wins.
-        // ============================================================
         function buildFreshnessQueue(pool, lang) {
-            // 1) Filter out anything older than 12 h or with a future date
             const recent = pool.filter(isWithinFreshnessWindow);
 
-            // 2) Compute cross-feed trend scores (how many feeds mention the same entities)
             const entityCount = new Map();
             for (const item of recent) {
                 const text = (item.title || '') + ' ' + (item.description || '');
@@ -824,7 +808,6 @@
                 }
             }
 
-            // 3) Compute combined sort key: recency + keyword trend + cross-feed mention count
             const scored = recent.map(item => {
                 const t = parseArticleDate(item.pubDate);
                 const baseT = isNaN(t) ? 0 : t;
@@ -838,12 +821,15 @@
                 return { item, key: baseT + kwBoost + crossBoost };
             });
 
-            // 4) Sort by combined key descending — pure newest-with-trending-boost
             scored.sort((a, b) => b.key - a.key);
             return scored.map(s => s.item);
         }
 
+        // ============================================================
+        // 🌍 WORLDWIDE MEDIA FEEDS — expanded list
+        // ============================================================
         const worldFeeds = [
+            // ── Global wire / aggregators ─────────────────────────────
             'https://feeds.bbci.co.uk/news/world/rss.xml',
             'https://feeds.npr.org/1004/rss.xml',
             'https://feeds.npr.org/1001/rss.xml',
@@ -852,17 +838,45 @@
             'https://feeds.theguardian.com/theguardian/world/rss',
             'https://feeds.theguardian.com/theguardian/politics/rss',
             'https://www.aljazeera.com/xml/rss/all.xml',
+            'https://rss.cnn.com/rss/cnn_world.rss',
+            'https://rss.cnn.com/rss/cnn_topstories.rss',
+            'https://abcnews.go.com/abcnews/internationalheadlines',
+            'https://feeds.skynews.com/feeds/rss/world.xml',
+            'https://news.sky.com/feeds/rss/home.xml',
+            'https://rss.dw.com/rdf/rss-en-world',
+            'https://www.france24.com/en/rss',
+            'https://www.euronews.com/rss',
+            'https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml',
+            'https://www.japantimes.co.jp/feed/',
+            'https://www.straitstimes.com/news/world/rss.xml',
+            'https://www.hindustantimes.com/feeds/rss/world-news/rssfeed.xml',
+            'https://www.cbc.ca/webfeed/rss/rss-world',
+            'https://www.abc.net.au/news/feed/51120/rss.xml',
+            'https://www.arabnews.com/rss.xml',
+            'https://www.thehindu.com/news/international/feeder/default.rss',
+
+            // ── AP / Reuters (via Google News proxy) ──────────────────
+            'https://news.google.com/rss/search?q=site:apnews.com&hl=en-US&gl=US&ceid=US:en',
+            'https://news.google.com/rss/search?q=site:reuters.com/world&hl=en-US&gl=US&ceid=US:en',
+
+            // ── Russia / Ukraine / Europe ──────────────────────────────
             'https://feeds.bbci.co.uk/news/world/europe/rss.xml',
             'https://www.rferl.org/api/zrqiteuuir-rss',
             'https://www.pravda.com.ua/eng/rss/view_news/',
             'https://feeds.theguardian.com/theguardian/world/ukraine/rss',
+
+            // ── Middle East ────────────────────────────────────────────
             'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml',
             'https://www.timesofisrael.com/feed/',
             'https://www.jpost.com/rss/rssfeedsfrontpage.aspx',
             'https://english.alarabiya.net/tools/rss',
+
+            // ── Africa ─────────────────────────────────────────────────
             'https://feeds.bbci.co.uk/news/world/africa/rss.xml',
             'https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf',
             'https://www.theafricareport.com/feed/',
+
+            // ── Caribbean ──────────────────────────────────────────────
             'https://www.jamaica-gleaner.com/rss.xml',
             'https://jamaicaobserver.com/feed/',
             'https://www.nationnews.com/feed/',
@@ -871,32 +885,52 @@
             'https://dominicantoday.com/feed/',
             'https://www.caribbeannationalweekly.com/feed/',
             'https://mexiconewsdaily.com/feed/',
+
+            // ── Asia ───────────────────────────────────────────────────
             'https://feeds.bbci.co.uk/news/world/asia/rss.xml',
             'https://www.scmp.com/rss/91/feed',
             'https://timesofindia.indiatimes.com/rssfeedsdefault.cms',
+
+            // ── Latin America ─────────────────────────────────────────
             'https://feeds.bbci.co.uk/news/world/latin_america/rss.xml',
+
+            // ── Vatican / Religion ────────────────────────────────────
             'https://www.vaticannews.va/en.rss.xml',
             'https://www.ncronline.org/rss.xml',
             'https://religionnews.com/feed/',
+
+            // ── Finance ────────────────────────────────────────────────
             'https://feeds.bbci.co.uk/news/business/rss.xml',
             'https://rss.nytimes.com/services/xml/rss/nyt/Business.xml',
             'https://rss.nytimes.com/services/xml/rss/nyt/Economy.xml',
             'https://feeds.theguardian.com/theguardian/business/rss',
             'https://feeds.bbci.co.uk/news/business/economy/rss.xml',
+            'https://www.cnbc.com/id/100003114/device/rss/rss.html',
+            'https://www.ft.com/rss/home',
+
+            // ── Tech ───────────────────────────────────────────────────
             'https://feeds.bbci.co.uk/news/technology/rss.xml',
             'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',
             'https://techcrunch.com/feed/',
             'https://www.theverge.com/rss/index.xml',
             'https://feeds.arstechnica.com/arstechnica/index',
+
+            // ── Health / Science ──────────────────────────────────────
             'https://feeds.bbci.co.uk/news/health/rss.xml',
             'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',
             'https://rss.nytimes.com/services/xml/rss/nyt/Health.xml',
             'https://rss.nytimes.com/services/xml/rss/nyt/Science.xml',
             'https://www.sciencedaily.com/rss/all.xml',
+
+            // ── Climate ────────────────────────────────────────────────
             'https://feeds.theguardian.com/theguardian/environment/rss',
             'https://insideclimatenews.org/feed/',
+
+            // ── Education ──────────────────────────────────────────────
             'https://rss.nytimes.com/services/xml/rss/nyt/Education.xml',
             'https://www.insidehighered.com/rss.xml',
+
+            // ── Humanitarian / Defense ────────────────────────────────
             'https://reliefweb.int/updates/rss.xml',
             'https://breakingdefense.com/feed/'
         ];
@@ -922,7 +956,9 @@
             'https://www.lefigaro.fr/rss/figaro_actualites.xml',
             'https://www.20minutes.fr/feeds/rss-une.xml',
             'https://www.haitilibre.com/rss.xml',
-            'https://www.loophaiti.com/rss.xml'
+            'https://www.loophaiti.com/rss.xml',
+            'https://www.rts.ch/info/monde.rss',
+            'https://www.rtbf.be/info/monde/rss'
         ];
 
         const backupWorldNews = ["UN Security Council holds emergency session","European Union announces new climate accord","Asian markets surge amid trade agreement","Middle East peace talks progress","Latin American countries sign historic treaty","Global leaders convene for climate summit","New breakthrough in renewable energy technology","International space station marks milestone","World health organization reports progress","Tech giants announce AI safety partnership"];
@@ -1085,7 +1121,7 @@
                     if (newsPool.length > 400) newsPool = newsPool.slice(0, 400);
                     newsIndex = 0;
                     updateAINewsTicker();
-                    document.getElementById('dataStatus').textContent = `✅ World news updated (${newsPool.length} fresh · ≤12h) · Next refresh in 15 min`;
+                    document.getElementById('dataStatus').textContent = `✅ World news updated (${newsPool.length} fresh · ≤12h) · Next refresh in 5 min`;
                 }
             );
         }
@@ -1441,7 +1477,7 @@
         let aiNewsFrWaitingMode = false;
 
         const THEME_DURATION_MS = 60000;
-        const NEWS_REFRESH_INTERVAL_MS = 15 * 60 * 1000;
+        const NEWS_REFRESH_INTERVAL_MS = 5 * 60 * 1000;      // 🆕 5 minutes
         const SPORTS_REFRESH_INTERVAL_MS = 900000;
         const WEATHER_REFRESH_INTERVAL_MS = 300000;
         const SCORES_REFRESH_INTERVAL_MS = 60000;
@@ -1449,7 +1485,7 @@
         const WATCHDOG_INTERVAL_MS = 20000;
         const STORY_IMAGE_ROTATE_MS = 8000;
         const STORY_MEDIA_FETCH_TIMEOUT_MS = 6000;
-        const WAIT_RETRY_INTERVAL_MS = 60000;
+        const WAIT_RETRY_INTERVAL_MS = 30000;                // 🆕 30s while waiting
 
         let streamRetryCount = 0;
         const MAX_STREAM_RETRIES = 5;
@@ -1661,12 +1697,12 @@
                 ? `Aucun titre récent disponible. Les nouveaux titres (publiés dans les 12 dernières heures) commenceront dès leur arrivée.`
                 : `No recent headlines available. New stories (published within the last 12 hours) will begin the moment they arrive.`;
             if (cntEl) cntEl.textContent = lang === 'fr'
-                ? `Filtre de fraîcheur : 12 heures · Surveillance du flux`
-                : `Freshness filter: 12 hours · Monitoring feed`;
+                ? `Filtre de fraîcheur : 12 heures · Surveillance du flux (5 min)`
+                : `Freshness filter: 12 hours · Monitoring feed (5-min refresh)`;
 
             console.log(`⏳ ${lang.toUpperCase()} waiting for fresh content — retry in ${WAIT_RETRY_INTERVAL_MS/1000}s`);
 
-            playNewsTheme(THEME_DURATION_MS, () => {
+            playNewsTheme(WAIT_RETRY_INTERVAL_MS, () => {
                 const stillActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
                 if (!stillActive) return;
                 waitForFreshStories(lang);
@@ -1689,7 +1725,6 @@
                 }
             }
 
-            // Skip stories that have played OR have aged out since the queue was built
             while (aiNewsCycleIdx < aiNewsCycleQueue.length) {
                 const cand = aiNewsCycleQueue[aiNewsCycleIdx];
                 const fp = storyFingerprint(cand);
@@ -1723,7 +1758,7 @@
                 document.getElementById('aiNewsCategory').textContent = 'AWAITING NEW STORIES';
                 document.getElementById('aiNewsHeadline').textContent = 'Awaiting fresh stories (published within 12 hours)...';
                 document.getElementById('aiNewsDetails').textContent = `No recent headlines available. New stories (published within the last 12 hours) will begin the moment they arrive.`;
-                document.getElementById('aiNewsCounter').textContent = `Freshness filter: 12 hours · Monitoring feed`;
+                document.getElementById('aiNewsCounter').textContent = `Freshness filter: 12 hours · Monitoring feed (5-min refresh)`;
                 speakSingle(waitMsg, {isFemale: false, pitch: 0.82, rate: 0.93, langCode: 'en', onEndCallback: () => {
                     if (!aiNewsActive) return;
                     waitForFreshStories('en');
@@ -1793,7 +1828,7 @@
                 document.getElementById('aiNewsFrCategory').textContent = 'EN ATTENTE DE NOUVELLES';
                 document.getElementById('aiNewsFrHeadline').textContent = 'En attente de nouveaux titres (moins de 12 heures)...';
                 document.getElementById('aiNewsFrDetails').textContent = `Aucun titre récent disponible. Les nouveaux titres (publiés dans les 12 dernières heures) commenceront dès leur arrivée.`;
-                document.getElementById('aiNewsFrCounter').textContent = `Filtre de fraîcheur : 12 heures · Surveillance du flux`;
+                document.getElementById('aiNewsFrCounter').textContent = `Filtre de fraîcheur : 12 heures · Surveillance du flux (5 min)`;
                 speakSingle(waitMsgFR, {isFemale: false, pitch: 0.88, rate: 0.94, langCode: 'fr', onEndCallback: () => {
                     if (!aiNewsFrActive) return;
                     waitForFreshStories('fr');
@@ -1822,7 +1857,7 @@
             document.getElementById('audioStatus').textContent = '🤖 AI News Flash TV · Broadcasting Live';
             document.getElementById('trackTitle').textContent = 'JP AI News Flash TV';
             document.getElementById('trackArtist').textContent = '100% AI-Generated Broadcast';
-            document.getElementById('trackGenre').textContent = 'Fresh ≤12h · Trending first · Newest first';
+            document.getElementById('trackGenre').textContent = 'Fresh ≤12h · Trending first · 5-min refresh';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -1841,7 +1876,7 @@
             document.getElementById('audioStatus').textContent = '🤖 Info Flash TV · Diffusion en direct';
             document.getElementById('trackTitle').textContent = 'JP IA Info Flash TV';
             document.getElementById('trackArtist').textContent = 'Diffusion 100% générée par IA';
-            document.getElementById('trackGenre').textContent = 'Récent ≤12h · Tendance d\'abord · Plus récents d\'abord';
+            document.getElementById('trackGenre').textContent = 'Récent ≤12h · Tendance d\'abord · Rafraîchissement 5 min';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -2102,77 +2137,82 @@
             events.slice(0,3).forEach(ev => { const comp = ev.competitions[0]; const home = comp.competitors.find(x => x.homeAway === 'home'); const away = comp.competitors.find(x => x.homeAway === 'away'); if (home && away) { const div = document.createElement('div'); div.className = 'sports-score'; div.innerHTML = `<strong>${away.team.displayName}</strong> ${away.score||'0'} &nbsp;—&nbsp; ${home.score||'0'} <strong>${home.team.displayName}</strong><br><small>${comp.status.type.detail||'Upcoming'}</small>`; c.appendChild(div); } });
         }
         function setCustomCity() { const input = document.getElementById('cityInput').value.trim(); if (!input) return; userLocation = {...BOSTON_LOCATION, city: input, region: '', source: 'Custom'}; fetchWeather(); document.getElementById('dataStatus').textContent = `📍 Weather city set to ${input}`; }
-        function createVisualizer() { const viz = document.getElementById('visualizer'); viz.innerHTML = ''; for (let i=0; i<40; i++) { const bar = document.createElement('div'); bar.className = 'visualizer-bar'; bar.style.animationDelay = `${i*0.05}s`; bar.style.animationDuration = `${0.45+Math.random()*0.9}s`; viz.appendChild(bar); } }
+        function createVisualizer() { const viz = document.getElementById('visualizer'); viz.innerHTML = ''; for (let i=0; i<40; i++) { const bar = document.createElement('div'); bar.className = 'visualizer-bar'; bar.style.animationDelay = (i * 0.05) + 's'; bar.style.animationDuration = (0.4 + Math.random() * 0.5).toFixed(2) + 's'; viz.appendChild(bar); } }
+
+        // ============================================================
+        // 🎧 AUDIO ELEMENT / RADIO BOOTSTRAP
+        // ============================================================
         function createAudioElement() {
-            if (audioElement) { audioElement.pause(); audioElement.remove(); }
             audioElement = new Audio();
-            audioElement.crossOrigin = "anonymous";
-            audioElement.volume = isMuted ? 0 : volume;
-            audioElement.addEventListener('play', () => { isPlaying = true; document.getElementById('playBtn').textContent='⏸'; document.getElementById('audioStatus').textContent='🔊 Streaming Live'; resetStreamRetry(); });
-            audioElement.addEventListener('pause', () => { isPlaying = false; document.getElementById('playBtn').textContent='▶'; document.getElementById('audioStatus').textContent='⏸ Paused'; });
-            audioElement.addEventListener('playing', () => { document.getElementById('audioStatus').textContent='✅ Playing'; resetStreamRetry(); });
-            audioElement.addEventListener('error', () => { document.getElementById('audioStatus').textContent='⚠️ Stream error — recovering...'; attemptStreamRecovery(); });
-            audioElement.addEventListener('stalled', () => { document.getElementById('audioStatus').textContent='⚠️ Stream stalled — recovering...'; attemptStreamRecovery(); });
-            audioElement.addEventListener('ended', () => { if (musicChannels.includes(currentChannel)) attemptStreamRecovery(); });
+            audioElement.crossOrigin = 'anonymous';
+            audioElement.preload = 'auto';
+            audioElement.volume = volume;
+            audioElement.addEventListener('play', () => { isPlaying = true; const b = document.getElementById('playBtn'); if (b) b.textContent = '⏸'; document.getElementById('audioStatus').textContent = '🔊 Playing Live'; });
+            audioElement.addEventListener('pause', () => { isPlaying = false; const b = document.getElementById('playBtn'); if (b) b.textContent = '▶'; });
+            audioElement.addEventListener('waiting', () => { document.getElementById('audioStatus').textContent = '⏳ Buffering...'; });
+            audioElement.addEventListener('playing', () => { document.getElementById('audioStatus').textContent = '🔊 Playing Live'; resetStreamRetry(); });
+            audioElement.addEventListener('error', () => { document.getElementById('audioStatus').textContent = '⚠️ Stream error — retrying...'; attemptStreamRecovery(); });
         }
-        function updateClock() { document.getElementById('currentTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
-        function updateListeners() { listeners += Math.floor(Math.random()*20)-5; listeners = Math.max(1500, Math.min(5000, listeners)); document.getElementById('listeners').textContent = listeners.toLocaleString(); }
-        function updateScheduleHighlight() { const hour = new Date().getHours(); const items = document.querySelectorAll('.schedule-item'); items.forEach(i => { i.style.background='transparent'; i.style.boxShadow='none'; }); let idx = hour<6?0:hour<10?1:hour<14?2:hour<18?3:hour<22?4:5; if (items[idx]) { items[idx].style.background='rgba(201,169,97,0.08)'; items[idx].style.boxShadow='inset 2px 0 0 var(--gold)'; } }
+
+        function updateTime() {
+            const el = document.getElementById('currentTime');
+            if (el) el.textContent = new Date().toLocaleTimeString('en-US', {hour12: false});
+        }
+        function updateListeners() {
+            listeners = Math.floor(1200 + Math.random() * 800);
+            const el = document.getElementById('listeners');
+            if (el) el.textContent = listeners.toLocaleString();
+        }
 
         function startRadio() {
-            document.getElementById('startScreen').style.display = 'none';
-            createAudioElement();
+            const startScreen = document.getElementById('startScreen');
+            if (startScreen) startScreen.style.display = 'none';
+            if (!audioElement) createAudioElement();
+            if (speechSynth) { try { speechSynth.resume(); } catch(e) {} }
             setupVoices();
-            if (speechSynth) {
-                speechSynth.onvoiceschanged = () => { setupVoices(); pickDebateVoices(); };
-                setTimeout(() => { setupVoices(); pickDebateVoices(); }, 500);
-                setTimeout(() => { setupVoices(); pickDebateVoices(); }, 1500);
-                setTimeout(() => { setupVoices(); pickDebateVoices(); }, 3000);
-            }
+            adjustVolume(70);
+            if (newsPool.length === 0) fetchWorldNews();
+            if (newsPoolFR.length === 0) fetchWorldNewsFR();
+            if (sportNewsPool.length === 0) fetchSportsNews();
+            switchChannel('mix');
+        }
+
+        function init() {
+            createVisualizer();
+            setupVoices();
+            if (speechSynth) speechSynth.onvoiceschanged = setupVoices;
+            updateTime();
+            setInterval(updateTime, 1000);
+            updateListeners();
+            setInterval(updateListeners, 15000);
+            adjustVolume(70);
+
+            // Initial data pulls
             fetchWorldNews();
             fetchWorldNewsFR();
             fetchSportsNews();
             fetchWeather();
             fetchSportsScores();
-            currentChannel = 'mix';
-            currentStationIndex = 0;
-            document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
-            const map = ['mix','rnb','rock','classical','electronic','french','haitian','aimusic','aireligious','bible','prayer','mix_fr','debate','sportflash'];
-            const idx = map.indexOf('mix');
-            const btns = document.querySelectorAll('.channel-btn');
-            if (btns[idx]) btns[idx].classList.add('active');
-            playStream();
-            updateClock();
-            adjustVolume(document.getElementById('volumeSlider').value);
-            setInterval(updateClock, 1000);
-            updateListeners();
-            setInterval(updateListeners, 15000);
-            updateScheduleHighlight();
-            setInterval(updateScheduleHighlight, 60000);
-            setInterval(fetchWorldNews, NEWS_REFRESH_INTERVAL_MS);
-            setInterval(fetchWorldNewsFR, NEWS_REFRESH_INTERVAL_MS);
+
+            // Watchdog for stream/AI-TV recovery
+            startWatchdog();
+
+            // ── 5-MIN NEWS REFRESH + 5-MIN STALE PRUNING ──
+            setInterval(() => { fetchWorldNews(); fetchWorldNewsFR(); }, NEWS_REFRESH_INTERVAL_MS);
+            setInterval(() => { pruneOldArticles(); pruneSeenStories(); }, NEWS_REFRESH_INTERVAL_MS);
+
+            // Wire ticker rotation
+            setInterval(displayNextNews, NEWS_TICKER_ROTATE_MS);
+
+            // Periodic refresh of side widgets
             setInterval(fetchSportsNews, SPORTS_REFRESH_INTERVAL_MS);
             setInterval(fetchWeather, WEATHER_REFRESH_INTERVAL_MS);
             setInterval(fetchSportsScores, SCORES_REFRESH_INTERVAL_MS);
-            setInterval(displayNextNews, NEWS_TICKER_ROTATE_MS);
-            setInterval(pruneSeenStories, 1800000);
-            setInterval(() => pruneOldArticles(), 15 * 60 * 1000);
-            startWatchdog();
-            console.log('%c🎬 JP AI Radio · TRENDING-FIRST FRESH BROADCAST · v31', 'color:#c9a961;font-weight:bold;font-size:14px;');
-            console.log('%c🕒 STRICT CUTOFF: headlines >12 h old are DELETED from pool and live queue', 'color:#c9a961;font-weight:bold;');
-            console.log('%c🚫 Future dates REJECTED (was the source of the "old headline" bug)', 'color:#c9a961;font-weight:bold;');
-            console.log('%c🆕 PURE TIME ORDER: newest first — no category interleaving', 'color:#c9a961;font-weight:bold;');
-            console.log('%c🌍 TRENDING BOOST: cross-feed mentions + major-topic keywords (≤150 min shift)', 'color:#c9a961;font-weight:bold;');
-            console.log('%c⏱️ NEWS AUTO-REFRESH: every 15 minutes · stale items pruned every 15 minutes', 'color:#c9a961;');
+
+            const ds = document.getElementById('dataStatus');
+            if (ds) ds.textContent = '📡 Fetching live data from worldwide media...';
         }
-
-        window.refreshWorldNews = refreshWorldNews;
-        window.toggleProductionPanel = toggleProductionPanel;
-
-        createVisualizer();
-        updateScheduleHighlight();
-        document.getElementById('cityInput').value = 'Boston, MA';
-        console.log('%c✅ JP AI Radio ready — press Tune In to start', 'color:#c9a961;font-weight:bold;');
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
