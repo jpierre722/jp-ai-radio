@@ -64,6 +64,9 @@
         .ai-news-source-chip{position:absolute;top:56px;right:28px;font-size:9px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold-bright);background:rgba(0,0,0,0.72);padding:4px 10px;border-radius:2px;border:1px solid var(--hairline-strong);z-index:6;backdrop-filter:blur(6px);transition:all 0.3s ease;}
         .ai-news-source-chip.archival{color:var(--mist);border-color:rgba(255,255,255,0.18);background:rgba(0,0,0,0.6);}
         .ai-news-source-chip.live{color:#ff6464;border-color:rgba(184,50,50,0.6);background:rgba(30,0,0,0.75);}
+        .ai-news-age-badge{position:absolute;top:56px;left:28px;font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold-bright);background:rgba(0,0,0,0.72);padding:4px 10px;border-radius:2px;border:1px solid var(--hairline-strong);z-index:6;backdrop-filter:blur(6px);}
+        .ai-news-age-badge.fresh{color:#7bc296;border-color:rgba(74,143,106,0.5);}
+        .ai-news-age-badge.stale{color:#e88383;border-color:rgba(184,50,50,0.5);}
         .ai-news-body{position:absolute;top:60px;left:0;right:0;bottom:90px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;padding:10px 60px 0 60px;z-index:4;pointer-events:none;overflow:hidden;}
         .ai-news-category{display:inline-block;font-size:11px;font-weight:800;letter-spacing:0.35em;color:var(--gold);padding:6px 14px;border:1px solid var(--hairline-strong);background:rgba(10,10,13,0.75);backdrop-filter:blur(6px);border-radius:2px;margin-bottom:14px;text-transform:uppercase;flex-shrink:0;}
         .ai-news-headline{font-family:'Cormorant Garamond',Georgia,serif;font-size:34px;font-weight:600;line-height:1.15;color:var(--platinum);max-width:92%;margin-bottom:14px;text-shadow:0 4px 30px rgba(0,0,0,0.95),0 2px 8px rgba(0,0,0,0.9);transition:opacity 0.5s ease,transform 0.5s ease;flex-shrink:0;}
@@ -199,7 +202,10 @@
         .start-subtitle{font-size:11px;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-top:-8px;}
         .start-button{background:linear-gradient(180deg,var(--gold-bright) 0%,var(--gold) 100%);border:1px solid var(--gold);color:var(--obsidian);padding:18px 44px;font-family:'Inter',sans-serif;font-size:12px;border-radius:2px;cursor:pointer;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;box-shadow:0 1px 0 rgba(255,255,255,0.4) inset,0 0 0 4px rgba(201,169,97,0.08),0 16px 40px rgba(201,169,97,0.25);}
         .start-button:hover{transform:translateY(-2px);}
+        .start-button:disabled{opacity:0.5;cursor:wait;}
         .start-info{color:var(--mist);text-align:center;font-size:12px;line-height:2;}
+        .start-loading{color:var(--gold);font-size:11px;letter-spacing:0.28em;text-transform:uppercase;font-weight:600;margin-top:8px;display:none;}
+        .start-loading.active{display:block;animation:pulse 1.8s ease-in-out infinite;}
         @media (max-width:980px){.channels{grid-template-columns:repeat(5,1fr);}}
         @media (max-width:900px){.info-section{grid-template-columns:1fr;}.ai-news-headline{font-size:28px;}.ai-news-details{font-size:12.5px;}.ai-news-body{padding:10px 40px 0 40px;}.ai-news-anchor-avatar{width:48px;height:48px;font-size:22px;}.ai-news-source-chip{right:16px;top:52px;}}
         @media (max-width:700px){body{padding:12px 8px;}.header{padding:20px 22px;flex-direction:column;align-items:flex-start;gap:14px;}.header-meta{display:none;}.brand-title{font-size:24px;}.content-pad{padding:20px 22px;}.status-bar{padding:12px 22px;gap:16px;}.channels{grid-template-columns:repeat(3,1fr);gap:6px;}.channel-btn{padding:10px 3px 8px;font-size:8px;letter-spacing:0.06em;}.channel-btn .channel-icon{font-size:17px;}.track-title{font-size:24px;}.control-btn{width:40px;height:40px;font-size:12px;}.control-btn.play{width:52px;height:52px;font-size:15px;}.now-playing{padding:24px 20px;}.anchor-container{padding:24px 20px;}.anchor-avatar{width:56px;height:56px;font-size:24px;}.anchor-info h2{font-size:18px;}.anchor-news-text{font-size:16px;padding:18px 20px;}.weather-temp{font-size:34px;}.start-title{font-size:32px;}.start-button{padding:16px 32px;font-size:11px;}.volume-slider{width:140px;}}
@@ -213,7 +219,8 @@
             <div class="start-title">JP AI Radio</div>
             <div class="start-subtitle">Est. · Broadcasting Worldwide · 24/7</div>
         </div>
-        <button class="start-button" onclick="startRadio()">Tune In</button>
+        <button class="start-button" id="startBtn" onclick="startRadio()">Tune In</button>
+        <div class="start-loading" id="startLoading">Fetching fresh news (≤6h old)…</div>
         <div class="start-info">
             R&amp;B · Classic Rock · Classical · Electronic · French · Haitian<br>
             AI Music · AI Religious · Bible Reading · Prayer · Debate<br>
@@ -275,6 +282,7 @@
                         <button class="prod-toggle-btn" onclick="toggleProductionPanel('en')">🎬 PROD</button>
                     </div>
                 </div>
+                <div class="ai-news-age-badge" id="aiNewsAgeBadgeEN">—</div>
                 <div class="ai-news-source-chip" id="aiNewsSourceChipEN">STORY IMAGE</div>
                 <div class="ai-news-body">
                     <div class="ai-news-category" id="aiNewsCategory">WORLD NEWS</div>
@@ -332,6 +340,7 @@
                         <button class="prod-toggle-btn" onclick="toggleProductionPanel('fr')">🎬 PROD</button>
                     </div>
                 </div>
+                <div class="ai-news-age-badge" id="aiNewsAgeBadgeFR">—</div>
                 <div class="ai-news-source-chip" id="aiNewsSourceChipFR">IMAGE DU SUJET</div>
                 <div class="ai-news-body">
                     <div class="ai-news-category" id="aiNewsFrCategory">ACTUALITÉS MONDIALES</div>
@@ -429,11 +438,7 @@
                 <div class="contact-marquee">
                     📧 <span class="marquee-em">For suggestions or support:</span> <a href="mailto:jpierre722@yahoo.com">jpierre722@yahoo.com</a>
                     <span class="marquee-divider">◆</span>
-                    🕒 <span class="marquee-em">Strict 12-hour cutoff:</span> headlines older than 12 hours are <strong>deleted</strong>, not just hidden
-                    <span class="marquee-divider">◆</span>
-                    🌍 <span class="marquee-em">Globally trending first:</span> cross-feed coverage + major-topic keywords boost priority
-                    <span class="marquee-divider">◆</span>
-                    🆕 <span class="marquee-em">Pure time order:</span> newest first — no category interleaving
+                    🕒 <span class="marquee-em">Strict 6-hour cutoff:</span> only headlines published in the last 6 hours are aired — older items are rejected at ingest
                     <span class="marquee-divider">◆</span>
                     ⏱️ <span class="marquee-em">Auto-refresh:</span> feeds pulled every 5 minutes · stale items pruned every 5 minutes
                     <span class="marquee-divider">◆</span>
@@ -492,15 +497,18 @@
 
     <script>
         // ============================================================
-        // JP AI RADIO — v32 · 5-MIN REFRESH + WORLDWIDE MEDIA MONITORING
+        // JP AI RADIO — v33 · STRICT FRESHNESS + 5-MIN REFRESH
         // ------------------------------------------------------------
-        // Changes from v31:
-        //   • News refresh interval: 15 min → 5 min
-        //   • Stale-item pruning: 15 min → 5 min
-        //   • Added 20+ global media feeds (AP, Reuters, CNBC, FT,
-        //     DW, Sky, France24 EN, Euronews, CNA, CBC, ABC AU, etc.)
-        //   • Waiting-mode retry: 60 s → 30 s
-        //   • All freshness/trending/deletion logic preserved
+        // v33 changes:
+        //   • Freshness window: 12h → 6h (stricter — no 2-week-old news)
+        //   • REMOVED fake backup/placeholder headlines entirely
+        //   • Strict chronological sort (newest first, no trending reorder)
+        //   • Items with missing/invalid pubDate are rejected
+        //   • Startup waits for fresh news before broadcasting
+        //   • Age badge displayed on each headline ("12 min ago", "2h ago")
+        //   • Console log shows age of every aired headline
+        //   • Waiting mode retries every 30s until fresh stories arrive
+        //   • News refresh + stale pruning both run every 5 minutes
         // ============================================================
 
         const HAITIAN_VOICE_MASTER_PROMPT = {enabled:true,tone:'dous, cho, natif natal',pronunciation:'kreyòl ayisyen klè',nasalRule:'an, en, on, oun byen make — n pa yon konsòn separe',substitutions:{'ou':'oo','è':'eh','ò':'aw','ay':'eye','im':'eem'},constraints:['pa tradui','pa chanje mo yo','li egzak jan li ekri','ritm natirèl yon Ayisyen'],delivery:{rate:0.72,pitch:0.92,volume:1.0,pauseBetweenSentences:900,pauseBetweenChunks:1400}};
@@ -529,9 +537,6 @@
         const categoryRotationEN = {}, categoryRotationFR = {};
         function getCategoryImage(category, lang) { const pool = CATEGORY_IMAGES[category] || CATEGORY_IMAGES['WORLD NEWS']; const bucket = (lang === 'fr') ? categoryRotationFR : categoryRotationEN; const idx = bucket[category] || 0; bucket[category] = (idx + 1) % pool.length; return pool[idx]; }
         function getFallbackImage(headline) { const seed = encodeURIComponent((headline || 'news').substring(0, 40).replace(/[^a-z0-9]/gi, '')); return `https://picsum.photos/seed/${seed}/2560/1440`; }
-
-        const NEWS_VIDEO_BY_CATEGORY = { 'POLITICS': ['https://videos.pexels.com/video-files/3130284/3130284-uhd_2560_1440_30fps.mp4'], 'BUSINESS': ['https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_30fps.mp4'], 'CLIMATE': ['https://videos.pexels.com/video-files/2098989/2098989-uhd_2560_1440_30fps.mp4'], 'CONFLICT': ['https://videos.pexels.com/video-files/3255275/3255275-uhd_2560_1440_25fps.mp4'], 'HEALTH': ['https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4'], 'TECHNOLOGY': ['https://videos.pexels.com/video-files/3141210/3141210-uhd_2560_1440_25fps.mp4'], 'SPORTS': ['https://videos.pexels.com/video-files/4763824/4763824-uhd_2560_1440_24fps.mp4'], 'DIPLOMACY': ['https://videos.pexels.com/video-files/3184292/3184292-uhd_2560_1440_25fps.mp4'], 'RELIGION': ['https://videos.pexels.com/video-files/3129957/3129957-uhd_2560_1440_25fps.mp4'], 'EDUCATION': ['https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_30fps.mp4'], 'WORLD NEWS': ['https://videos.pexels.com/video-files/3129957/3129957-uhd_2560_1440_25fps.mp4'] };
-        const NEWS_VIDEO_BY_CATEGORY_FR = { 'POLITICS': ['https://videos.pexels.com/video-files/5598976/5598976-uhd_2560_1440_30fps.mp4'], 'BUSINESS': ['https://videos.pexels.com/video-files/7578544/7578544-uhd_2560_1440_30fps.mp4'], 'CLIMATE': ['https://videos.pexels.com/video-files/3214448/3214448-uhd_2560_1440_25fps.mp4'], 'CONFLICT': ['https://videos.pexels.com/video-files/857251/857251-uhd_2560_1440_25fps.mp4'], 'HEALTH': ['https://videos.pexels.com/video-files/4021821/4021821-uhd_2560_1440_25fps.mp4'], 'TECHNOLOGY': ['https://videos.pexels.com/video-files/2887463/2887463-uhd_2560_1440_24fps.mp4'], 'SPORTS': ['https://videos.pexels.com/video-files/5473955/5473955-uhd_2560_1440_25fps.mp4'], 'DIPLOMACY': ['https://videos.pexels.com/video-files/2611250/2611250-uhd_2560_1440_30fps.mp4'], 'RELIGION': ['https://videos.pexels.com/video-files/3129957/3129957-uhd_2560_1440_25fps.mp4'], 'EDUCATION': ['https://videos.pexels.com/video-files/7578544/7578544-uhd_2560_1440_30fps.mp4'], 'WORLD NEWS': ['https://videos.pexels.com/video-files/3129957/3129957-uhd_2560_1440_25fps.mp4'] };
 
         const newsVideoStateEN = { slot:'B', idx:{}, active:false, errorCount:0, generation:0, currentCategory:'WORLD NEWS', storyVideos:[], storyVideoIdx:0, usingStoryVideo:false };
         const newsVideoStateFR = { slot:'B', idx:{}, active:false, errorCount:0, generation:0, currentCategory:'WORLD NEWS', storyVideos:[], storyVideoIdx:0, usingStoryVideo:false };
@@ -680,33 +685,15 @@
         const SEEN_STORY_TTL_MS = 6 * 60 * 60 * 1000;
         function storyFingerprint(item) { return (item.title || '').toLowerCase().replace(/[^\wà-ÿ\s]/g, '').replace(/\s+/g, ' ').trim().substring(0, 80); }
         function markStoryAsSeen(item) { const fp = storyFingerprint(item); SEEN_STORY_REGISTRY.set(fp, { lastSeen: Date.now(), pubDate: item.pubDate || '' }); }
-        function isStoryFresh(item) {
-            const fp = storyFingerprint(item);
-            const rec = SEEN_STORY_REGISTRY.get(fp);
-            if (!rec) return true;
-            if (Date.now() - rec.lastSeen > SEEN_STORY_TTL_MS) return true;
-            if (item.pubDate && rec.pubDate && item.pubDate !== rec.pubDate) return true;
-            return false;
-        }
         function pruneSeenStories() {
             const cutoff = Date.now() - SEEN_STORY_TTL_MS;
             for (const [key, rec] of SEEN_STORY_REGISTRY.entries()) if (rec.lastSeen < cutoff) SEEN_STORY_REGISTRY.delete(key);
         }
 
         // ============================================================
-        // 🕒 AGE FILTERING + TRENDING SCORING
+        // 🕒 STRICT FRESHNESS — 6-HOUR CUTOFF, NO EXCEPTIONS
         // ============================================================
-        const MAX_ARTICLE_AGE_MS = 12 * 60 * 60 * 1000;
-
-        const TRENDING_PATTERNS = {
-            CONFLICT:   /\b(ukraine|russia|gaza|israel|hezbollah|hamas|iran|lebanon|syria|yemen|nato|ceasefire|invasion|missile|drone strike|hostage)\b/i,
-            POLITICS:   /\b(election|president|prime minister|parliament|congress|senate|kremlin|white house|european union|referendum|impeachment|g7|g20|summit)\b/i,
-            BUSINESS:   /\b(recession|inflation|federal reserve|stock market|crash|tariff|trade war|fed rate|oil price|nasdaq)\b/i,
-            CLIMATE:    /\b(hurricane|earthquake|wildfire|flood|tsunami|disaster|climate summit|cop\d+|heatwave)\b/i,
-            HEALTH:     /\b(outbreak|pandemic|epidemic|virus|vaccine|world health|disease|who)\b/i,
-            TECHNOLOGY: /\b(openai|chatgpt|nvidia|apple|google|microsoft|meta|ai breakthrough|quantum|cybersecurity)\b/i,
-            DIPLOMACY:  /\b(united nations|security council|treaty|sanctions|ambassador|foreign minister|state visit)\b/i
-        };
+        const MAX_ARTICLE_AGE_MS = 6 * 60 * 60 * 1000;   // 6 hours (was 12)
 
         function parseArticleDate(pubDate) {
             if (!pubDate) return NaN;
@@ -716,52 +703,47 @@
             return isNaN(t) ? NaN : t;
         }
 
-        function extractEntities(text) {
-            const set = new Set();
-            const rx = /\b([A-ZÀ-Ý][a-zà-ÿ'\-]{2,}(?:\s+[A-ZÀ-Ý][a-zà-ÿ'\-]{2,}){0,2})\b/g;
-            let m;
-            while ((m = rx.exec(text)) !== null) {
-                const e = m[1].trim();
-                if (e.length >= 4) set.add(e.toLowerCase());
-            }
-            return set;
-        }
-
+        // Strict freshness: MUST have a valid pubDate within the 6-hour window
         function isWithinFreshnessWindow(item) {
-            if (!item) return false;
+            if (!item || !item.pubDate) return false;
             const t = parseArticleDate(item.pubDate);
             if (isNaN(t)) return false;
             const age = Date.now() - t;
-            if (age < 0) return false;
-            return age <= MAX_ARTICLE_AGE_MS;
+            return age >= 0 && age <= MAX_ARTICLE_AGE_MS;
         }
 
-        function itemSortKey(item) {
-            const t = parseArticleDate(item.pubDate);
-            const baseT = isNaN(t) ? 0 : t;
-            const text = (item.title || '') + ' ' + (item.description || '');
-            let trend = 0;
-            for (const cat in TRENDING_PATTERNS) if (TRENDING_PATTERNS[cat].test(text)) trend += 1;
-            const boost = Math.min(trend * 30 * 60 * 1000, 90 * 60 * 1000);
-            return baseT + boost;
+        function formatAge(ms) {
+            if (!ms || ms < 0) return '—';
+            if (ms < 60 * 1000) return 'Just now';
+            if (ms < 60 * 60 * 1000) return `${Math.floor(ms / 60000)} min ago`;
+            if (ms < 24 * 60 * 60 * 1000) return `${Math.floor(ms / 3600000)}h ago`;
+            return `${Math.floor(ms / 86400000)}d ago`;
         }
 
+        function itemAgeMs(item) {
+            const t = parseArticleDate(item && item.pubDate);
+            return isNaN(t) ? -1 : (Date.now() - t);
+        }
+
+        // STRICT chronological sort — newest first. No trending reorder.
         function sortByNewest(a, b) {
-            return itemSortKey(b) - itemSortKey(a);
+            const tA = parseArticleDate(a.pubDate);
+            const tB = parseArticleDate(b.pubDate);
+            const safeA = isNaN(tA) ? 0 : tA;
+            const safeB = isNaN(tB) ? 0 : tB;
+            return safeB - safeA;
         }
 
         function pruneOldArticles(lang) {
             if (!lang || lang === 'en') {
                 const before = newsPool.length;
-                newsPool = newsPool.filter(isWithinFreshnessWindow);
-                newsPool.sort(sortByNewest);
+                newsPool = newsPool.filter(isWithinFreshnessWindow).sort(sortByNewest);
                 const dropped = before - newsPool.length;
                 if (dropped > 0) console.log(`🧹 EN pool: deleted ${dropped} stale headlines · ${newsPool.length} fresh remaining`);
             }
             if (!lang || lang === 'fr') {
                 const before = newsPoolFR.length;
-                newsPoolFR = newsPoolFR.filter(isWithinFreshnessWindow);
-                newsPoolFR.sort(sortByNewest);
+                newsPoolFR = newsPoolFR.filter(isWithinFreshnessWindow).sort(sortByNewest);
                 const dropped = before - newsPoolFR.length;
                 if (dropped > 0) console.log(`🧹 FR pool: deleted ${dropped} stale headlines · ${newsPoolFR.length} fresh remaining`);
             }
@@ -797,39 +779,18 @@
             }
         }
 
+        // STRICT chronological queue — no trending boost, no randomization
         function buildFreshnessQueue(pool, lang) {
             const recent = pool.filter(isWithinFreshnessWindow);
-
-            const entityCount = new Map();
-            for (const item of recent) {
-                const text = (item.title || '') + ' ' + (item.description || '');
-                for (const e of extractEntities(text)) {
-                    entityCount.set(e, (entityCount.get(e) || 0) + 1);
-                }
-            }
-
-            const scored = recent.map(item => {
-                const t = parseArticleDate(item.pubDate);
-                const baseT = isNaN(t) ? 0 : t;
-                const text = (item.title || '') + ' ' + (item.description || '');
-                let kw = 0;
-                for (const cat in TRENDING_PATTERNS) if (TRENDING_PATTERNS[cat].test(text)) kw += 1;
-                let cross = 0;
-                for (const e of extractEntities(text)) cross += (entityCount.get(e) || 0);
-                const kwBoost = Math.min(kw * 30 * 60 * 1000, 90 * 60 * 1000);
-                const crossBoost = Math.min(cross * 5 * 60 * 1000, 60 * 60 * 1000);
-                return { item, key: baseT + kwBoost + crossBoost };
-            });
-
-            scored.sort((a, b) => b.key - a.key);
-            return scored.map(s => s.item);
+            recent.sort(sortByNewest);
+            return recent;
         }
 
         // ============================================================
-        // 🌍 WORLDWIDE MEDIA FEEDS — expanded list
+        // 🌍 WORLDWIDE MEDIA FEEDS — only feeds known to publish fresh RSS
         // ============================================================
         const worldFeeds = [
-            // ── Global wire / aggregators ─────────────────────────────
+            // ── Global wire / aggregators (verified fresh RSS) ──────────
             'https://feeds.bbci.co.uk/news/world/rss.xml',
             'https://feeds.npr.org/1004/rss.xml',
             'https://feeds.npr.org/1001/rss.xml',
@@ -855,9 +816,10 @@
             'https://www.arabnews.com/rss.xml',
             'https://www.thehindu.com/news/international/feeder/default.rss',
 
-            // ── AP / Reuters (via Google News proxy) ──────────────────
+            // ── AP / Reuters via Google News RSS (fresh, reliable) ──────
             'https://news.google.com/rss/search?q=site:apnews.com&hl=en-US&gl=US&ceid=US:en',
             'https://news.google.com/rss/search?q=site:reuters.com/world&hl=en-US&gl=US&ceid=US:en',
+            'https://news.google.com/rss/search?q=site:apnews.com+OR+site:reuters.com&hl=en-US&gl=US&ceid=US:en',
 
             // ── Russia / Ukraine / Europe ──────────────────────────────
             'https://feeds.bbci.co.uk/news/world/europe/rss.xml',
@@ -868,21 +830,17 @@
             // ── Middle East ────────────────────────────────────────────
             'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml',
             'https://www.timesofisrael.com/feed/',
-            'https://www.jpost.com/rss/rssfeedsfrontpage.aspx',
             'https://english.alarabiya.net/tools/rss',
 
             // ── Africa ─────────────────────────────────────────────────
             'https://feeds.bbci.co.uk/news/world/africa/rss.xml',
             'https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf',
-            'https://www.theafricareport.com/feed/',
 
             // ── Caribbean ──────────────────────────────────────────────
             'https://www.jamaica-gleaner.com/rss.xml',
             'https://jamaicaobserver.com/feed/',
             'https://www.nationnews.com/feed/',
             'https://www.guardian.co.tt/rss',
-            'https://www.haitilibre.com/rss.xml',
-            'https://dominicantoday.com/feed/',
             'https://www.caribbeannationalweekly.com/feed/',
             'https://mexiconewsdaily.com/feed/',
 
@@ -955,16 +913,15 @@
             'https://www.jeuneafrique.com/feed/',
             'https://www.lefigaro.fr/rss/figaro_actualites.xml',
             'https://www.20minutes.fr/feeds/rss-une.xml',
-            'https://www.haitilibre.com/rss.xml',
-            'https://www.loophaiti.com/rss.xml',
             'https://www.rts.ch/info/monde.rss',
             'https://www.rtbf.be/info/monde/rss'
         ];
 
-        const backupWorldNews = ["UN Security Council holds emergency session","European Union announces new climate accord","Asian markets surge amid trade agreement","Middle East peace talks progress","Latin American countries sign historic treaty","Global leaders convene for climate summit","New breakthrough in renewable energy technology","International space station marks milestone","World health organization reports progress","Tech giants announce AI safety partnership"];
-        const backupWorldNewsFR = ["Le Conseil de sécurité de l'ONU tient une session d'urgence","L'Union européenne annonce un nouvel accord climatique","Les marchés asiatiques bondissent après un accord commercial","Progrès des pourparlers de paix au Moyen-Orient","Les pays d'Amérique latine signent un traité historique","Les dirigeants mondiaux se réunissent pour le sommet climatique","Nouvelle percée dans la technologie des énergies renouvelables","La station spatiale internationale marque un jalon","L'organisation mondiale de la santé rapporte des progrès","Les géants de la tech annoncent un partenariat sur la sécurité de l'IA"];
+        // ⚠️ NO fake backups. If no fresh items exist, the broadcast WAITS.
+        const backupWorldNews = [];
+        const backupWorldNewsFR = [];
         const sportsFeeds = ['https://feeds.bbci.co.uk/sport/rss.xml','https://www.espn.com/espn/rss/news','https://rss.nytimes.com/services/xml/rss/nyt/Sports.xml'];
-        const backupSportsNews = ["Lakers defeat Warriors in overtime","Patriots win against Jets","Red Sox beat Yankees","Champions League final set","World Cup qualifiers underway","NBA trade deadline updates","Premier League title race tightens","Olympic trials conclude"];
+        const backupSportsNews = [];
         const upcomingGamesData = [{home:"Lakers",away:"Warriors",date:"Tomorrow",time:"7:30 PM"},{home:"Patriots",away:"Jets",date:"Sunday",time:"1:00 PM"},{home:"Red Sox",away:"Yankees",date:"Saturday",time:"4:05 PM"},{home:"Manchester City",away:"Liverpool",date:"Next Wednesday",time:"3:00 PM"}];
 
         function setupVoices() { if (!speechSynth) return; let voices = speechSynth.getVoices(); if (voices.length === 0) { speechSynth.onvoiceschanged = () => { setupVoices(); }; return; } maleVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Microsoft David') || v.name.includes('Daniel')) || voices.find(v => v.lang === 'en-US' && v.name.toLowerCase().includes('male')) || voices[0]; femaleVoice = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Microsoft Zira') || v.name.includes('Samantha') || v.name.includes('Victoria')) || voices.find(v => v.lang === 'en-US' && v.name.toLowerCase().includes('female')) || voices[voices.length - 1]; haitianVoice = voices.find(v => { const lang = (v.lang || '').toLowerCase(); const name = (v.name || '').toLowerCase(); return lang.startsWith('ht') || name.includes('haitian') || name.includes('creole') || name.includes('kreyòl') || name.includes('kreyol'); }) || null; frenchVoice = voices.find(v => v.lang === 'fr-FR') || voices.find(v => v.lang === 'fr-CA') || voices.find(v => (v.lang || '').toLowerCase().startsWith('fr')) || voices.find(v => (v.name || '').toLowerCase().includes('french')) || voices.find(v => (v.name || '').toLowerCase().includes('français')) || null; pickDebateVoices(); }
@@ -1045,7 +1002,7 @@
                         }
                     }
                     if (description.length > 2400) { const cut = description.substring(0, 2400); const lastDot = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '), cut.lastIndexOf('? ')); description = lastDot > 500 ? cut.substring(0, lastDot + 1) : cut; }
-                    const pubDate = getRssChildText(item, 'pubDate');
+                    const pubDate = getRssChildText(item, 'pubDate') || getRssChildText(item, 'published') || getRssChildText(item, 'updated') || getRssChildText(item, 'dc:date') || '';
                     let imageUrl = '';
                     if (!imageUrl) { const t = getRssChildAttr(item, 'url', 'media:thumbnail', 'thumbnail'); if (t) imageUrl = t; }
                     if (!imageUrl) { const all = item.getElementsByTagName('*'); for (let k = 0; k < all.length; k++) { const n = (all[k].nodeName || '').toLowerCase(); if (n === 'media:content' || n.endsWith(':content')) { const type = all[k].getAttribute('type') || ''; const medium = all[k].getAttribute('medium') || ''; const u = all[k].getAttribute('url') || ''; if (u && (type.indexOf('image') === 0 || medium === 'image')) { imageUrl = u; break; } } } }
@@ -1072,95 +1029,113 @@
             }
             return [];
         }
-        async function fastFetchNews(feedList, backupList, onFirstBatch, onComplete) {
+
+        // ⚠️ NO fake placeholder generation. If no real fresh items exist, returns [].
+        function fastFetchNews(feedList, backupList, onFirstBatch, onComplete) {
             const seenTitles = new Set();
             const collected = [];
             let firstBatchFired = false;
             let pendingCount = feedList.length;
             function pushItems(items) { let added = 0; for (const it of items) { const key = it.title.toLowerCase().substring(0, 80); if (seenTitles.has(key)) continue; seenTitles.add(key); collected.push(it); added++; } return added; }
+            if (feedList.length === 0) { if (onFirstBatch) onFirstBatch([]); if (onComplete) onComplete([]); return; }
             feedList.forEach(feedUrl => {
                 fetchSingleFeed(feedUrl).then(items => {
                     const added = pushItems(items);
                     if (!firstBatchFired && added > 0) { firstBatchFired = true; if (onFirstBatch) onFirstBatch(collected.slice()); }
                     pendingCount--;
-                    if (pendingCount === 0) {
-                        const finalItems = collected.length > 0 ? collected.sort(() => Math.random() - 0.5) : backupList.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: '', url: ''}));
-                        if (onComplete) onComplete(finalItems);
-                    }
-                }).catch(() => { pendingCount--; if (pendingCount === 0) { const finalItems = collected.length > 0 ? collected.sort(() => Math.random() - 0.5) : backupList.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: '', url: ''})); if (onComplete) onComplete(finalItems); } });
+                    if (pendingCount === 0) { if (onComplete) onComplete(collected.slice()); }
+                }).catch(() => { pendingCount--; if (pendingCount === 0) { if (onComplete) onComplete(collected.slice()); } });
             });
-            setTimeout(() => { if (!firstBatchFired && collected.length === 0) { const fallback = backupList.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: '', url: ''})); if (onFirstBatch) onFirstBatch(fallback); if (onComplete) onComplete(fallback); } }, 7000);
+            setTimeout(() => { if (!firstBatchFired && collected.length === 0) { if (onFirstBatch) onFirstBatch([]); if (onComplete) onComplete([]); } }, 7000);
         }
 
-        async function fetchWorldNews() {
-            const firstHeadlineEl = document.getElementById('aiNewsHeadline');
-            if (firstHeadlineEl && aiNewsActive && newsPool.length === 0) firstHeadlineEl.textContent = 'Retrieving the latest global headlines...';
-            await fastFetchNews(worldFeeds, backupWorldNews,
-                (firstItems) => {
-                    const recentFirst = firstItems.filter(isWithinFreshnessWindow);
-                    if (newsPool.length === 0) newsPool = recentFirst.slice();
-                    else {
-                        const seen = new Set(newsPool.map(i => i.title.toLowerCase().substring(0, 80)));
-                        for (const it of recentFirst) { const k = it.title.toLowerCase().substring(0, 80); if (!seen.has(k)) { newsPool.push(it); seen.add(k); } }
+        // fetchWorldNews returns a Promise that resolves only when fetch is complete
+        function fetchWorldNews() {
+            return new Promise((resolve) => {
+                fastFetchNews(worldFeeds, backupWorldNews,
+                    (firstItems) => {
+                        const recentFirst = firstItems.filter(isWithinFreshnessWindow).sort(sortByNewest);
+                        if (recentFirst.length > 0 && newsPool.length === 0) {
+                            newsPool = recentFirst.slice();
+                            console.log(`📥 First batch: ${recentFirst.length} fresh headlines loaded`);
+                        }
+                        newsIndex = 0;
+                        displayNextNews();
+                        updateAINewsTicker();
+                        document.getElementById('dataStatus').textContent = `✅ ${newsPool.length} fresh headline(s) ≤6h old · Refresh every 5 min`;
+                    },
+                    (finalItems) => {
+                        const recentFinal = finalItems.filter(isWithinFreshnessWindow).sort(sortByNewest);
+                        if (newsPool.length === 0) newsPool = recentFinal.slice();
+                        else {
+                            const seen = new Set(newsPool.map(i => i.title.toLowerCase().substring(0, 80)));
+                            for (const it of recentFinal) {
+                                const k = it.title.toLowerCase().substring(0, 80);
+                                if (!seen.has(k)) { newsPool.push(it); seen.add(k); }
+                            }
+                        }
+                        newsPool = newsPool.filter(isWithinFreshnessWindow).sort(sortByNewest);
+                        if (newsPool.length > 400) newsPool = newsPool.slice(0, 400);
+                        newsIndex = 0;
+                        updateAINewsTicker();
+                        displayNextNews();
+                        console.log(`🔄 World news refreshed · ${newsPool.length} fresh headline(s) ≤6h`);
+                        document.getElementById('dataStatus').textContent = `✅ World news updated (${newsPool.length} fresh ≤6h) · Next refresh in 5 min`;
+                        resolve();
                     }
-                    newsPool = newsPool.filter(isWithinFreshnessWindow).sort(sortByNewest);
-                    if (newsPool.length > 400) newsPool = newsPool.slice(0, 400);
-                    newsIndex = 0;
-                    displayNextNews();
-                    updateAINewsTicker();
-                    document.getElementById('dataStatus').textContent = `✅ Live headlines streaming (${newsPool.length} fresh · ≤12h)`;
-                },
-                (finalItems) => {
-                    const recentFinal = finalItems.filter(isWithinFreshnessWindow);
-                    if (newsPool.length === 0) newsPool = recentFinal.slice();
-                    else {
-                        const seen = new Set(newsPool.map(i => i.title.toLowerCase().substring(0, 80)));
-                        for (const it of recentFinal) { const k = it.title.toLowerCase().substring(0, 80); if (!seen.has(k)) { newsPool.push(it); seen.add(k); } }
-                    }
-                    newsPool = newsPool.filter(isWithinFreshnessWindow).sort(sortByNewest);
-                    if (newsPool.length > 400) newsPool = newsPool.slice(0, 400);
-                    newsIndex = 0;
-                    updateAINewsTicker();
-                    document.getElementById('dataStatus').textContent = `✅ World news updated (${newsPool.length} fresh · ≤12h) · Next refresh in 5 min`;
-                }
-            );
+                );
+            });
         }
-        async function fetchWorldNewsFR() {
-            await fastFetchNews(worldFeedsFR, backupWorldNewsFR,
-                (firstItems) => {
-                    const recentFirst = firstItems.filter(isWithinFreshnessWindow);
-                    if (newsPoolFR.length === 0) newsPoolFR = recentFirst.slice();
-                    else {
-                        const seen = new Set(newsPoolFR.map(i => i.title.toLowerCase().substring(0, 80)));
-                        for (const it of recentFirst) { const k = it.title.toLowerCase().substring(0, 80); if (!seen.has(k)) { newsPoolFR.push(it); seen.add(k); } }
+
+        function fetchWorldNewsFR() {
+            return new Promise((resolve) => {
+                fastFetchNews(worldFeedsFR, backupWorldNewsFR,
+                    (firstItems) => {
+                        const recentFirst = firstItems.filter(isWithinFreshnessWindow).sort(sortByNewest);
+                        if (recentFirst.length > 0 && newsPoolFR.length === 0) newsPoolFR = recentFirst.slice();
+                        updateAINewsTickerFR();
+                    },
+                    (finalItems) => {
+                        const recentFinal = finalItems.filter(isWithinFreshnessWindow).sort(sortByNewest);
+                        if (newsPoolFR.length === 0) newsPoolFR = recentFinal.slice();
+                        else {
+                            const seen = new Set(newsPoolFR.map(i => i.title.toLowerCase().substring(0, 80)));
+                            for (const it of recentFinal) {
+                                const k = it.title.toLowerCase().substring(0, 80);
+                                if (!seen.has(k)) { newsPoolFR.push(it); seen.add(k); }
+                            }
+                        }
+                        newsPoolFR = newsPoolFR.filter(isWithinFreshnessWindow).sort(sortByNewest);
+                        if (newsPoolFR.length > 400) newsPoolFR = newsPoolFR.slice(0, 400);
+                        updateAINewsTickerFR();
+                        console.log(`🔄 FR world news refreshed · ${newsPoolFR.length} fresh headline(s) ≤6h`);
+                        resolve();
                     }
-                    newsPoolFR = newsPoolFR.filter(isWithinFreshnessWindow).sort(sortByNewest);
-                    if (newsPoolFR.length > 400) newsPoolFR = newsPoolFR.slice(0, 400);
-                    updateAINewsTickerFR();
-                },
-                (finalItems) => {
-                    const recentFinal = finalItems.filter(isWithinFreshnessWindow);
-                    if (newsPoolFR.length === 0) newsPoolFR = recentFinal.slice();
-                    else {
-                        const seen = new Set(newsPoolFR.map(i => i.title.toLowerCase().substring(0, 80)));
-                        for (const it of recentFinal) { const k = it.title.toLowerCase().substring(0, 80); if (!seen.has(k)) { newsPoolFR.push(it); seen.add(k); } }
-                    }
-                    newsPoolFR = newsPoolFR.filter(isWithinFreshnessWindow).sort(sortByNewest);
-                    if (newsPoolFR.length > 400) newsPoolFR = newsPoolFR.slice(0, 400);
-                    updateAINewsTickerFR();
-                }
-            );
+                );
+            });
         }
-        async function fetchSportsNews() {
-            try {
-                const allItems = await new Promise((resolve) => { fastFetchNews(sportsFeeds, [], null, resolve); });
-                if (allItems && allItems.length > 0) sportNewsPool = allItems.slice(0, 50);
-                else sportNewsPool = backupSportsNews.map(title => ({title, description: '', pubDate: new Date().toISOString(), url: ''}));
-                sportNewsIndex = 0;
-            } catch(e) { sportNewsPool = backupSportsNews.map(title => ({title, description: '', pubDate: new Date().toISOString(), url: ''})); }
-            upcomingGames = upcomingGamesData;
+
+        function fetchSportsNews() {
+            return new Promise((resolve) => {
+                fastFetchNews(sportsFeeds, backupSportsNews, null, (allItems) => {
+                    const recent = allItems.filter(isWithinFreshnessWindow).sort(sortByNewest);
+                    sportNewsPool = recent.slice(0, 50);
+                    sportNewsIndex = 0;
+                    upcomingGames = upcomingGamesData;
+                    resolve();
+                });
+            });
         }
-        function displayNextNews() { if (newsPool.length === 0) return; const item = newsPool[newsIndex % newsPool.length]; const timeStr = item.pubDate ? new Date(item.pubDate).toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'}) : 'Now'; const desc = item.description ? ` — ${item.description.substring(0, 140)}` : ''; document.getElementById('newsTicker').textContent = `${item.title}${desc} (${timeStr})`; newsIndex++; }
+
+        function displayNextNews() {
+            if (newsPool.length === 0) { const el = document.getElementById('newsTicker'); if (el) el.textContent = 'Waiting for fresh headlines (≤6h old)…'; return; }
+            const item = newsPool[newsIndex % newsPool.length];
+            const ageMs = itemAgeMs(item);
+            const ageLabel = formatAge(ageMs);
+            const desc = item.description ? ` — ${item.description.substring(0, 140)}` : '';
+            document.getElementById('newsTicker').textContent = `${item.title}${desc} (${ageLabel})`;
+            newsIndex++;
+        }
         function refreshWorldNews() { fetchWorldNews(); fetchWorldNewsFR(); }
         function getDayOfYear() { const now = new Date(); const start = new Date(now.getFullYear(), 0, 0); return Math.floor((now - start) / (1000 * 60 * 60 * 24)); }
         function getLanguageCodeForStream(stream) { if (stream.name.includes('English')) return 'en'; if (stream.name.includes('Français')) return 'fr'; return 'ht'; }
@@ -1309,6 +1284,17 @@
             const commit = (url) => { incoming.classList.remove('active'); incoming.src = url; const reveal = () => { incoming.classList.add('active'); outgoing.classList.remove('active'); currentFrImageSlot = currentFrImageSlot === 'A' ? 'B' : 'A'; }; if (incoming.decode) incoming.decode().then(reveal).catch(reveal); else reveal(); };
             const preloader = new Image(); preloader.crossOrigin = 'anonymous'; preloader.onload = () => commit(imageUrl); preloader.onerror = () => commit(getFallbackImage(imageUrl)); preloader.src = imageUrl;
             if (sourceLabel) setSourceChip('fr', sourceLabel, !!isArchival);
+        }
+
+        // Age badge updater — shows "Just now" / "12 min ago" / "2h ago"
+        function updateAgeBadge(lang, item) {
+            const el = document.getElementById(lang === 'fr' ? 'aiNewsAgeBadgeFR' : 'aiNewsAgeBadgeEN');
+            if (!el) return;
+            const ageMs = itemAgeMs(item);
+            if (ageMs < 0) { el.textContent = '—'; el.className = 'ai-news-age-badge'; return; }
+            const label = formatAge(ageMs);
+            el.textContent = label;
+            el.className = 'ai-news-age-badge ' + (ageMs <= 2 * 60 * 60 * 1000 ? 'fresh' : 'stale');
         }
 
         const NEWS_PRODUCTION_RULES = {
@@ -1477,7 +1463,7 @@
         let aiNewsFrWaitingMode = false;
 
         const THEME_DURATION_MS = 60000;
-        const NEWS_REFRESH_INTERVAL_MS = 5 * 60 * 1000;      // 🆕 5 minutes
+        const NEWS_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
         const SPORTS_REFRESH_INTERVAL_MS = 900000;
         const WEATHER_REFRESH_INTERVAL_MS = 300000;
         const SCORES_REFRESH_INTERVAL_MS = 60000;
@@ -1485,7 +1471,7 @@
         const WATCHDOG_INTERVAL_MS = 20000;
         const STORY_IMAGE_ROTATE_MS = 8000;
         const STORY_MEDIA_FETCH_TIMEOUT_MS = 6000;
-        const WAIT_RETRY_INTERVAL_MS = 30000;                // 🆕 30s while waiting
+        const WAIT_RETRY_INTERVAL_MS = 30000;
 
         let streamRetryCount = 0;
         const MAX_STREAM_RETRIES = 5;
@@ -1539,8 +1525,16 @@
         })();
 
         function displayAIHeadline(item) {
+            // Final freshness check — reject if aged out at display time
+            if (!isWithinFreshnessWindow(item)) {
+                console.warn(`⚠️ Rejected at display time (stale): "${item.title}"`);
+                return;
+            }
+            const ageMs = itemAgeMs(item);
+            console.log(`📺 EN airing: "${item.title.substring(0,60)}" (${formatAge(ageMs)})`);
             const category = detectNewsCategory(item.title + ' ' + ((item.fullText || item.description || '')));
             document.getElementById('aiNewsCategory').textContent = category;
+            updateAgeBadge('en', item);
             stopStoryImageSlideshow('en');
             stopNewsVideoLoop('en');
             setNewsVideoCategory('en', category);
@@ -1572,8 +1566,15 @@
         }
 
         function displayAIHeadlineFR(item) {
+            if (!isWithinFreshnessWindow(item)) {
+                console.warn(`⚠️ Rejeté à l'affichage (périmé) : "${item.title}"`);
+                return;
+            }
+            const ageMs = itemAgeMs(item);
+            console.log(`📺 FR airing: "${item.title.substring(0,60)}" (${formatAge(ageMs)})`);
             const category = detectNewsCategoryFR(item.title + ' ' + ((item.fullText || item.description || '')));
             document.getElementById('aiNewsFrCategory').textContent = category;
+            updateAgeBadge('fr', item);
             stopStoryImageSlideshow('fr');
             stopNewsVideoLoop('fr');
             setNewsVideoCategory('fr', category);
@@ -1657,14 +1658,16 @@
             const fresh = pool.filter(item => !sessionPlayed.has(storyFingerprint(item)));
 
             if (fresh.length === 0) {
-                console.log(`⏳ ${lang.toUpperCase()}: no unplayed recent stories remaining — will wait for fresh content`);
+                console.log(`⏳ ${lang.toUpperCase()}: no unplayed fresh stories remaining — waiting for new content`);
                 return false;
             }
 
             const balanced = buildFreshnessQueue(fresh, lang);
+            if (balanced.length === 0) return false;
             if (lang === 'fr') { aiNewsFrCycleQueue = balanced; aiNewsFrCycleIdx = 0; }
             else { aiNewsCycleQueue = balanced; aiNewsCycleIdx = 0; }
-            console.log(`🔁 New ${lang.toUpperCase()} cycle: ${balanced.length} headlines (${sessionPlayed.size} already played this session)`);
+            const newest = balanced[0];
+            console.log(`🔁 New ${lang.toUpperCase()} cycle: ${balanced.length} fresh headlines · newest is ${formatAge(itemAgeMs(newest))}`);
             return true;
         }
 
@@ -1676,37 +1679,40 @@
 
             if (lang === 'fr') fetchWorldNewsFR(); else fetchWorldNews();
 
-            if (beginNewCycle(lang)) {
-                console.log(`✅ Fresh content arrived for ${lang.toUpperCase()} — starting new cycle`);
-                if (lang === 'fr') aiNewsFrWaitingMode = false; else aiNewsWaitingMode = false;
-                playNewsTheme(THEME_DURATION_MS, () => {
-                    const stillActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
-                    if (!stillActive) return;
-                    if (lang === 'fr') startAINewsTVLoopFR(); else startAINewsTVLoop();
-                });
-                return;
-            }
-
-            const catEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCategory' : 'aiNewsCategory');
-            const headEl = document.getElementById(lang === 'fr' ? 'aiNewsFrHeadline' : 'aiNewsHeadline');
-            const detEl = document.getElementById(lang === 'fr' ? 'aiNewsFrDetails' : 'aiNewsDetails');
-            const cntEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCounter' : 'aiNewsCounter');
-            if (catEl) catEl.textContent = lang === 'fr' ? 'EN ATTENTE DE NOUVELLES' : 'AWAITING NEW STORIES';
-            if (headEl) headEl.textContent = lang === 'fr' ? 'En attente de nouveaux titres (moins de 12 heures)...' : 'Awaiting fresh stories (published within 12 hours)...';
-            if (detEl) detEl.textContent = lang === 'fr'
-                ? `Aucun titre récent disponible. Les nouveaux titres (publiés dans les 12 dernières heures) commenceront dès leur arrivée.`
-                : `No recent headlines available. New stories (published within the last 12 hours) will begin the moment they arrive.`;
-            if (cntEl) cntEl.textContent = lang === 'fr'
-                ? `Filtre de fraîcheur : 12 heures · Surveillance du flux (5 min)`
-                : `Freshness filter: 12 hours · Monitoring feed (5-min refresh)`;
-
-            console.log(`⏳ ${lang.toUpperCase()} waiting for fresh content — retry in ${WAIT_RETRY_INTERVAL_MS/1000}s`);
-
-            playNewsTheme(WAIT_RETRY_INTERVAL_MS, () => {
+            setTimeout(() => {
                 const stillActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
                 if (!stillActive) return;
-                waitForFreshStories(lang);
-            });
+                if (beginNewCycle(lang)) {
+                    console.log(`✅ Fresh content arrived for ${lang.toUpperCase()} — starting new cycle`);
+                    if (lang === 'fr') aiNewsFrWaitingMode = false; else aiNewsWaitingMode = false;
+                    playNewsTheme(THEME_DURATION_MS, () => {
+                        const stillActive2 = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
+                        if (!stillActive2) return;
+                        if (lang === 'fr') startAINewsTVLoopFR(); else startAINewsTVLoop();
+                    });
+                    return;
+                }
+
+                const catEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCategory' : 'aiNewsCategory');
+                const headEl = document.getElementById(lang === 'fr' ? 'aiNewsFrHeadline' : 'aiNewsHeadline');
+                const detEl = document.getElementById(lang === 'fr' ? 'aiNewsFrDetails' : 'aiNewsDetails');
+                const cntEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCounter' : 'aiNewsCounter');
+                if (catEl) catEl.textContent = lang === 'fr' ? 'EN ATTENTE DE NOUVELLES FRAÎCHES' : 'AWAITING FRESH STORIES';
+                if (headEl) headEl.textContent = lang === 'fr' ? 'En attente de titres publiés dans les 6 dernières heures...' : 'Awaiting stories published within the last 6 hours...';
+                if (detEl) detEl.textContent = lang === 'fr'
+                    ? `Aucun titre récent disponible (≤6h). Les titres plus anciens sont rejetés. Nouvelle tentative dans 30 secondes.`
+                    : `No recent headlines available (≤6h old). Older items are rejected. Retrying in 30 seconds.`;
+                if (cntEl) cntEl.textContent = lang === 'fr'
+                    ? `Filtre : 6 heures · Surveillance du flux (5 min)`
+                    : `Freshness filter: 6 hours · Monitoring feed (5-min refresh)`;
+
+                console.log(`⏳ ${lang.toUpperCase()} waiting for fresh content — retry in ${WAIT_RETRY_INTERVAL_MS/1000}s`);
+                playNewsTheme(WAIT_RETRY_INTERVAL_MS, () => {
+                    const stillActive2 = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
+                    if (!stillActive2) return;
+                    waitForFreshStories(lang);
+                });
+            }, 500);
         }
 
         function startAINewsTVLoop() {
@@ -1715,8 +1721,8 @@
 
             if (aiNewsCycleQueue.length === 0) {
                 if (newsPool.length === 0) {
-                    document.getElementById('aiNewsHeadline').textContent = 'Connecting to the JP AI News Room · Retrieving the latest global headlines...';
-                    aiNewsLoopTimeoutId = setTimeout(startAINewsTVLoop, 1500);
+                    document.getElementById('aiNewsHeadline').textContent = 'Fetching fresh headlines (published within 6 hours)...';
+                    waitForFreshStories('en');
                     return;
                 }
                 if (!beginNewCycle('en')) {
@@ -1730,7 +1736,7 @@
                 const fp = storyFingerprint(cand);
                 if (aiNewsSessionPlayed.has(fp)) { aiNewsCycleIdx++; continue; }
                 if (!isWithinFreshnessWindow(cand)) {
-                    console.log(`⏱️ Skipping stale headline at playtime: ${(cand.title || '').substring(0, 60)}`);
+                    console.log(`⏱️ Skipping stale headline at playtime: "${(cand.title || '').substring(0, 60)}"`);
                     aiNewsCycleIdx++;
                     continue;
                 }
@@ -1738,28 +1744,12 @@
             }
 
             if (aiNewsCycleIdx >= aiNewsCycleQueue.length) {
-                if (beginNewCycle('en')) {
-                    const closingMsg = "That completes this news flash from the JP AI News Room. Stay tuned. A new news flash begins in 60 seconds.";
-                    document.getElementById('aiNewsCategory').textContent = 'STAY TUNED';
-                    document.getElementById('aiNewsHeadline').textContent = 'Stay tuned — next news flash in 60 seconds...';
-                    document.getElementById('aiNewsDetails').textContent = '';
-                    document.getElementById('aiNewsCounter').textContent = `Cycle complete · ${aiNewsSessionPlayed.size} headlines aired this session · Next flash in 60 seconds`;
-                    speakSingle(closingMsg, {isFemale: false, pitch: 0.82, rate: 0.93, langCode: 'en', onEndCallback: () => {
-                        if (!aiNewsActive) return;
-                        playNewsTheme(THEME_DURATION_MS, () => {
-                            if (!aiNewsActive) return;
-                            startAINewsTVLoop();
-                        });
-                    }});
-                    return;
-                }
-
-                const waitMsg = "That completes this news flash. Every recent headline from the JP AI News Room has now been broadcast. We are waiting for fresh updates. Only headlines published within the last twelve hours will air. A new news flash will begin as soon as new stories arrive.";
-                document.getElementById('aiNewsCategory').textContent = 'AWAITING NEW STORIES';
-                document.getElementById('aiNewsHeadline').textContent = 'Awaiting fresh stories (published within 12 hours)...';
-                document.getElementById('aiNewsDetails').textContent = `No recent headlines available. New stories (published within the last 12 hours) will begin the moment they arrive.`;
-                document.getElementById('aiNewsCounter').textContent = `Freshness filter: 12 hours · Monitoring feed (5-min refresh)`;
-                speakSingle(waitMsg, {isFemale: false, pitch: 0.82, rate: 0.93, langCode: 'en', onEndCallback: () => {
+                const closingMsg = "That completes this news flash from the JP AI News Room. We are now waiting for fresh headlines. A new flash begins as soon as new stories arrive.";
+                document.getElementById('aiNewsCategory').textContent = 'AWAITING FRESH STORIES';
+                document.getElementById('aiNewsHeadline').textContent = 'Awaiting fresh stories (published within 6 hours)...';
+                document.getElementById('aiNewsDetails').textContent = 'No recent headlines available. Older items are rejected. New stories (published within the last 6 hours) will begin the moment they arrive.';
+                document.getElementById('aiNewsCounter').textContent = `Freshness filter: 6 hours · Monitoring feed (5-min refresh)`;
+                speakSingle(closingMsg, {isFemale: false, pitch: 0.82, rate: 0.93, langCode: 'en', onEndCallback: () => {
                     if (!aiNewsActive) return;
                     waitForFreshStories('en');
                 }});
@@ -1785,8 +1775,8 @@
 
             if (aiNewsFrCycleQueue.length === 0) {
                 if (newsPoolFR.length === 0) {
-                    document.getElementById('aiNewsFrHeadline').textContent = 'Connexion à la salle de presse JP IA · Chargement des derniers titres mondiaux...';
-                    aiNewsFrLoopTimeoutId = setTimeout(startAINewsTVLoopFR, 1500);
+                    document.getElementById('aiNewsFrHeadline').textContent = 'Chargement de titres récents (≤6h)...';
+                    waitForFreshStories('fr');
                     return;
                 }
                 if (!beginNewCycle('fr')) {
@@ -1800,7 +1790,7 @@
                 const fp = storyFingerprint(cand);
                 if (aiNewsFrSessionPlayed.has(fp)) { aiNewsFrCycleIdx++; continue; }
                 if (!isWithinFreshnessWindow(cand)) {
-                    console.log(`⏱️ Titre périmé ignoré à la diffusion : ${(cand.title || '').substring(0, 60)}`);
+                    console.log(`⏱️ Titre périmé ignoré à la diffusion : "${(cand.title || '').substring(0, 60)}"`);
                     aiNewsFrCycleIdx++;
                     continue;
                 }
@@ -1808,28 +1798,12 @@
             }
 
             if (aiNewsFrCycleIdx >= aiNewsFrCycleQueue.length) {
-                if (beginNewCycle('fr')) {
-                    const closingMsgFR = "Ceci conclut ce flash d'information de la salle de presse JP IA. Restez à l'écoute. Un nouveau flash commence dans 60 secondes.";
-                    document.getElementById('aiNewsFrCategory').textContent = 'RESTEZ À L\'ÉCOUTE';
-                    document.getElementById('aiNewsFrHeadline').textContent = 'Restez à l\'écoute — prochain flash dans 60 secondes...';
-                    document.getElementById('aiNewsFrDetails').textContent = '';
-                    document.getElementById('aiNewsFrCounter').textContent = `Cycle terminé · ${aiNewsFrSessionPlayed.size} titres diffusés · Prochain flash dans 60 secondes`;
-                    speakSingle(closingMsgFR, {isFemale: false, pitch: 0.88, rate: 0.94, langCode: 'fr', onEndCallback: () => {
-                        if (!aiNewsFrActive) return;
-                        playNewsTheme(THEME_DURATION_MS, () => {
-                            if (!aiNewsFrActive) return;
-                            startAINewsTVLoopFR();
-                        });
-                    }});
-                    return;
-                }
-
-                const waitMsgFR = "Ceci conclut ce flash d'information. Tous les titres récents de la salle de presse JP IA ont été diffusés. Nous attendons de nouvelles mises à jour. Seuls les titres publiés dans les douze dernières heures seront diffusés. Un nouveau flash commencera dès l'arrivée de nouvelles histoires.";
-                document.getElementById('aiNewsFrCategory').textContent = 'EN ATTENTE DE NOUVELLES';
-                document.getElementById('aiNewsFrHeadline').textContent = 'En attente de nouveaux titres (moins de 12 heures)...';
-                document.getElementById('aiNewsFrDetails').textContent = `Aucun titre récent disponible. Les nouveaux titres (publiés dans les 12 dernières heures) commenceront dès leur arrivée.`;
-                document.getElementById('aiNewsFrCounter').textContent = `Filtre de fraîcheur : 12 heures · Surveillance du flux (5 min)`;
-                speakSingle(waitMsgFR, {isFemale: false, pitch: 0.88, rate: 0.94, langCode: 'fr', onEndCallback: () => {
+                const closingMsgFR = "Ceci conclut ce flash d'information. Nous attendons de nouveaux titres récents. Un nouveau flash commencera dès l'arrivée de nouvelles histoires.";
+                document.getElementById('aiNewsFrCategory').textContent = 'EN ATTENTE DE NOUVELLES FRAÎCHES';
+                document.getElementById('aiNewsFrHeadline').textContent = 'En attente de titres publiés dans les 6 dernières heures...';
+                document.getElementById('aiNewsFrDetails').textContent = `Aucun titre récent disponible. Les titres plus anciens sont rejetés. Nouvelle tentative dans 30 secondes.`;
+                document.getElementById('aiNewsFrCounter').textContent = `Filtre : 6 heures · Surveillance du flux (5 min)`;
+                speakSingle(closingMsgFR, {isFemale: false, pitch: 0.88, rate: 0.94, langCode: 'fr', onEndCallback: () => {
                     if (!aiNewsFrActive) return;
                     waitForFreshStories('fr');
                 }});
@@ -1857,7 +1831,7 @@
             document.getElementById('audioStatus').textContent = '🤖 AI News Flash TV · Broadcasting Live';
             document.getElementById('trackTitle').textContent = 'JP AI News Flash TV';
             document.getElementById('trackArtist').textContent = '100% AI-Generated Broadcast';
-            document.getElementById('trackGenre').textContent = 'Fresh ≤12h · Trending first · 5-min refresh';
+            document.getElementById('trackGenre').textContent = 'Fresh ≤6h only · 5-min refresh';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -1876,7 +1850,7 @@
             document.getElementById('audioStatus').textContent = '🤖 Info Flash TV · Diffusion en direct';
             document.getElementById('trackTitle').textContent = 'JP IA Info Flash TV';
             document.getElementById('trackArtist').textContent = 'Diffusion 100% générée par IA';
-            document.getElementById('trackGenre').textContent = 'Récent ≤12h · Tendance d\'abord · Rafraîchissement 5 min';
+            document.getElementById('trackGenre').textContent = 'Récent ≤6h uniquement · Rafraîchissement 5 min';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -1941,7 +1915,7 @@
         };
         function detectDebateCategory(topicText) { const t = topicText.toLowerCase(); const map = [{key:'election',words:['election','vote','voting','ballot','senate','congress','parliament','primary','poll']},{key:'tax',words:['tax','taxes','irs','revenue','budget','deficit','tariff']},{key:'health',words:['health','healthcare','medicare','medicaid','hospital','insurance','drug','pharma','vaccine']},{key:'immigration',words:['immigration','immigrant','border','migrant','asylum','visa','deport']},{key:'climate',words:['climate','energy','green','carbon','emission','renewable','oil','gas','environment']},{key:'gun',words:['gun','firearm','shooting','weapon','second amendment','nra']},{key:'education',words:['education','school','student','teacher','university','college','curriculum']}]; for (const entry of map) if (entry.words.some(w => t.includes(w))) return entry.key; return 'default'; }
         function startDebateLoop() { if (debateLoopActive) return; debateLoopActive = true; pickAndStartDebate(); }
-        function pickAndStartDebate() { if (!debateLoopActive) return; if (newsPool.length === 0) newsPool = backupWorldNews.map(title => ({title, description: '', pubDate: new Date().toISOString(), image: '', url: ''})); const politicalKeywords = ['election','president','government','senate','congress','policy','law','vote','minister','prime minister','political','parliament','bill','tax','health','immigration','climate','energy','defense','education','trade','gun','border','budget']; const politicalItems = newsPool.filter(item => politicalKeywords.some(keyword => (item.title + ' ' + item.description).toLowerCase().includes(keyword))); const topic = politicalItems.length > 0 ? politicalItems[0] : newsPool[0]; if (!topic) return; topic.debated = true; if (newsPool.every(item => item.debated)) newsPool.forEach(item => item.debated = false); runProfessionalDebate(topic, 1800000); }
+        function pickAndStartDebate() { if (!debateLoopActive) return; if (newsPool.length === 0) return; const politicalKeywords = ['election','president','government','senate','congress','policy','law','vote','minister','prime minister','political','parliament','bill','tax','health','immigration','climate','energy','defense','education','trade','gun','border','budget']; const politicalItems = newsPool.filter(item => politicalKeywords.some(keyword => (item.title + ' ' + item.description).toLowerCase().includes(keyword))); const topic = politicalItems.length > 0 ? politicalItems[0] : newsPool[0]; if (!topic) return; topic.debated = true; if (newsPool.every(item => item.debated)) newsPool.forEach(item => item.debated = false); runProfessionalDebate(topic, 1800000); }
         function runProfessionalDebate(topic, duration) {
             isDebating = true; debateTransitionPending = false; stopSpeech();
             document.getElementById('anchorContainer').classList.add('active');
@@ -2052,9 +2026,9 @@
         }
 
         function speakSportsFlash(onComplete = null) {
-            if (sportNewsPool.length === 0) sportNewsPool = backupSportsNews.map(title => ({title, description: '', pubDate: new Date().toISOString(), url: ''}));
+            if (sportNewsPool.length === 0) { if (onComplete) onComplete(); return; }
             let flashText = "This is JP AI Radio Sports Flash. Scores: ";
-            for (let i = 0; i < 3; i++) flashText += `${sportNewsPool[(sportNewsIndex + i) % sportNewsPool.length].title}. `;
+            for (let i = 0; i < Math.min(3, sportNewsPool.length); i++) flashText += `${sportNewsPool[(sportNewsIndex + i) % sportNewsPool.length].title}. `;
             sportNewsIndex = (sportNewsIndex + 3) % sportNewsPool.length;
             flashText += "Upcoming games: ";
             upcomingGames.forEach(game => { flashText += `${game.away} at ${game.home} on ${game.date} at ${game.time}. `; });
@@ -2164,16 +2138,29 @@
             if (el) el.textContent = listeners.toLocaleString();
         }
 
-        function startRadio() {
+        async function startRadio() {
             const startScreen = document.getElementById('startScreen');
-            if (startScreen) startScreen.style.display = 'none';
+            const startBtn = document.getElementById('startBtn');
+            const startLoading = document.getElementById('startLoading');
+            if (startBtn) { startBtn.disabled = true; startBtn.textContent = 'Loading…'; }
+            if (startLoading) startLoading.classList.add('active');
+
             if (!audioElement) createAudioElement();
             if (speechSynth) { try { speechSynth.resume(); } catch(e) {} }
             setupVoices();
             adjustVolume(70);
-            if (newsPool.length === 0) fetchWorldNews();
-            if (newsPoolFR.length === 0) fetchWorldNewsFR();
-            if (sportNewsPool.length === 0) fetchSportsNews();
+
+            // Ensure fresh news is loaded BEFORE we start broadcasting
+            try {
+                if (newsPool.length === 0) await fetchWorldNews();
+                if (newsPoolFR.length === 0) await fetchWorldNewsFR();
+                if (sportNewsPool.length === 0) await fetchSportsNews();
+            } catch (e) {
+                console.warn('Initial fetch error:', e);
+            }
+
+            if (startLoading) startLoading.classList.remove('active');
+            if (startScreen) startScreen.style.display = 'none';
             switchChannel('mix');
         }
 
@@ -2187,7 +2174,7 @@
             setInterval(updateListeners, 15000);
             adjustVolume(70);
 
-            // Initial data pulls
+            // Initial background prefetch (start screen may still be up)
             fetchWorldNews();
             fetchWorldNewsFR();
             fetchSportsNews();
@@ -2210,7 +2197,7 @@
             setInterval(fetchSportsScores, SCORES_REFRESH_INTERVAL_MS);
 
             const ds = document.getElementById('dataStatus');
-            if (ds) ds.textContent = '📡 Fetching live data from worldwide media...';
+            if (ds) ds.textContent = '📡 Fetching fresh news (≤6h old) from worldwide media...';
         }
         document.addEventListener('DOMContentLoaded', init);
     </script>
