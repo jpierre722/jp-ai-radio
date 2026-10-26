@@ -440,7 +440,7 @@
                     <span class="marquee-divider">◆</span>
                     🕒 <span class="marquee-em">Strict 6-hour cutoff:</span> only headlines published in the last 6 hours are aired — older items are rejected at ingest
                     <span class="marquee-divider">◆</span>
-                    ⏱️ <span class="marquee-em">Auto-refresh:</span> feeds pulled every 5 minutes · stale items pruned every 5 minutes
+                    ⏱️ <span class="marquee-em">Auto-refresh:</span> feeds pulled every 5 minutes · stale items pruned every 5 minutes · waiting-mode retry every 15 s
                     <span class="marquee-divider">◆</span>
                     📡 <span class="marquee-em">Worldwide media monitoring:</span> BBC · CNN · NPR · AP · Reuters · Guardian · DW · France24 · Sky · Al Jazeera · CBC · ABC AU · CNA · CNBC · FT · and more
                     <span class="marquee-divider">◆</span>
@@ -497,18 +497,14 @@
 
     <script>
         // ============================================================
-        // JP AI RADIO — v33 · STRICT FRESHNESS + 5-MIN REFRESH
+        // JP AI RADIO — v34 · STRICT FRESHNESS + 15s WAIT + 4s STING
         // ------------------------------------------------------------
-        // v33 changes:
-        //   • Freshness window: 12h → 6h (stricter — no 2-week-old news)
-        //   • REMOVED fake backup/placeholder headlines entirely
-        //   • Strict chronological sort (newest first, no trending reorder)
-        //   • Items with missing/invalid pubDate are rejected
-        //   • Startup waits for fresh news before broadcasting
-        //   • Age badge displayed on each headline ("12 min ago", "2h ago")
-        //   • Console log shows age of every aired headline
-        //   • Waiting mode retries every 30s until fresh stories arrive
-        //   • News refresh + stale pruning both run every 5 minutes
+        // v34 changes from v33:
+        //   • WAIT_RETRY_INTERVAL_MS: 30s → 15s
+        //   • Fresh-found sting: 60s theme → 4s sting (FRESH_FOUND_STING_MS)
+        //   • waitForFreshStories is now async and awaits the fetch directly
+        //     (previously a fixed 500ms setTimeout wasted entire retry cycles)
+        //   • Worst-case wait from "queue empty" → "next story airing": ~11-33s
         // ============================================================
 
         const HAITIAN_VOICE_MASTER_PROMPT = {enabled:true,tone:'dous, cho, natif natal',pronunciation:'kreyòl ayisyen klè',nasalRule:'an, en, on, oun byen make — n pa yon konsòn separe',substitutions:{'ou':'oo','è':'eh','ò':'aw','ay':'eye','im':'eem'},constraints:['pa tradui','pa chanje mo yo','li egzak jan li ekri','ritm natirèl yon Ayisyen'],delivery:{rate:0.72,pitch:0.92,volume:1.0,pauseBetweenSentences:900,pauseBetweenChunks:1400}};
@@ -693,7 +689,7 @@
         // ============================================================
         // 🕒 STRICT FRESHNESS — 6-HOUR CUTOFF, NO EXCEPTIONS
         // ============================================================
-        const MAX_ARTICLE_AGE_MS = 6 * 60 * 60 * 1000;   // 6 hours (was 12)
+        const MAX_ARTICLE_AGE_MS = 6 * 60 * 60 * 1000;
 
         function parseArticleDate(pubDate) {
             if (!pubDate) return NaN;
@@ -703,7 +699,6 @@
             return isNaN(t) ? NaN : t;
         }
 
-        // Strict freshness: MUST have a valid pubDate within the 6-hour window
         function isWithinFreshnessWindow(item) {
             if (!item || !item.pubDate) return false;
             const t = parseArticleDate(item.pubDate);
@@ -725,7 +720,6 @@
             return isNaN(t) ? -1 : (Date.now() - t);
         }
 
-        // STRICT chronological sort — newest first. No trending reorder.
         function sortByNewest(a, b) {
             const tA = parseArticleDate(a.pubDate);
             const tB = parseArticleDate(b.pubDate);
@@ -779,7 +773,6 @@
             }
         }
 
-        // STRICT chronological queue — no trending boost, no randomization
         function buildFreshnessQueue(pool, lang) {
             const recent = pool.filter(isWithinFreshnessWindow);
             recent.sort(sortByNewest);
@@ -790,7 +783,6 @@
         // 🌍 WORLDWIDE MEDIA FEEDS — only feeds known to publish fresh RSS
         // ============================================================
         const worldFeeds = [
-            // ── Global wire / aggregators (verified fresh RSS) ──────────
             'https://feeds.bbci.co.uk/news/world/rss.xml',
             'https://feeds.npr.org/1004/rss.xml',
             'https://feeds.npr.org/1001/rss.xml',
@@ -816,27 +808,22 @@
             'https://www.arabnews.com/rss.xml',
             'https://www.thehindu.com/news/international/feeder/default.rss',
 
-            // ── AP / Reuters via Google News RSS (fresh, reliable) ──────
             'https://news.google.com/rss/search?q=site:apnews.com&hl=en-US&gl=US&ceid=US:en',
             'https://news.google.com/rss/search?q=site:reuters.com/world&hl=en-US&gl=US&ceid=US:en',
             'https://news.google.com/rss/search?q=site:apnews.com+OR+site:reuters.com&hl=en-US&gl=US&ceid=US:en',
 
-            // ── Russia / Ukraine / Europe ──────────────────────────────
             'https://feeds.bbci.co.uk/news/world/europe/rss.xml',
             'https://www.rferl.org/api/zrqiteuuir-rss',
             'https://www.pravda.com.ua/eng/rss/view_news/',
             'https://feeds.theguardian.com/theguardian/world/ukraine/rss',
 
-            // ── Middle East ────────────────────────────────────────────
             'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml',
             'https://www.timesofisrael.com/feed/',
             'https://english.alarabiya.net/tools/rss',
 
-            // ── Africa ─────────────────────────────────────────────────
             'https://feeds.bbci.co.uk/news/world/africa/rss.xml',
             'https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf',
 
-            // ── Caribbean ──────────────────────────────────────────────
             'https://www.jamaica-gleaner.com/rss.xml',
             'https://jamaicaobserver.com/feed/',
             'https://www.nationnews.com/feed/',
@@ -844,20 +831,16 @@
             'https://www.caribbeannationalweekly.com/feed/',
             'https://mexiconewsdaily.com/feed/',
 
-            // ── Asia ───────────────────────────────────────────────────
             'https://feeds.bbci.co.uk/news/world/asia/rss.xml',
             'https://www.scmp.com/rss/91/feed',
             'https://timesofindia.indiatimes.com/rssfeedsdefault.cms',
 
-            // ── Latin America ─────────────────────────────────────────
             'https://feeds.bbci.co.uk/news/world/latin_america/rss.xml',
 
-            // ── Vatican / Religion ────────────────────────────────────
             'https://www.vaticannews.va/en.rss.xml',
             'https://www.ncronline.org/rss.xml',
             'https://religionnews.com/feed/',
 
-            // ── Finance ────────────────────────────────────────────────
             'https://feeds.bbci.co.uk/news/business/rss.xml',
             'https://rss.nytimes.com/services/xml/rss/nyt/Business.xml',
             'https://rss.nytimes.com/services/xml/rss/nyt/Economy.xml',
@@ -866,29 +849,24 @@
             'https://www.cnbc.com/id/100003114/device/rss/rss.html',
             'https://www.ft.com/rss/home',
 
-            // ── Tech ───────────────────────────────────────────────────
             'https://feeds.bbci.co.uk/news/technology/rss.xml',
             'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',
             'https://techcrunch.com/feed/',
             'https://www.theverge.com/rss/index.xml',
             'https://feeds.arstechnica.com/arstechnica/index',
 
-            // ── Health / Science ──────────────────────────────────────
             'https://feeds.bbci.co.uk/news/health/rss.xml',
             'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',
             'https://rss.nytimes.com/services/xml/rss/nyt/Health.xml',
             'https://rss.nytimes.com/services/xml/rss/nyt/Science.xml',
             'https://www.sciencedaily.com/rss/all.xml',
 
-            // ── Climate ────────────────────────────────────────────────
             'https://feeds.theguardian.com/theguardian/environment/rss',
             'https://insideclimatenews.org/feed/',
 
-            // ── Education ──────────────────────────────────────────────
             'https://rss.nytimes.com/services/xml/rss/nyt/Education.xml',
             'https://www.insidehighered.com/rss.xml',
 
-            // ── Humanitarian / Defense ────────────────────────────────
             'https://reliefweb.int/updates/rss.xml',
             'https://breakingdefense.com/feed/'
         ];
@@ -917,7 +895,6 @@
             'https://www.rtbf.be/info/monde/rss'
         ];
 
-        // ⚠️ NO fake backups. If no fresh items exist, the broadcast WAITS.
         const backupWorldNews = [];
         const backupWorldNewsFR = [];
         const sportsFeeds = ['https://feeds.bbci.co.uk/sport/rss.xml','https://www.espn.com/espn/rss/news','https://rss.nytimes.com/services/xml/rss/nyt/Sports.xml'];
@@ -1030,7 +1007,6 @@
             return [];
         }
 
-        // ⚠️ NO fake placeholder generation. If no real fresh items exist, returns [].
         function fastFetchNews(feedList, backupList, onFirstBatch, onComplete) {
             const seenTitles = new Set();
             const collected = [];
@@ -1049,7 +1025,6 @@
             setTimeout(() => { if (!firstBatchFired && collected.length === 0) { if (onFirstBatch) onFirstBatch([]); if (onComplete) onComplete([]); } }, 7000);
         }
 
-        // fetchWorldNews returns a Promise that resolves only when fetch is complete
         function fetchWorldNews() {
             return new Promise((resolve) => {
                 fastFetchNews(worldFeeds, backupWorldNews,
@@ -1286,7 +1261,6 @@
             if (sourceLabel) setSourceChip('fr', sourceLabel, !!isArchival);
         }
 
-        // Age badge updater — shows "Just now" / "12 min ago" / "2h ago"
         function updateAgeBadge(lang, item) {
             const el = document.getElementById(lang === 'fr' ? 'aiNewsAgeBadgeFR' : 'aiNewsAgeBadgeEN');
             if (!el) return;
@@ -1462,8 +1436,12 @@
         let aiNewsFrCycleQueue = [], aiNewsFrCycleIdx = 0;
         let aiNewsFrWaitingMode = false;
 
-        const THEME_DURATION_MS = 60000;
-        const NEWS_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+        // ============================================================
+        // 🕒 TIMING CONSTANTS — v34 fast-wait
+        // ============================================================
+        const THEME_DURATION_MS = 60000;                    // unused in wait path
+        const FRESH_FOUND_STING_MS = 4000;                  // v34: short 4s sting when fresh content found
+        const NEWS_REFRESH_INTERVAL_MS = 5 * 60 * 1000;     // 5 minutes
         const SPORTS_REFRESH_INTERVAL_MS = 900000;
         const WEATHER_REFRESH_INTERVAL_MS = 300000;
         const SCORES_REFRESH_INTERVAL_MS = 60000;
@@ -1471,7 +1449,7 @@
         const WATCHDOG_INTERVAL_MS = 20000;
         const STORY_IMAGE_ROTATE_MS = 8000;
         const STORY_MEDIA_FETCH_TIMEOUT_MS = 6000;
-        const WAIT_RETRY_INTERVAL_MS = 30000;
+        const WAIT_RETRY_INTERVAL_MS = 15000;               // v34: was 30000 — retry every 15s
 
         let streamRetryCount = 0;
         const MAX_STREAM_RETRIES = 5;
@@ -1525,7 +1503,6 @@
         })();
 
         function displayAIHeadline(item) {
-            // Final freshness check — reject if aged out at display time
             if (!isWithinFreshnessWindow(item)) {
                 console.warn(`⚠️ Rejected at display time (stale): "${item.title}"`);
                 return;
@@ -1671,48 +1648,55 @@
             return true;
         }
 
-        function waitForFreshStories(lang) {
+        // ============================================================
+        // ⚡ v34 — FAST WAIT: 4s sting when fresh found, 15s retry
+        // ============================================================
+        async function waitForFreshStories(lang) {
             const isActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
             if (!isActive) return;
 
             if (lang === 'fr') aiNewsFrWaitingMode = true; else aiNewsWaitingMode = true;
 
-            if (lang === 'fr') fetchWorldNewsFR(); else fetchWorldNews();
+            const catEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCategory' : 'aiNewsCategory');
+            const headEl = document.getElementById(lang === 'fr' ? 'aiNewsFrHeadline' : 'aiNewsHeadline');
+            const detEl = document.getElementById(lang === 'fr' ? 'aiNewsFrDetails' : 'aiNewsDetails');
+            const cntEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCounter' : 'aiNewsCounter');
+            if (catEl) catEl.textContent = lang === 'fr' ? 'RECHERCHE DE NOUVELLES FRAÎCHES' : 'SEARCHING FOR FRESH STORIES';
+            if (headEl) headEl.textContent = lang === 'fr' ? 'Recherche de titres récents (≤6h)…' : 'Searching for fresh stories (≤6h old)…';
+            if (detEl) detEl.textContent = lang === 'fr' ? 'Rafraîchissement des flux en cours…' : 'Refreshing feeds now…';
+            if (cntEl) cntEl.textContent = lang === 'fr' ? 'Filtre : 6 heures · Vérification toutes les 15 secondes' : 'Freshness filter: 6 hours · Checking every 15 seconds';
 
-            setTimeout(() => {
-                const stillActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
-                if (!stillActive) return;
-                if (beginNewCycle(lang)) {
-                    console.log(`✅ Fresh content arrived for ${lang.toUpperCase()} — starting new cycle`);
-                    if (lang === 'fr') aiNewsFrWaitingMode = false; else aiNewsWaitingMode = false;
-                    playNewsTheme(THEME_DURATION_MS, () => {
-                        const stillActive2 = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
-                        if (!stillActive2) return;
-                        if (lang === 'fr') startAINewsTVLoopFR(); else startAINewsTVLoop();
-                    });
-                    return;
-                }
+            // Await the fetch directly — no wasted retry cycle
+            try {
+                if (lang === 'fr') await fetchWorldNewsFR(); else await fetchWorldNews();
+            } catch (e) {
+                console.warn(`Fetch during wait (${lang}) failed:`, e);
+            }
 
-                const catEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCategory' : 'aiNewsCategory');
-                const headEl = document.getElementById(lang === 'fr' ? 'aiNewsFrHeadline' : 'aiNewsHeadline');
-                const detEl = document.getElementById(lang === 'fr' ? 'aiNewsFrDetails' : 'aiNewsDetails');
-                const cntEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCounter' : 'aiNewsCounter');
-                if (catEl) catEl.textContent = lang === 'fr' ? 'EN ATTENTE DE NOUVELLES FRAÎCHES' : 'AWAITING FRESH STORIES';
-                if (headEl) headEl.textContent = lang === 'fr' ? 'En attente de titres publiés dans les 6 dernières heures...' : 'Awaiting stories published within the last 6 hours...';
-                if (detEl) detEl.textContent = lang === 'fr'
-                    ? `Aucun titre récent disponible (≤6h). Les titres plus anciens sont rejetés. Nouvelle tentative dans 30 secondes.`
-                    : `No recent headlines available (≤6h old). Older items are rejected. Retrying in 30 seconds.`;
-                if (cntEl) cntEl.textContent = lang === 'fr'
-                    ? `Filtre : 6 heures · Surveillance du flux (5 min)`
-                    : `Freshness filter: 6 hours · Monitoring feed (5-min refresh)`;
+            const stillActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
+            if (!stillActive) return;
 
-                console.log(`⏳ ${lang.toUpperCase()} waiting for fresh content — retry in ${WAIT_RETRY_INTERVAL_MS/1000}s`);
-                playNewsTheme(WAIT_RETRY_INTERVAL_MS, () => {
+            // Fresh content found → short 4s sting, then broadcast immediately
+            if (beginNewCycle(lang)) {
+                console.log(`✅ Fresh content arrived for ${lang.toUpperCase()} — starting new cycle (4s sting)`);
+                if (lang === 'fr') aiNewsFrWaitingMode = false; else aiNewsWaitingMode = false;
+                playNewsTheme(FRESH_FOUND_STING_MS, () => {
                     const stillActive2 = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
                     if (!stillActive2) return;
-                    waitForFreshStories(lang);
+                    if (lang === 'fr') startAINewsTVLoopFR(); else startAINewsTVLoop();
                 });
-            }, 500);
+                return;
+            }
+
+            // Still nothing — brief 15s retry (was 30s)
+            if (headEl) headEl.textContent = lang === 'fr' ? 'Aucun titre ≤6h pour l\'instant — nouvel essai dans 15 s' : 'No ≤6h stories yet — retrying in 15 s';
+            if (detEl) detEl.textContent = lang === 'fr' ? 'Les titres plus anciens sont rejetés. Vérification dans 15 secondes.' : 'Older items are rejected. Checking again in 15 seconds.';
+            console.log(`⏳ ${lang.toUpperCase()} waiting for fresh content — retry in 15s`);
+            playNewsTheme(WAIT_RETRY_INTERVAL_MS, () => {
+                const stillActive2 = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
+                if (!stillActive2) return;
+                waitForFreshStories(lang);
+            });
         }
 
         function startAINewsTVLoop() {
@@ -1801,7 +1785,7 @@
                 const closingMsgFR = "Ceci conclut ce flash d'information. Nous attendons de nouveaux titres récents. Un nouveau flash commencera dès l'arrivée de nouvelles histoires.";
                 document.getElementById('aiNewsFrCategory').textContent = 'EN ATTENTE DE NOUVELLES FRAÎCHES';
                 document.getElementById('aiNewsFrHeadline').textContent = 'En attente de titres publiés dans les 6 dernières heures...';
-                document.getElementById('aiNewsFrDetails').textContent = `Aucun titre récent disponible. Les titres plus anciens sont rejetés. Nouvelle tentative dans 30 secondes.`;
+                document.getElementById('aiNewsFrDetails').textContent = `Aucun titre récent disponible. Les titres plus anciens sont rejetés. Nouvelle tentative dans 15 secondes.`;
                 document.getElementById('aiNewsFrCounter').textContent = `Filtre : 6 heures · Surveillance du flux (5 min)`;
                 speakSingle(closingMsgFR, {isFemale: false, pitch: 0.88, rate: 0.94, langCode: 'fr', onEndCallback: () => {
                     if (!aiNewsFrActive) return;
@@ -1831,7 +1815,7 @@
             document.getElementById('audioStatus').textContent = '🤖 AI News Flash TV · Broadcasting Live';
             document.getElementById('trackTitle').textContent = 'JP AI News Flash TV';
             document.getElementById('trackArtist').textContent = '100% AI-Generated Broadcast';
-            document.getElementById('trackGenre').textContent = 'Fresh ≤6h only · 5-min refresh';
+            document.getElementById('trackGenre').textContent = 'Fresh ≤6h only · 5-min refresh · 15s wait retry';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -1850,7 +1834,7 @@
             document.getElementById('audioStatus').textContent = '🤖 Info Flash TV · Diffusion en direct';
             document.getElementById('trackTitle').textContent = 'JP IA Info Flash TV';
             document.getElementById('trackArtist').textContent = 'Diffusion 100% générée par IA';
-            document.getElementById('trackGenre').textContent = 'Récent ≤6h uniquement · Rafraîchissement 5 min';
+            document.getElementById('trackGenre').textContent = 'Récent ≤6h uniquement · Rafraîchissement 5 min · Attente 15s';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -2113,9 +2097,6 @@
         function setCustomCity() { const input = document.getElementById('cityInput').value.trim(); if (!input) return; userLocation = {...BOSTON_LOCATION, city: input, region: '', source: 'Custom'}; fetchWeather(); document.getElementById('dataStatus').textContent = `📍 Weather city set to ${input}`; }
         function createVisualizer() { const viz = document.getElementById('visualizer'); viz.innerHTML = ''; for (let i=0; i<40; i++) { const bar = document.createElement('div'); bar.className = 'visualizer-bar'; bar.style.animationDelay = (i * 0.05) + 's'; bar.style.animationDuration = (0.4 + Math.random() * 0.5).toFixed(2) + 's'; viz.appendChild(bar); } }
 
-        // ============================================================
-        // 🎧 AUDIO ELEMENT / RADIO BOOTSTRAP
-        // ============================================================
         function createAudioElement() {
             audioElement = new Audio();
             audioElement.crossOrigin = 'anonymous';
@@ -2150,7 +2131,6 @@
             setupVoices();
             adjustVolume(70);
 
-            // Ensure fresh news is loaded BEFORE we start broadcasting
             try {
                 if (newsPool.length === 0) await fetchWorldNews();
                 if (newsPoolFR.length === 0) await fetchWorldNewsFR();
@@ -2174,24 +2154,19 @@
             setInterval(updateListeners, 15000);
             adjustVolume(70);
 
-            // Initial background prefetch (start screen may still be up)
             fetchWorldNews();
             fetchWorldNewsFR();
             fetchSportsNews();
             fetchWeather();
             fetchSportsScores();
 
-            // Watchdog for stream/AI-TV recovery
             startWatchdog();
 
-            // ── 5-MIN NEWS REFRESH + 5-MIN STALE PRUNING ──
             setInterval(() => { fetchWorldNews(); fetchWorldNewsFR(); }, NEWS_REFRESH_INTERVAL_MS);
             setInterval(() => { pruneOldArticles(); pruneSeenStories(); }, NEWS_REFRESH_INTERVAL_MS);
 
-            // Wire ticker rotation
             setInterval(displayNextNews, NEWS_TICKER_ROTATE_MS);
 
-            // Periodic refresh of side widgets
             setInterval(fetchSportsNews, SPORTS_REFRESH_INTERVAL_MS);
             setInterval(fetchWeather, WEATHER_REFRESH_INTERVAL_MS);
             setInterval(fetchSportsScores, SCORES_REFRESH_INTERVAL_MS);
