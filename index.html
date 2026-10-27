@@ -436,7 +436,9 @@
                     <span class="marquee-divider">◆</span>
                     🕒 <span class="marquee-em">Strict 6-hour cutoff:</span> only headlines published in the last 6 hours are aired
                     <span class="marquee-divider">◆</span>
-                    ⚡ <span class="marquee-em">Seamless broadcast:</span> prefetch during last 5 stories → 0s gap between cycles · 800ms between stories · 8s retry only when truly empty
+                    ⚡ <span class="marquee-em">Seamless broadcast:</span> prefetch during last 5 stories → 0s gap · 800ms between stories · 8s retry with music
+                    <span class="marquee-divider">◆</span>
+                    🎵 <span class="marquee-em">"Stay tuned" music:</span> continuous news theme plays while headlines refresh
                     <span class="marquee-divider">◆</span>
                     ⏱️ <span class="marquee-em">Auto-refresh:</span> feeds pulled every 5 minutes · stale items pruned every 5 minutes
                     <span class="marquee-divider">◆</span>
@@ -491,18 +493,22 @@
 
     <script>
         // ============================================================
-        // JP AI RADIO — v36 · SEAMLESS CONTINUOUS BROADCAST
+        // JP AI RADIO — v37 · WAIT MUSIC + STAY-TUNED ANNOUNCEMENT
         // ------------------------------------------------------------
-        // v36 changes from v35:
-        //   • Prefetch: refresh pool during last 5 stories of every cycle
-        //     → cycle bridge is INSTANT (0s gap) when fresh content exists
-        //   • Removed spoken "closing message" — bridges straight to next story
-        //   • STORY_GAP_MS: 2500ms → 800ms between stories
-        //   • EMPTY_RETRY_MS: 15000ms → 8000ms when truly out of fresh content
-        //   • waitForFreshStories rewritten: non-blocking poll every 8s,
-        //     no long theme, no await — resumes the instant fresh items exist
-        //   • In-flight guards prevent duplicate fetch calls
-        //   • All v35 features preserved (instant start, 6h cutoff, etc.)
+        // v37 changes from v36:
+        //   • During wait-for-fresh-stories mode, continuous news-theme
+        //     music plays non-stop (chained playNewsTheme calls, ~500ms
+        //     overlap so there is never a silent gap)
+        //   • On first entry into wait mode, the anchor speaks:
+        //       EN: "We're updating our headlines... A new headline
+        //            news story is coming soon — stay tuned."
+        //       FR: "Nous actualisons nos titres... Une nouvelle
+        //            histoire arrive très bientôt — restez à l'écoute."
+        //     The announcement plays OVER the background music.
+        //   • Music + speech keep playing across every 8s retry
+        //   • When fresh content arrives, music stops, brief sting,
+        //     broadcast resumes
+        //   • Channel switches cleanly kill wait music + speech
         // ============================================================
 
         const HAITIAN_VOICE_MASTER_PROMPT = {enabled:true,tone:'dous, cho, natif natal',pronunciation:'kreyòl ayisyen klè',nasalRule:'an, en, on, oun byen make — n pa yon konsòn separe',substitutions:{'ou':'oo','è':'eh','ò':'aw','ay':'eye','im':'eem'},constraints:['pa tradui','pa chanje mo yo','li egzak jan li ekri','ritm natirèl yon Ayisyen'],delivery:{rate:0.72,pitch:0.92,volume:1.0,pauseBetweenSentences:900,pauseBetweenChunks:1400}};
@@ -1003,7 +1009,6 @@
             setTimeout(() => { if (!firstBatchFired && collected.length === 0) { if (onFirstBatch) onFirstBatch([]); if (onComplete) onComplete([]); } }, 7000);
         }
 
-        // ── v36: In-flight guards prevent duplicate fetches ──
         let worldNewsFetchInFlightEN = false;
         let worldNewsFetchInFlightFR = false;
 
@@ -1387,6 +1392,9 @@
         let aiNewsWaitingMode = false;
         let aiNewsEmptyPollsEN = 0;
         let aiNewsPrefetchedThisCycleEN = false;
+        // v37: track wait-music state so we only announce once per wait session
+        let aiNewsWaitMusicActiveEN = false;
+        let aiNewsWaitAnnouncedEN = false;
 
         let aiNewsFrActive = false, aiNewsFrLoopTimeoutId = null, aiNewsFrClockInterval = null;
         let aiNewsFrHeadlineIndex = 0, currentFrImageSlot = 'A';
@@ -1394,12 +1402,15 @@
         let aiNewsFrWaitingMode = false;
         let aiNewsEmptyPollsFR = 0;
         let aiNewsPrefetchedThisCycleFR = false;
+        // v37
+        let aiNewsFrWaitMusicActiveFR = false;
+        let aiNewsFrWaitAnnouncedFR = false;
 
         // ============================================================
-        // 🕒 v36 TIMING — seamless continuous broadcast
+        // 🕒 v37 TIMING
         // ============================================================
-        const THEME_DURATION_MS = 60000;                    // unused in wait path
-        const FRESH_FOUND_STING_MS = 1000;                  // brief sting when recovering from empty
+        const THEME_DURATION_MS = 60000;
+        const FRESH_FOUND_STING_MS = 1000;
         const NEWS_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
         const SPORTS_REFRESH_INTERVAL_MS = 900000;
         const WEATHER_REFRESH_INTERVAL_MS = 300000;
@@ -1408,10 +1419,12 @@
         const WATCHDOG_INTERVAL_MS = 20000;
         const STORY_IMAGE_ROTATE_MS = 8000;
         const STORY_MEDIA_FETCH_TIMEOUT_MS = 6000;
-        const WAIT_RETRY_INTERVAL_MS = 8000;                // v36: was 15000 — retry every 8s
+        const WAIT_RETRY_INTERVAL_MS = 8000;                // poll every 8s when empty
         const STARTUP_POLL_INTERVAL_MS = 1200;
-        const STORY_GAP_MS = 800;                           // v36: was 2500 — between stories
-        const PREFETCH_THRESHOLD = 5;                       // v36: prefetch when 5 left
+        const STORY_GAP_MS = 800;
+        const PREFETCH_THRESHOLD = 5;
+        // v37: how long each wait-music round plays. 8.5s > 8s poll → continuous.
+        const WAIT_MUSIC_ROUND_MS = WAIT_RETRY_INTERVAL_MS + 500;
 
         let streamRetryCount = 0;
         const MAX_STREAM_RETRIES = 5;
@@ -1611,7 +1624,41 @@
         }
 
         // ============================================================
-        // ⚡ v36 — NON-BLOCKING wait: fire-and-forget fetch + 8s poll
+        // 🎵 v37 — Continuous wait-music (chained playNewsTheme calls)
+        // ------------------------------------------------------------
+        // Each round plays for WAIT_MUSIC_ROUND_MS (8.5s), and the
+        // onComplete callback immediately starts the next round while
+        // waiting mode is still active. Result: uninterrupted music
+        // while headlines refresh, and instant stop when fresh content
+        // arrives (the fresh-content branch calls stopNewsTheme()).
+        // ============================================================
+        function chainWaitMusic(lang) {
+            const waiting = lang === 'fr' ? aiNewsFrWaitingMode : aiNewsWaitingMode;
+            if (!waiting) return;
+            playNewsTheme(WAIT_MUSIC_ROUND_MS, () => {
+                const stillWaiting = lang === 'fr' ? aiNewsFrWaitingMode : aiNewsWaitingMode;
+                if (!stillWaiting) return;
+                chainWaitMusic(lang);   // ── loop forever while waiting
+            });
+        }
+
+        // ============================================================
+        // 🎙️ v37 — Speak the "stay tuned" announcement
+        // ============================================================
+        function speakWaitAnnouncement(lang) {
+            const msg = lang === 'fr'
+                ? "Nous actualisons nos titres depuis la salle de presse mondiale JP IA. Une nouvelle histoire d'actualité arrive très bientôt — restez à l'écoute sur JP IA Info Flash."
+                : "We're updating our headlines from the worldwide JP AI Newsroom. A new headline news story is coming soon — stay tuned to JP AI News Flash.";
+            speakSingle(msg, {
+                langCode: lang,
+                isFemale: false,
+                pitch: lang === 'fr' ? 0.88 : 0.82,
+                rate: lang === 'fr' ? 0.94 : 0.93
+            });
+        }
+
+        // ============================================================
+        // ⚡ v37 — waitForFreshStories: music + announcement on entry
         // ============================================================
         function waitForFreshStories(lang) {
             const isActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
@@ -1619,27 +1666,39 @@
 
             if (lang === 'fr') aiNewsFrWaitingMode = true; else aiNewsWaitingMode = true;
 
+            // Show search state in the UI
             const catEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCategory' : 'aiNewsCategory');
             const headEl = document.getElementById(lang === 'fr' ? 'aiNewsFrHeadline' : 'aiNewsHeadline');
             const detEl = document.getElementById(lang === 'fr' ? 'aiNewsFrDetails' : 'aiNewsDetails');
             const cntEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCounter' : 'aiNewsCounter');
             if (catEl) catEl.textContent = lang === 'fr' ? 'EN DIRECT · ACTUALISATION' : 'LIVE · UPDATING';
-            if (headEl) headEl.textContent = lang === 'fr' ? 'Mise à jour des titres en cours…' : 'Updating headlines…';
-            if (detEl) detEl.textContent = lang === 'fr' ? 'Surveillance des flux mondiaux — reprise dès qu\'un titre récent arrive.' : 'Monitoring worldwide feeds — resuming the moment a fresh story lands.';
+            if (headEl) headEl.textContent = lang === 'fr' ? 'Mise à jour des titres — restez à l\'écoute…' : 'Updating headlines — stay tuned…';
+            if (detEl) detEl.textContent = lang === 'fr' ? 'Une nouvelle histoire arrive très bientôt. Musique d\'attente en cours.' : 'A new headline news story is coming soon. Background music playing.';
             if (cntEl) cntEl.textContent = `${(lang === 'fr' ? aiNewsFrSessionPlayed : aiNewsSessionPlayed).size} headlines aired this session`;
 
-            // Fire-and-forget — in-flight guard prevents duplicate requests
+            // ── On first entry into wait mode: start music + speak announcement
+            const musicActive = lang === 'fr' ? aiNewsFrWaitMusicActiveFR : aiNewsWaitMusicActiveEN;
+            if (!musicActive) {
+                if (lang === 'fr') aiNewsFrWaitMusicActiveFR = true; else aiNewsWaitMusicActiveEN = true;
+                console.log(`🎵 ${lang.toUpperCase()} — wait music + "stay tuned" announcement`);
+                chainWaitMusic(lang);        // continuous background music
+                speakWaitAnnouncement(lang); // spoken announcement over the music
+            }
+
+            // Fire-and-forget refresh (in-flight guard prevents duplicate)
             if (lang === 'fr') fetchWorldNewsFR(); else fetchWorldNews();
 
-            console.log(`⏳ ${lang.toUpperCase()} empty — polling every 8s`);
-
+            // ── Retry check in 8s
             setTimeout(() => {
                 const stillActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
                 if (!stillActive) return;
+
                 if (beginNewCycle(lang)) {
-                    console.log(`⚡ Fresh content found for ${lang.toUpperCase()} — resuming immediately`);
-                    if (lang === 'fr') aiNewsFrWaitingMode = false; else aiNewsWaitingMode = false;
-                    // Very short sting to fill the moment
+                    console.log(`⚡ Fresh content found for ${lang.toUpperCase()} — resuming broadcast`);
+                    stopNewsTheme();   // kills current wait-music round AND its chain
+                    if (lang === 'fr') { aiNewsFrWaitingMode = false; aiNewsFrWaitMusicActiveFR = false; }
+                    else { aiNewsWaitingMode = false; aiNewsWaitMusicActiveEN = false; }
+                    // Brief sting, then broadcast — speech (announcement) may still be playing; browser TTS queues it naturally
                     playNewsTheme(FRESH_FOUND_STING_MS, () => {
                         const stillActive2 = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
                         if (!stillActive2) return;
@@ -1647,19 +1706,18 @@
                     });
                     return;
                 }
+                // Still empty — recurse (music already chained, no need to restart)
                 waitForFreshStories(lang);
             }, WAIT_RETRY_INTERVAL_MS);
         }
 
         // ============================================================
-        // ⚡ v36 — SEAMLESS LOOP: prefetch during last 5 stories,
-        //           bridge to next cycle with ZERO gap
+        // ⚡ v37 — Seamless broadcast loop with prefetch
         // ============================================================
         function startAINewsTVLoop() {
             if (!aiNewsActive) return;
             if (aiNewsWaitingMode) return;
 
-            // ── PREFETCH: refresh pool when 5 stories remain ──
             if (aiNewsCycleQueue.length > 0 &&
                 aiNewsCycleIdx >= aiNewsCycleQueue.length - PREFETCH_THRESHOLD &&
                 !aiNewsPrefetchedThisCycleEN) {
@@ -1699,14 +1757,12 @@
                 break;
             }
 
-            // ── END-OF-CYCLE: bridge seamlessly, no closing speech ──
             if (aiNewsCycleIdx >= aiNewsCycleQueue.length) {
                 if (beginNewCycle('en')) {
                     console.log(`⚡ EN seamless bridge — continuing immediately`);
                     startAINewsTVLoop();
                     return;
                 }
-                // Truly exhausted — go to wait loop
                 waitForFreshStories('en');
                 return;
             }
@@ -1798,7 +1854,7 @@
             document.getElementById('audioStatus').textContent = '🤖 AI News Flash TV · Broadcasting Live';
             document.getElementById('trackTitle').textContent = 'JP AI News Flash TV';
             document.getElementById('trackArtist').textContent = '100% AI-Generated Broadcast';
-            document.getElementById('trackGenre').textContent = 'Continuous · Fresh ≤6h · Seamless';
+            document.getElementById('trackGenre').textContent = 'Continuous · Fresh ≤6h · Wait-music when refreshing';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -1807,6 +1863,8 @@
             aiNewsWaitingMode = false;
             aiNewsEmptyPollsEN = 0;
             aiNewsPrefetchedThisCycleEN = false;
+            aiNewsWaitMusicActiveEN = false;
+            aiNewsWaitAnnouncedEN = false;
             if (aiNewsCycleQueue.length === 0) beginNewCycle('en');
             startAINewsTVLoop();
         }
@@ -1819,7 +1877,7 @@
             document.getElementById('audioStatus').textContent = '🤖 Info Flash TV · Diffusion en direct';
             document.getElementById('trackTitle').textContent = 'JP IA Info Flash TV';
             document.getElementById('trackArtist').textContent = 'Diffusion 100% générée par IA';
-            document.getElementById('trackGenre').textContent = 'Continu · Récent ≤6h · Sans interruption';
+            document.getElementById('trackGenre').textContent = 'Continu · Récent ≤6h · Musique d\'attente pendant l\'actualisation';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -1828,6 +1886,8 @@
             aiNewsFrWaitingMode = false;
             aiNewsEmptyPollsFR = 0;
             aiNewsPrefetchedThisCycleFR = false;
+            aiNewsFrWaitMusicActiveFR = false;
+            aiNewsFrWaitAnnouncedFR = false;
             if (aiNewsFrCycleQueue.length === 0) beginNewCycle('fr');
             startAINewsTVLoopFR();
         }
@@ -1837,6 +1897,8 @@
             stopNewsVideoLoop('en');
             aiNewsActive = false;
             aiNewsWaitingMode = false;
+            aiNewsWaitMusicActiveEN = false;
+            aiNewsWaitAnnouncedEN = false;
             if (aiNewsLoopTimeoutId) { clearTimeout(aiNewsLoopTimeoutId); aiNewsLoopTimeoutId = null; }
             if (aiNewsClockInterval) { clearInterval(aiNewsClockInterval); aiNewsClockInterval = null; }
             stopNewsTheme();
@@ -1849,6 +1911,8 @@
             stopNewsVideoLoop('fr');
             aiNewsFrActive = false;
             aiNewsFrWaitingMode = false;
+            aiNewsFrWaitMusicActiveFR = false;
+            aiNewsFrWaitAnnouncedFR = false;
             if (aiNewsFrLoopTimeoutId) { clearTimeout(aiNewsFrLoopTimeoutId); aiNewsFrLoopTimeoutId = null; }
             if (aiNewsFrClockInterval) { clearInterval(aiNewsFrClockInterval); aiNewsFrClockInterval = null; }
             stopNewsTheme();
