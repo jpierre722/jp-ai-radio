@@ -434,17 +434,13 @@
                 <div class="contact-marquee">
                     📧 <span class="marquee-em">For suggestions or support:</span> <a href="mailto:jpierre722@yahoo.com">jpierre722@yahoo.com</a>
                     <span class="marquee-divider">◆</span>
-                    🕒 <span class="marquee-em">Strict 6-hour cutoff:</span> only headlines published in the last 6 hours are aired — older items are rejected at ingest
+                    🕒 <span class="marquee-em">Strict 6-hour cutoff:</span> only headlines published in the last 6 hours are aired
                     <span class="marquee-divider">◆</span>
-                    ⏱️ <span class="marquee-em">Auto-refresh:</span> feeds pulled every 5 minutes · stale items pruned every 5 minutes · waiting-mode retry every 15 s
+                    ⚡ <span class="marquee-em">Seamless broadcast:</span> prefetch during last 5 stories → 0s gap between cycles · 800ms between stories · 8s retry only when truly empty
                     <span class="marquee-divider">◆</span>
-                    ⚡ <span class="marquee-em">Instant start:</span> playback begins as soon as the very first feed responds
+                    ⏱️ <span class="marquee-em">Auto-refresh:</span> feeds pulled every 5 minutes · stale items pruned every 5 minutes
                     <span class="marquee-divider">◆</span>
-                    📡 <span class="marquee-em">Worldwide media monitoring:</span> BBC · CNN · NPR · AP · Reuters · Guardian · DW · France24 · Sky · Al Jazeera · CBC · ABC AU · CNA · CNBC · FT · and more
-                    <span class="marquee-divider">◆</span>
-                    🗞️ <span class="marquee-em">Single-play broadcast:</span> each headline airs once per session
-                    <span class="marquee-divider">◆</span>
-                    🎬 <span class="marquee-em">PROD button:</span> opens the CNN/BBC/Fox-style production package for the current story
+                    📡 <span class="marquee-em">Worldwide media:</span> BBC · CNN · NPR · AP · Reuters · Guardian · DW · France24 · Sky · Al Jazeera · CBC · ABC AU · CNA · CNBC · FT · and more
                     <span class="marquee-divider">◆</span>
                     📻 <span class="marquee-em">JP AI Radio</span> — broadcasting live 24/7 from Boston, MA
                     <span class="marquee-divider">◆</span>
@@ -495,14 +491,18 @@
 
     <script>
         // ============================================================
-        // JP AI RADIO — v35 · INSTANT PLAY + STRICT FRESHNESS
+        // JP AI RADIO — v36 · SEAMLESS CONTINUOUS BROADCAST
         // ------------------------------------------------------------
-        // v35 changes from v34:
-        //   • startRadio() no longer awaits feed fetches — dismisses
-        //     start screen immediately and begins broadcasting the moment
-        //     the first batch lands (poll every 1.2s during startup)
-        //   • Self-healing refetch every ~5s if the first fetch fails
-        //   • All v34 features preserved (6h cutoff, 15s wait, 4s sting)
+        // v36 changes from v35:
+        //   • Prefetch: refresh pool during last 5 stories of every cycle
+        //     → cycle bridge is INSTANT (0s gap) when fresh content exists
+        //   • Removed spoken "closing message" — bridges straight to next story
+        //   • STORY_GAP_MS: 2500ms → 800ms between stories
+        //   • EMPTY_RETRY_MS: 15000ms → 8000ms when truly out of fresh content
+        //   • waitForFreshStories rewritten: non-blocking poll every 8s,
+        //     no long theme, no await — resumes the instant fresh items exist
+        //   • In-flight guards prevent duplicate fetch calls
+        //   • All v35 features preserved (instant start, 6h cutoff, etc.)
         // ============================================================
 
         const HAITIAN_VOICE_MASTER_PROMPT = {enabled:true,tone:'dous, cho, natif natal',pronunciation:'kreyòl ayisyen klè',nasalRule:'an, en, on, oun byen make — n pa yon konsòn separe',substitutions:{'ou':'oo','è':'eh','ò':'aw','ay':'eye','im':'eem'},constraints:['pa tradui','pa chanje mo yo','li egzak jan li ekri','ritm natirèl yon Ayisyen'],delivery:{rate:0.72,pitch:0.92,volume:1.0,pauseBetweenSentences:900,pauseBetweenChunks:1400}};
@@ -684,9 +684,6 @@
             for (const [key, rec] of SEEN_STORY_REGISTRY.entries()) if (rec.lastSeen < cutoff) SEEN_STORY_REGISTRY.delete(key);
         }
 
-        // ============================================================
-        // 🕒 STRICT FRESHNESS — 6-HOUR CUTOFF, NO EXCEPTIONS
-        // ============================================================
         const MAX_ARTICLE_AGE_MS = 6 * 60 * 60 * 1000;
 
         function parseArticleDate(pubDate) {
@@ -777,9 +774,6 @@
             return recent;
         }
 
-        // ============================================================
-        // 🌍 WORLDWIDE MEDIA FEEDS
-        // ============================================================
         const worldFeeds = [
             'https://feeds.bbci.co.uk/news/world/rss.xml',
             'https://feeds.npr.org/1004/rss.xml',
@@ -1009,7 +1003,13 @@
             setTimeout(() => { if (!firstBatchFired && collected.length === 0) { if (onFirstBatch) onFirstBatch([]); if (onComplete) onComplete([]); } }, 7000);
         }
 
+        // ── v36: In-flight guards prevent duplicate fetches ──
+        let worldNewsFetchInFlightEN = false;
+        let worldNewsFetchInFlightFR = false;
+
         function fetchWorldNews() {
+            if (worldNewsFetchInFlightEN) return Promise.resolve();
+            worldNewsFetchInFlightEN = true;
             return new Promise((resolve) => {
                 fastFetchNews(worldFeeds, backupWorldNews,
                     (firstItems) => {
@@ -1040,6 +1040,7 @@
                         displayNextNews();
                         console.log(`🔄 World news refreshed · ${newsPool.length} fresh headline(s) ≤6h`);
                         document.getElementById('dataStatus').textContent = `✅ World news updated (${newsPool.length} fresh ≤6h) · Next refresh in 5 min`;
+                        worldNewsFetchInFlightEN = false;
                         resolve();
                     }
                 );
@@ -1047,6 +1048,8 @@
         }
 
         function fetchWorldNewsFR() {
+            if (worldNewsFetchInFlightFR) return Promise.resolve();
+            worldNewsFetchInFlightFR = true;
             return new Promise((resolve) => {
                 fastFetchNews(worldFeedsFR, backupWorldNewsFR,
                     (firstItems) => {
@@ -1068,6 +1071,7 @@
                         if (newsPoolFR.length > 400) newsPoolFR = newsPoolFR.slice(0, 400);
                         updateAINewsTickerFR();
                         console.log(`🔄 FR world news refreshed · ${newsPoolFR.length} fresh headline(s) ≤6h`);
+                        worldNewsFetchInFlightFR = false;
                         resolve();
                     }
                 );
@@ -1256,50 +1260,17 @@
         }
 
         const NEWS_PRODUCTION_RULES = {
-            POLITICS: {
-                en: { timeline: [ ['00:00','WIDE ESTABLISHING','3s','Exterior of capitol / parliament / government building — slow push in, golden hour'], ['00:03','MEDIUM · LEADER','4s','World leader at podium mid-speech, tight framing, shallow DOF'], ['00:07','GRAPHIC · MAP','3s','Animated election map with live vote tally and district highlights'], ['00:10','CLOSE-UP · FLAG','2s','National flag rippling in slow motion, backlit — dissolve to anchor'] ], imgPrompt: 'Cinematic wide shot: {title}. Marble government chamber, world leaders at a lectern, national flags, warm golden volumetric light, photoreal, 85mm, 4K', vidPrompt: '4K slow-motion dolly push into a marble parliament hall as world leaders stand at the lectern, {title}', thumb: 'Split-screen: politician left, animated vote tally right, BREAKING band bottom, gold accent', ost: ['BREAKING · POLITICS','{title}','LIVE · JP AI NEWSROOM'], social: '🚨 {title} — full report on JP AI News Flash. #Politics #WorldNews' },
-                fr: { timeline: [ ['00:00','PLAN LARGE · ÉTABLISSEMENT','3s','Extérieur du parlement — travelling avant lent, heure dorée'], ['00:03','PLAN MOYEN · DIRIGEANT','4s','Dirigeant mondial au pupitre'], ['00:07','GRAPHISME · CARTE','3s','Carte électorale animée'], ['00:10','GROS PLAN · DRAPEAU','2s','Drapeau national flottant'] ], imgPrompt: 'Plan large cinématographique : {title}. Chambre parlementaire en marbre, dirigeants, drapeaux, lumière dorée', vidPrompt: 'Travelling 4K ralenti dans un parlement, {title}', thumb: 'Écran partagé : politicien, décompte, bandeau URGENT', ost: ['URGENT · POLITIQUE','{title}','DIRECT · JP IA INFO'], social: '🚨 {title} — rapport complet sur JP IA Info Flash. #Politique' }
-            },
-            BUSINESS: {
-                en: { timeline: [ ['00:00','WIDE · CITY','3s','Financial district skyline at dusk'], ['00:03','MEDIUM · TRADING','4s','Trading floor screens, red/green tickers'], ['00:07','GRAPHIC · CHART','3s','Animated stock chart'], ['00:10','CLOSE-UP · CURRENCY','2s','Currency notes fanning out'] ], imgPrompt: 'Cinematic wide of a financial district at dusk, {title}, glass towers, gold and teal lighting, photoreal', vidPrompt: '4K dolly through a trading floor, {title}, red and green tickers', thumb: 'Big animated percentage arrow over skyline, MARKETS band', ost: ['MARKETS · LIVE','{title}','JP AI NEWSROOM'], social: '📈 {title} — full market report. #Markets #Finance' },
-                fr: { timeline: [ ['00:00','PLAN LARGE · VILLE','3s','Quartier financier au crépuscule'], ['00:03','PLAN MOYEN · TRADING','4s','Écrans de salle de marché'], ['00:07','GRAPHISME · COURBE','3s','Graphique boursier animé'], ['00:10','GROS PLAN · MONNAIE','2s','Billets de banque'] ], imgPrompt: 'Plan large cinématographique d\'un quartier financier, {title}', vidPrompt: 'Travelling 4K dans une salle de marché, {title}', thumb: 'Flèche animée sur skyline, bandeau MARCHÉS', ost: ['MARCHÉS · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '📈 {title} — rapport complet. #Marchés' }
-            },
-            CLIMATE: {
-                en: { timeline: [ ['00:00','WIDE · STORM','3s','Storm footage — dark supercell, lightning'], ['00:03','GRAPHIC · RADAR','4s','Animated weather radar sweep'], ['00:07','MEDIUM · DAMAGE','3s','Flooded street, first responders'], ['00:10','CLOSE-UP · SATELLITE','2s','Satellite imagery of the region'] ], imgPrompt: 'Cinematic wide of a supercell storm over a city at dusk, {title}, lightning striking', vidPrompt: '4K timelapse of a storm system, {title}, animated radar overlay', thumb: 'Storm cell with lightning, ALERT band, animated radar', ost: ['WEATHER · ALERT','{title}','LIVE RADAR · JP AI'], social: '⛈️ {title} — full weather report. #Weather #Climate' },
-                fr: { timeline: [ ['00:00','PLAN LARGE · ORAGE','3s','Supercellule, éclairs'], ['00:03','GRAPHISME · RADAR','4s','Radar météo animé'], ['00:07','PLAN MOYEN · DÉGÂTS','3s','Rue inondée, secouristes'], ['00:10','GROS PLAN · SATELLITE','2s','Imagerie satellite'] ], imgPrompt: 'Plan large cinématographique d\'une supercellule, {title}', vidPrompt: 'Timelapse 4K d\'un système orageux, {title}', thumb: 'Cellule orageuse, bandeau ALERTE', ost: ['MÉTÉO · ALERTE','{title}','RADAR · JP IA'], social: '⛈️ {title} — rapport météo complet. #Météo' }
-            },
-            CONFLICT: {
-                en: { timeline: [ ['00:00','WIDE · REGION','3s','Wide shot of contested region, smoke plumes, handheld'], ['00:03','MEDIUM · OBSERVER','4s','International observers / humanitarian workers'], ['00:07','GRAPHIC · MAP','3s','Animated conflict map with front-line'], ['00:10','CLOSE-UP · REFUGEES','2s','Displaced civilians in a shelter'] ], imgPrompt: 'Cinematic medium of humanitarian workers in a contested region, {title}, smoke on horizon', vidPrompt: 'Handheld 4K footage of responders in a conflict region, {title}', thumb: 'Map with front-line zone in red, BREAKING band', ost: ['CONFLICT · LIVE','{title}','JP AI NEWSROOM'], social: '🌍 {title} — full report on JP AI News Flash. #Conflict #WorldNews' },
-                fr: { timeline: [ ['00:00','PLAN LARGE · RÉGION','3s','Région contestée, fumée'], ['00:03','PLAN MOYEN · OBSERVATEURS','4s','Observateurs internationaux'], ['00:07','GRAPHISME · CARTE','3s','Carte du conflit animée'], ['00:10','GROS PLAN · RÉFUGIÉS','2s','Civils déplacés'] ], imgPrompt: 'Plan moyen cinématographique de travailleurs humanitaires, {title}', vidPrompt: 'Images 4K caméra à l\'épaule de secouristes, {title}', thumb: 'Carte avec zone de front, bandeau URGENT', ost: ['CONFLIT · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '🌍 {title} — rapport complet. #Conflit' }
-            },
-            HEALTH: {
-                en: { timeline: [ ['00:00','WIDE · HOSPITAL','3s','Hospital exterior at blue hour'], ['00:03','MEDIUM · CLINIC','4s','Medical team in a modern lab'], ['00:07','GRAPHIC · DATA','3s','Public health data viz'], ['00:10','CLOSE-UP · DETAIL','2s','Medical equipment / gloved hands'] ], imgPrompt: 'Cinematic wide of a modern hospital at blue hour, {title}, medical staff', vidPrompt: '4K slow dolly through a hospital corridor, {title}', thumb: 'Medical cross over hospital silhouette, HEALTH band', ost: ['HEALTH · LIVE','{title}','JP AI NEWSROOM'], social: '🩺 {title} — full health report. #Health' },
-                fr: { timeline: [ ['00:00','PLAN LARGE · HÔPITAL','3s','Hôpital à l\'heure bleue'], ['00:03','PLAN MOYEN · CLINIQUE','4s','Équipe médicale'], ['00:07','GRAPHISME · DONNÉES','3s','Données de santé animées'], ['00:10','GROS PLAN · DÉTAIL','2s','Équipement médical'] ], imgPrompt: 'Plan large cinématographique d\'un hôpital, {title}', vidPrompt: 'Travelling 4K dans un couloir d\'hôpital, {title}', thumb: 'Croix médicale, bandeau SANTÉ', ost: ['SANTÉ · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '🩺 {title} — rapport santé complet. #Santé' }
-            },
-            TECHNOLOGY: {
-                en: { timeline: [ ['00:00','WIDE · LAB','3s','High-tech lab / data center, cool blue light'], ['00:03','MEDIUM · SCREENS','4s','Computer screens scrolling code / neural nets'], ['00:07','GRAPHIC · AI VIZ','3s','Animated AI graphic — nodes lighting up'], ['00:10','CLOSE-UP · ROBOT','2s','Robotic hand or chip wafer'] ], imgPrompt: 'Cinematic wide of a modern AI data center, {title}, cool blue LEDs', vidPrompt: '4K slow push through an AI data center, {title}', thumb: 'Neural network graphic over chip close-up', ost: ['TECHNOLOGY · LIVE','{title}','JP AI NEWSROOM'], social: '🤖 {title} — full tech report. #Technology #AI' },
-                fr: { timeline: [ ['00:00','PLAN LARGE · LABO','3s','Laboratoire high-tech'], ['00:03','PLAN MOYEN · ÉCRANS','4s','Écrans avec code'], ['00:07','GRAPHISME · IA','3s','Graphique IA animé'], ['00:10','GROS PLAN · ROBOT','2s','Main robotique'] ], imgPrompt: 'Plan large d\'un centre de données IA, {title}', vidPrompt: 'Travelling 4K dans un centre de données, {title}', thumb: 'Réseau de neurones, bandeau TECH', ost: ['TECHNOLOGIE · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '🤖 {title} — rapport tech complet. #Technologie' }
-            },
-            SPORTS: {
-                en: { timeline: [ ['00:00','WIDE · STADIUM','3s','Wide stadium at kickoff, floodlights'], ['00:03','MEDIUM · ATHLETE','4s','Athlete in action — tight tracking'], ['00:07','GRAPHIC · SCORE','3s','Animated score graphic'], ['00:10','CLOSE-UP · CROWD','2s','Crowd reaction close-up'] ], imgPrompt: 'Cinematic wide of a packed stadium, {title}, floodlights', vidPrompt: '4K broadcast-style tracking shot of an athlete, {title}', thumb: 'Athlete silhouette over score graphic', ost: ['SPORTS · LIVE','{title}','JP AI NEWSROOM'], social: '🏟️ {title} — full sports report. #Sports' },
-                fr: { timeline: [ ['00:00','PLAN LARGE · STADE','3s','Stade au coup d\'envoi'], ['00:03','PLAN MOYEN · ATHLÈTE','4s','Athlète en action'], ['00:07','GRAPHISME · SCORE','3s','Graphique de score'], ['00:10','GROS PLAN · FOULE','2s','Réaction de la foule'] ], imgPrompt: 'Plan large d\'un stade plein, {title}', vidPrompt: 'Travelling 4K d\'un athlète, {title}', thumb: 'Athlète silhouette, bandeau SPORTS', ost: ['SPORTS · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '🏟️ {title} — rapport sport complet. #Sport' }
-            },
-            DIPLOMACY: {
-                en: { timeline: [ ['00:00','WIDE · SUMMIT','3s','Diplomatic summit hall, flags lined up'], ['00:03','MEDIUM · HANDSHAKE','4s','Leaders shaking hands'], ['00:07','GRAPHIC · MAP','3s','Animated world map with diplomatic arcs'], ['00:10','CLOSE-UP · TREATY','2s','Treaty page / pen stroke'] ], imgPrompt: 'Cinematic wide of an international summit hall, {title}, national flags, delegates', vidPrompt: '4K slow dolly across a diplomatic summit, {title}', thumb: 'World map with diplomatic arcs, DIPLOMACY band', ost: ['DIPLOMACY · LIVE','{title}','JP AI NEWSROOM'], social: '🌐 {title} — full diplomatic report. #Diplomacy' },
-                fr: { timeline: [ ['00:00','PLAN LARGE · SOMMET','3s','Salle de sommet'], ['00:03','PLAN MOYEN · POIGNÉE','4s','Poignée de main'], ['00:07','GRAPHISME · CARTE','3s','Carte mondiale animée'], ['00:10','GROS PLAN · TRAITÉ','2s','Page de traité'] ], imgPrompt: 'Plan large d\'une salle de sommet, {title}', vidPrompt: 'Travelling 4K dans un sommet, {title}', thumb: 'Carte mondiale, bandeau DIPLOMATIE', ost: ['DIPLOMATIE · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '🌐 {title} — rapport diplomatique complet. #Diplomatie' }
-            },
-            RELIGION: {
-                en: { timeline: [ ['00:00','WIDE · PLACE OF WORSHIP','3s','Exterior of a church, mosque, temple or cathedral at golden hour'], ['00:03','MEDIUM · LEADER','4s','Religious leader speaking at pulpit, altar, or minbar'], ['00:07','GRAPHIC · MAP','3s','Map of the region or diocese referenced in the story'], ['00:10','CLOSE-UP · CONGREGATION','2s','Worshippers in prayer — candles, hands, gentle light'] ], imgPrompt: 'Cinematic wide of {title}, historic place of worship with worshippers arriving, warm golden light', vidPrompt: '4K slow dolly into a place of worship as a religious leader speaks, {title}', thumb: 'Silhouette of a cathedral / mosque / temple dome against a dawn sky', ost: ['RELIGION · LIVE','{title}','JP AI NEWSROOM'], social: '🙏 {title} — full report on JP AI News Flash. #Religion #Faith' },
-                fr: { timeline: [ ['00:00','PLAN LARGE · LIEU DE CULTE','3s','Extérieur d\'un lieu de culte à l\'heure dorée'], ['00:03','PLAN MOYEN · GUIDE','4s','Responsable religieux à la chaire'], ['00:07','GRAPHISME · CARTE','3s','Carte de la région'], ['00:10','GROS PLAN · FIDÈLES','2s','Fidèles en prière'] ], imgPrompt: 'Plan large : {title}, lieu de culte historique', vidPrompt: 'Travelling 4K dans un lieu de culte, {title}', thumb: 'Silhouette de cathédrale / mosquée / temple', ost: ['RELIGION · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '🙏 {title} — rapport complet sur JP IA Info Flash. #Religion' }
-            },
-            EDUCATION: {
-                en: { timeline: [ ['00:00','WIDE · CAMPUS','3s','University campus / school exterior at golden hour'], ['00:03','MEDIUM · CLASSROOM','4s','Students in a classroom or lecture hall, active discussion'], ['00:07','GRAPHIC · DATA','3s','Animated literacy / enrollment / graduation rate graphic'], ['00:10','CLOSE-UP · DETAIL','2s','Textbooks, notebooks, or students studying'] ], imgPrompt: 'Cinematic wide of a university campus, {title}, students walking, warm afternoon light, photoreal', vidPrompt: '4K slow dolly across a university campus, {title}, students in conversation', thumb: 'Campus silhouette at golden hour, EDUCATION band', ost: ['EDUCATION · LIVE','{title}','JP AI NEWSROOM'], social: '🎓 {title} — full education report on JP AI News Flash. #Education' },
-                fr: { timeline: [ ['00:00','PLAN LARGE · CAMPUS','3s','Campus universitaire à l\'heure dorée'], ['00:03','PLAN MOYEN · CLASSE','4s','Étudiants en classe'], ['00:07','GRAPHISME · DONNÉES','3s','Graphique éducation animé'], ['00:10','GROS PLAN · DÉTAIL','2s','Manuels, cahiers, étudiants'] ], imgPrompt: 'Plan large d\'un campus universitaire, {title}, étudiants', vidPrompt: 'Travelling 4K dans un campus, {title}', thumb: 'Campus silhouette, bandeau ÉDUCATION', ost: ['ÉDUCATION · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '🎓 {title} — rapport complet sur JP IA Info Flash. #Éducation' }
-            },
-            'WORLD NEWS': {
-                en: { timeline: [ ['00:00','WIDE · GLOBAL','3s','Wide shot of a world city skyline at dusk, drone push'], ['00:03','MEDIUM · SCENE','4s','Regional landmark or street scene tied to the story'], ['00:07','GRAPHIC · MAP','3s','Animated world map zooming to the affected region'], ['00:10','CLOSE-UP · DETAIL','2s','Close-up human detail — hands, eyes, symbolic object'] ], imgPrompt: 'Cinematic wide of a world city skyline at dusk, {title}, cultural landmark, photoreal', vidPrompt: '4K drone push-in over a global city skyline, {title}, world map zoom', thumb: 'City skyline at dusk with world map overlay', ost: ['WORLD NEWS · LIVE','{title}','JP AI NEWSROOM'], social: '🌍 {title} — full report on JP AI News Flash. #WorldNews' },
-                fr: { timeline: [ ['00:00','PLAN LARGE · MONDE','3s','Skyline mondiale au crépuscule'], ['00:03','PLAN MOYEN · SCÈNE','4s','Lieu emblématique lié à l\'histoire'], ['00:07','GRAPHISME · CARTE','3s','Carte mondiale animée'], ['00:10','GROS PLAN · DÉTAIL','2s','Détail humain'] ], imgPrompt: 'Plan large d\'une skyline mondiale, {title}', vidPrompt: 'Drone 4K survolant une skyline, {title}', thumb: 'Skyline avec carte mondiale', ost: ['ACTUALITÉS MONDIALES','{title}','SALLE DE PRESSE JP IA'], social: '🌍 {title} — rapport complet. #ActualitésMondiales' }
-            }
+            POLITICS: { en: { timeline: [ ['00:00','WIDE ESTABLISHING','3s','Exterior of capitol / parliament / government building — slow push in, golden hour'], ['00:03','MEDIUM · LEADER','4s','World leader at podium mid-speech, tight framing, shallow DOF'], ['00:07','GRAPHIC · MAP','3s','Animated election map with live vote tally and district highlights'], ['00:10','CLOSE-UP · FLAG','2s','National flag rippling in slow motion, backlit — dissolve to anchor'] ], imgPrompt: 'Cinematic wide shot: {title}. Marble government chamber, world leaders at a lectern, national flags, warm golden volumetric light, photoreal, 85mm, 4K', vidPrompt: '4K slow-motion dolly push into a marble parliament hall as world leaders stand at the lectern, {title}', thumb: 'Split-screen: politician left, animated vote tally right, BREAKING band bottom, gold accent', ost: ['BREAKING · POLITICS','{title}','LIVE · JP AI NEWSROOM'], social: '🚨 {title} — full report on JP AI News Flash. #Politics #WorldNews' }, fr: { timeline: [ ['00:00','PLAN LARGE · ÉTABLISSEMENT','3s','Extérieur du parlement — travelling avant lent, heure dorée'], ['00:03','PLAN MOYEN · DIRIGEANT','4s','Dirigeant mondial au pupitre'], ['00:07','GRAPHISME · CARTE','3s','Carte électorale animée'], ['00:10','GROS PLAN · DRAPEAU','2s','Drapeau national flottant'] ], imgPrompt: 'Plan large cinématographique : {title}. Chambre parlementaire en marbre, dirigeants, drapeaux, lumière dorée', vidPrompt: 'Travelling 4K ralenti dans un parlement, {title}', thumb: 'Écran partagé : politicien, décompte, bandeau URGENT', ost: ['URGENT · POLITIQUE','{title}','DIRECT · JP IA INFO'], social: '🚨 {title} — rapport complet sur JP IA Info Flash. #Politique' } },
+            BUSINESS: { en: { timeline: [ ['00:00','WIDE · CITY','3s','Financial district skyline at dusk'], ['00:03','MEDIUM · TRADING','4s','Trading floor screens, red/green tickers'], ['00:07','GRAPHIC · CHART','3s','Animated stock chart'], ['00:10','CLOSE-UP · CURRENCY','2s','Currency notes fanning out'] ], imgPrompt: 'Cinematic wide of a financial district at dusk, {title}, glass towers, gold and teal lighting, photoreal', vidPrompt: '4K dolly through a trading floor, {title}, red and green tickers', thumb: 'Big animated percentage arrow over skyline, MARKETS band', ost: ['MARKETS · LIVE','{title}','JP AI NEWSROOM'], social: '📈 {title} — full market report. #Markets #Finance' }, fr: { timeline: [ ['00:00','PLAN LARGE · VILLE','3s','Quartier financier au crépuscule'], ['00:03','PLAN MOYEN · TRADING','4s','Écrans de salle de marché'], ['00:07','GRAPHISME · COURBE','3s','Graphique boursier animé'], ['00:10','GROS PLAN · MONNAIE','2s','Billets de banque'] ], imgPrompt: 'Plan large cinématographique d\'un quartier financier, {title}', vidPrompt: 'Travelling 4K dans une salle de marché, {title}', thumb: 'Flèche animée sur skyline, bandeau MARCHÉS', ost: ['MARCHÉS · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '📈 {title} — rapport complet. #Marchés' } },
+            CLIMATE: { en: { timeline: [ ['00:00','WIDE · STORM','3s','Storm footage — dark supercell, lightning'], ['00:03','GRAPHIC · RADAR','4s','Animated weather radar sweep'], ['00:07','MEDIUM · DAMAGE','3s','Flooded street, first responders'], ['00:10','CLOSE-UP · SATELLITE','2s','Satellite imagery of the region'] ], imgPrompt: 'Cinematic wide of a supercell storm over a city at dusk, {title}, lightning striking', vidPrompt: '4K timelapse of a storm system, {title}, animated radar overlay', thumb: 'Storm cell with lightning, ALERT band, animated radar', ost: ['WEATHER · ALERT','{title}','LIVE RADAR · JP AI'], social: '⛈️ {title} — full weather report. #Weather #Climate' }, fr: { timeline: [ ['00:00','PLAN LARGE · ORAGE','3s','Supercellule, éclairs'], ['00:03','GRAPHISME · RADAR','4s','Radar météo animé'], ['00:07','PLAN MOYEN · DÉGÂTS','3s','Rue inondée, secouristes'], ['00:10','GROS PLAN · SATELLITE','2s','Imagerie satellite'] ], imgPrompt: 'Plan large cinématographique d\'une supercellule, {title}', vidPrompt: 'Timelapse 4K d\'un système orageux, {title}', thumb: 'Cellule orageuse, bandeau ALERTE', ost: ['MÉTÉO · ALERTE','{title}','RADAR · JP IA'], social: '⛈️ {title} — rapport météo complet. #Météo' } },
+            CONFLICT: { en: { timeline: [ ['00:00','WIDE · REGION','3s','Wide shot of contested region, smoke plumes, handheld'], ['00:03','MEDIUM · OBSERVER','4s','International observers / humanitarian workers'], ['00:07','GRAPHIC · MAP','3s','Animated conflict map with front-line'], ['00:10','CLOSE-UP · REFUGEES','2s','Displaced civilians in a shelter'] ], imgPrompt: 'Cinematic medium of humanitarian workers in a contested region, {title}, smoke on horizon', vidPrompt: 'Handheld 4K footage of responders in a conflict region, {title}', thumb: 'Map with front-line zone in red, BREAKING band', ost: ['CONFLICT · LIVE','{title}','JP AI NEWSROOM'], social: '🌍 {title} — full report on JP AI News Flash. #Conflict #WorldNews' }, fr: { timeline: [ ['00:00','PLAN LARGE · RÉGION','3s','Région contestée, fumée'], ['00:03','PLAN MOYEN · OBSERVATEURS','4s','Observateurs internationaux'], ['00:07','GRAPHISME · CARTE','3s','Carte du conflit animée'], ['00:10','GROS PLAN · RÉFUGIÉS','2s','Civils déplacés'] ], imgPrompt: 'Plan moyen cinématographique de travailleurs humanitaires, {title}', vidPrompt: 'Images 4K caméra à l\'épaule de secouristes, {title}', thumb: 'Carte avec zone de front, bandeau URGENT', ost: ['CONFLIT · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '🌍 {title} — rapport complet. #Conflit' } },
+            HEALTH: { en: { timeline: [ ['00:00','WIDE · HOSPITAL','3s','Hospital exterior at blue hour'], ['00:03','MEDIUM · CLINIC','4s','Medical team in a modern lab'], ['00:07','GRAPHIC · DATA','3s','Public health data viz'], ['00:10','CLOSE-UP · DETAIL','2s','Medical equipment / gloved hands'] ], imgPrompt: 'Cinematic wide of a modern hospital at blue hour, {title}, medical staff', vidPrompt: '4K slow dolly through a hospital corridor, {title}', thumb: 'Medical cross over hospital silhouette, HEALTH band', ost: ['HEALTH · LIVE','{title}','JP AI NEWSROOM'], social: '🩺 {title} — full health report. #Health' }, fr: { timeline: [ ['00:00','PLAN LARGE · HÔPITAL','3s','Hôpital à l\'heure bleue'], ['00:03','PLAN MOYEN · CLINIQUE','4s','Équipe médicale'], ['00:07','GRAPHISME · DONNÉES','3s','Données de santé animées'], ['00:10','GROS PLAN · DÉTAIL','2s','Équipement médical'] ], imgPrompt: 'Plan large cinématographique d\'un hôpital, {title}', vidPrompt: 'Travelling 4K dans un couloir d\'hôpital, {title}', thumb: 'Croix médicale, bandeau SANTÉ', ost: ['SANTÉ · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '🩺 {title} — rapport santé complet. #Santé' } },
+            TECHNOLOGY: { en: { timeline: [ ['00:00','WIDE · LAB','3s','High-tech lab / data center, cool blue light'], ['00:03','MEDIUM · SCREENS','4s','Computer screens scrolling code / neural nets'], ['00:07','GRAPHIC · AI VIZ','3s','Animated AI graphic — nodes lighting up'], ['00:10','CLOSE-UP · ROBOT','2s','Robotic hand or chip wafer'] ], imgPrompt: 'Cinematic wide of a modern AI data center, {title}, cool blue LEDs', vidPrompt: '4K slow push through an AI data center, {title}', thumb: 'Neural network graphic over chip close-up', ost: ['TECHNOLOGY · LIVE','{title}','JP AI NEWSROOM'], social: '🤖 {title} — full tech report. #Technology #AI' }, fr: { timeline: [ ['00:00','PLAN LARGE · LABO','3s','Laboratoire high-tech'], ['00:03','PLAN MOYEN · ÉCRANS','4s','Écrans avec code'], ['00:07','GRAPHISME · IA','3s','Graphique IA animé'], ['00:10','GROS PLAN · ROBOT','2s','Main robotique'] ], imgPrompt: 'Plan large d\'un centre de données IA, {title}', vidPrompt: 'Travelling 4K dans un centre de données, {title}', thumb: 'Réseau de neurones, bandeau TECH', ost: ['TECHNOLOGIE · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '🤖 {title} — rapport tech complet. #Technologie' } },
+            SPORTS: { en: { timeline: [ ['00:00','WIDE · STADIUM','3s','Wide stadium at kickoff, floodlights'], ['00:03','MEDIUM · ATHLETE','4s','Athlete in action — tight tracking'], ['00:07','GRAPHIC · SCORE','3s','Animated score graphic'], ['00:10','CLOSE-UP · CROWD','2s','Crowd reaction close-up'] ], imgPrompt: 'Cinematic wide of a packed stadium, {title}, floodlights', vidPrompt: '4K broadcast-style tracking shot of an athlete, {title}', thumb: 'Athlete silhouette over score graphic', ost: ['SPORTS · LIVE','{title}','JP AI NEWSROOM'], social: '🏟️ {title} — full sports report. #Sports' }, fr: { timeline: [ ['00:00','PLAN LARGE · STADE','3s','Stade au coup d\'envoi'], ['00:03','PLAN MOYEN · ATHLÈTE','4s','Athlète en action'], ['00:07','GRAPHISME · SCORE','3s','Graphique de score'], ['00:10','GROS PLAN · FOULE','2s','Réaction de la foule'] ], imgPrompt: 'Plan large d\'un stade plein, {title}', vidPrompt: 'Travelling 4K d\'un athlète, {title}', thumb: 'Athlète silhouette, bandeau SPORTS', ost: ['SPORTS · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '🏟️ {title} — rapport sport complet. #Sport' } },
+            DIPLOMACY: { en: { timeline: [ ['00:00','WIDE · SUMMIT','3s','Diplomatic summit hall, flags lined up'], ['00:03','MEDIUM · HANDSHAKE','4s','Leaders shaking hands'], ['00:07','GRAPHIC · MAP','3s','Animated world map with diplomatic arcs'], ['00:10','CLOSE-UP · TREATY','2s','Treaty page / pen stroke'] ], imgPrompt: 'Cinematic wide of an international summit hall, {title}, national flags, delegates', vidPrompt: '4K slow dolly across a diplomatic summit, {title}', thumb: 'World map with diplomatic arcs, DIPLOMACY band', ost: ['DIPLOMACY · LIVE','{title}','JP AI NEWSROOM'], social: '🌐 {title} — full diplomatic report. #Diplomacy' }, fr: { timeline: [ ['00:00','PLAN LARGE · SOMMET','3s','Salle de sommet'], ['00:03','PLAN MOYEN · POIGNÉE','4s','Poignée de main'], ['00:07','GRAPHISME · CARTE','3s','Carte mondiale animée'], ['00:10','GROS PLAN · TRAITÉ','2s','Page de traité'] ], imgPrompt: 'Plan large d\'une salle de sommet, {title}', vidPrompt: 'Travelling 4K dans un sommet, {title}', thumb: 'Carte mondiale, bandeau DIPLOMATIE', ost: ['DIPLOMATIE · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '🌐 {title} — rapport diplomatique complet. #Diplomatie' } },
+            RELIGION: { en: { timeline: [ ['00:00','WIDE · PLACE OF WORSHIP','3s','Exterior of a church, mosque, temple or cathedral at golden hour'], ['00:03','MEDIUM · LEADER','4s','Religious leader speaking at pulpit, altar, or minbar'], ['00:07','GRAPHIC · MAP','3s','Map of the region or diocese referenced in the story'], ['00:10','CLOSE-UP · CONGREGATION','2s','Worshippers in prayer — candles, hands, gentle light'] ], imgPrompt: 'Cinematic wide of {title}, historic place of worship with worshippers arriving, warm golden light', vidPrompt: '4K slow dolly into a place of worship as a religious leader speaks, {title}', thumb: 'Silhouette of a cathedral / mosque / temple dome against a dawn sky', ost: ['RELIGION · LIVE','{title}','JP AI NEWSROOM'], social: '🙏 {title} — full report on JP AI News Flash. #Religion #Faith' }, fr: { timeline: [ ['00:00','PLAN LARGE · LIEU DE CULTE','3s','Extérieur d\'un lieu de culte à l\'heure dorée'], ['00:03','PLAN MOYEN · GUIDE','4s','Responsable religieux à la chaire'], ['00:07','GRAPHISME · CARTE','3s','Carte de la région'], ['00:10','GROS PLAN · FIDÈLES','2s','Fidèles en prière'] ], imgPrompt: 'Plan large : {title}, lieu de culte historique', vidPrompt: 'Travelling 4K dans un lieu de culte, {title}', thumb: 'Silhouette de cathédrale / mosquée / temple', ost: ['RELIGION · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '🙏 {title} — rapport complet sur JP IA Info Flash. #Religion' } },
+            EDUCATION: { en: { timeline: [ ['00:00','WIDE · CAMPUS','3s','University campus / school exterior at golden hour'], ['00:03','MEDIUM · CLASSROOM','4s','Students in a classroom or lecture hall, active discussion'], ['00:07','GRAPHIC · DATA','3s','Animated literacy / enrollment / graduation rate graphic'], ['00:10','CLOSE-UP · DETAIL','2s','Textbooks, notebooks, or students studying'] ], imgPrompt: 'Cinematic wide of a university campus, {title}, students walking, warm afternoon light, photoreal', vidPrompt: '4K slow dolly across a university campus, {title}, students in conversation', thumb: 'Campus silhouette at golden hour, EDUCATION band', ost: ['EDUCATION · LIVE','{title}','JP AI NEWSROOM'], social: '🎓 {title} — full education report on JP AI News Flash. #Education' }, fr: { timeline: [ ['00:00','PLAN LARGE · CAMPUS','3s','Campus universitaire à l\'heure dorée'], ['00:03','PLAN MOYEN · CLASSE','4s','Étudiants en classe'], ['00:07','GRAPHISME · DONNÉES','3s','Graphique éducation animé'], ['00:10','GROS PLAN · DÉTAIL','2s','Manuels, cahiers, étudiants'] ], imgPrompt: 'Plan large d\'un campus universitaire, {title}, étudiants', vidPrompt: 'Travelling 4K dans un campus, {title}', thumb: 'Campus silhouette, bandeau ÉDUCATION', ost: ['ÉDUCATION · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '🎓 {title} — rapport complet sur JP IA Info Flash. #Éducation' } },
+            'WORLD NEWS': { en: { timeline: [ ['00:00','WIDE · GLOBAL','3s','Wide shot of a world city skyline at dusk, drone push'], ['00:03','MEDIUM · SCENE','4s','Regional landmark or street scene tied to the story'], ['00:07','GRAPHIC · MAP','3s','Animated world map zooming to the affected region'], ['00:10','CLOSE-UP · DETAIL','2s','Close-up human detail — hands, eyes, symbolic object'] ], imgPrompt: 'Cinematic wide of a world city skyline at dusk, {title}, cultural landmark, photoreal', vidPrompt: '4K drone push-in over a global city skyline, {title}, world map zoom', thumb: 'City skyline at dusk with world map overlay', ost: ['WORLD NEWS · LIVE','{title}','JP AI NEWSROOM'], social: '🌍 {title} — full report on JP AI News Flash. #WorldNews' }, fr: { timeline: [ ['00:00','PLAN LARGE · MONDE','3s','Skyline mondiale au crépuscule'], ['00:03','PLAN MOYEN · SCÈNE','4s','Lieu emblématique lié à l\'histoire'], ['00:07','GRAPHISME · CARTE','3s','Carte mondiale animée'], ['00:10','GROS PLAN · DÉTAIL','2s','Détail humain'] ], imgPrompt: 'Plan large d\'une skyline mondiale, {title}', vidPrompt: 'Drone 4K survolant une skyline, {title}', thumb: 'Skyline avec carte mondiale', ost: ['ACTUALITÉS MONDIALES','{title}','SALLE DE PRESSE JP IA'], social: '🌍 {title} — rapport complet. #ActualitésMondiales' } }
         };
 
         function buildProductionPackage(item, lang) {
@@ -1414,19 +1385,21 @@
         let aiNewsHeadlineIndex = 0, currentImageSlot = 'A';
         let aiNewsCycleQueue = [], aiNewsCycleIdx = 0;
         let aiNewsWaitingMode = false;
-        let aiNewsEmptyPollsEN = 0;   // v35
+        let aiNewsEmptyPollsEN = 0;
+        let aiNewsPrefetchedThisCycleEN = false;
 
         let aiNewsFrActive = false, aiNewsFrLoopTimeoutId = null, aiNewsFrClockInterval = null;
         let aiNewsFrHeadlineIndex = 0, currentFrImageSlot = 'A';
         let aiNewsFrCycleQueue = [], aiNewsFrCycleIdx = 0;
         let aiNewsFrWaitingMode = false;
-        let aiNewsEmptyPollsFR = 0;   // v35
+        let aiNewsEmptyPollsFR = 0;
+        let aiNewsPrefetchedThisCycleFR = false;
 
         // ============================================================
-        // 🕒 TIMING CONSTANTS
+        // 🕒 v36 TIMING — seamless continuous broadcast
         // ============================================================
-        const THEME_DURATION_MS = 60000;
-        const FRESH_FOUND_STING_MS = 4000;
+        const THEME_DURATION_MS = 60000;                    // unused in wait path
+        const FRESH_FOUND_STING_MS = 1000;                  // brief sting when recovering from empty
         const NEWS_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
         const SPORTS_REFRESH_INTERVAL_MS = 900000;
         const WEATHER_REFRESH_INTERVAL_MS = 300000;
@@ -1435,8 +1408,10 @@
         const WATCHDOG_INTERVAL_MS = 20000;
         const STORY_IMAGE_ROTATE_MS = 8000;
         const STORY_MEDIA_FETCH_TIMEOUT_MS = 6000;
-        const WAIT_RETRY_INTERVAL_MS = 15000;
-        const STARTUP_POLL_INTERVAL_MS = 1200;   // v35 — fast first-batch poll
+        const WAIT_RETRY_INTERVAL_MS = 8000;                // v36: was 15000 — retry every 8s
+        const STARTUP_POLL_INTERVAL_MS = 1200;
+        const STORY_GAP_MS = 800;                           // v36: was 2500 — between stories
+        const PREFETCH_THRESHOLD = 5;                       // v36: prefetch when 5 left
 
         let streamRetryCount = 0;
         const MAX_STREAM_RETRIES = 5;
@@ -1628,17 +1603,17 @@
 
             const balanced = buildFreshnessQueue(fresh, lang);
             if (balanced.length === 0) return false;
-            if (lang === 'fr') { aiNewsFrCycleQueue = balanced; aiNewsFrCycleIdx = 0; }
-            else { aiNewsCycleQueue = balanced; aiNewsCycleIdx = 0; }
+            if (lang === 'fr') { aiNewsFrCycleQueue = balanced; aiNewsFrCycleIdx = 0; aiNewsPrefetchedThisCycleFR = false; }
+            else { aiNewsCycleQueue = balanced; aiNewsCycleIdx = 0; aiNewsPrefetchedThisCycleEN = false; }
             const newest = balanced[0];
             console.log(`🔁 New ${lang.toUpperCase()} cycle: ${balanced.length} fresh headlines · newest is ${formatAge(itemAgeMs(newest))}`);
             return true;
         }
 
         // ============================================================
-        // ⚡ v35 — FAST WAIT (only reached after startup)
+        // ⚡ v36 — NON-BLOCKING wait: fire-and-forget fetch + 8s poll
         // ============================================================
-        async function waitForFreshStories(lang) {
+        function waitForFreshStories(lang) {
             const isActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
             if (!isActive) return;
 
@@ -1648,48 +1623,50 @@
             const headEl = document.getElementById(lang === 'fr' ? 'aiNewsFrHeadline' : 'aiNewsHeadline');
             const detEl = document.getElementById(lang === 'fr' ? 'aiNewsFrDetails' : 'aiNewsDetails');
             const cntEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCounter' : 'aiNewsCounter');
-            if (catEl) catEl.textContent = lang === 'fr' ? 'RECHERCHE DE NOUVELLES FRAÎCHES' : 'SEARCHING FOR FRESH STORIES';
-            if (headEl) headEl.textContent = lang === 'fr' ? 'Recherche de titres récents (≤6h)…' : 'Searching for fresh stories (≤6h old)…';
-            if (detEl) detEl.textContent = lang === 'fr' ? 'Rafraîchissement des flux en cours…' : 'Refreshing feeds now…';
-            if (cntEl) cntEl.textContent = lang === 'fr' ? 'Filtre : 6 heures · Vérification toutes les 15 secondes' : 'Freshness filter: 6 hours · Checking every 15 seconds';
+            if (catEl) catEl.textContent = lang === 'fr' ? 'EN DIRECT · ACTUALISATION' : 'LIVE · UPDATING';
+            if (headEl) headEl.textContent = lang === 'fr' ? 'Mise à jour des titres en cours…' : 'Updating headlines…';
+            if (detEl) detEl.textContent = lang === 'fr' ? 'Surveillance des flux mondiaux — reprise dès qu\'un titre récent arrive.' : 'Monitoring worldwide feeds — resuming the moment a fresh story lands.';
+            if (cntEl) cntEl.textContent = `${(lang === 'fr' ? aiNewsFrSessionPlayed : aiNewsSessionPlayed).size} headlines aired this session`;
 
-            try {
-                if (lang === 'fr') await fetchWorldNewsFR(); else await fetchWorldNews();
-            } catch (e) {
-                console.warn(`Fetch during wait (${lang}) failed:`, e);
-            }
+            // Fire-and-forget — in-flight guard prevents duplicate requests
+            if (lang === 'fr') fetchWorldNewsFR(); else fetchWorldNews();
 
-            const stillActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
-            if (!stillActive) return;
+            console.log(`⏳ ${lang.toUpperCase()} empty — polling every 8s`);
 
-            if (beginNewCycle(lang)) {
-                console.log(`✅ Fresh content arrived for ${lang.toUpperCase()} — starting new cycle (4s sting)`);
-                if (lang === 'fr') aiNewsFrWaitingMode = false; else aiNewsWaitingMode = false;
-                playNewsTheme(FRESH_FOUND_STING_MS, () => {
-                    const stillActive2 = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
-                    if (!stillActive2) return;
-                    if (lang === 'fr') startAINewsTVLoopFR(); else startAINewsTVLoop();
-                });
-                return;
-            }
-
-            if (headEl) headEl.textContent = lang === 'fr' ? 'Aucun titre ≤6h pour l\'instant — nouvel essai dans 15 s' : 'No ≤6h stories yet — retrying in 15 s';
-            if (detEl) detEl.textContent = lang === 'fr' ? 'Les titres plus anciens sont rejetés. Vérification dans 15 secondes.' : 'Older items are rejected. Checking again in 15 seconds.';
-            console.log(`⏳ ${lang.toUpperCase()} waiting for fresh content — retry in 15s`);
-            playNewsTheme(WAIT_RETRY_INTERVAL_MS, () => {
-                const stillActive2 = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
-                if (!stillActive2) return;
+            setTimeout(() => {
+                const stillActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
+                if (!stillActive) return;
+                if (beginNewCycle(lang)) {
+                    console.log(`⚡ Fresh content found for ${lang.toUpperCase()} — resuming immediately`);
+                    if (lang === 'fr') aiNewsFrWaitingMode = false; else aiNewsWaitingMode = false;
+                    // Very short sting to fill the moment
+                    playNewsTheme(FRESH_FOUND_STING_MS, () => {
+                        const stillActive2 = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
+                        if (!stillActive2) return;
+                        if (lang === 'fr') startAINewsTVLoopFR(); else startAINewsTVLoop();
+                    });
+                    return;
+                }
                 waitForFreshStories(lang);
-            });
+            }, WAIT_RETRY_INTERVAL_MS);
         }
 
         // ============================================================
-        // ⚡ v35 — STARTUP LOOP: poll every 1.2s for first batch,
-        //           self-heal by refiring fetch every ~5s if still empty
+        // ⚡ v36 — SEAMLESS LOOP: prefetch during last 5 stories,
+        //           bridge to next cycle with ZERO gap
         // ============================================================
         function startAINewsTVLoop() {
             if (!aiNewsActive) return;
             if (aiNewsWaitingMode) return;
+
+            // ── PREFETCH: refresh pool when 5 stories remain ──
+            if (aiNewsCycleQueue.length > 0 &&
+                aiNewsCycleIdx >= aiNewsCycleQueue.length - PREFETCH_THRESHOLD &&
+                !aiNewsPrefetchedThisCycleEN) {
+                aiNewsPrefetchedThisCycleEN = true;
+                console.log(`🔮 EN prefetching (${aiNewsCycleQueue.length - aiNewsCycleIdx} left in queue)`);
+                fetchWorldNews();
+            }
 
             if (aiNewsCycleQueue.length === 0) {
                 if (newsPool.length === 0) {
@@ -1698,10 +1675,7 @@
                     document.getElementById('aiNewsHeadline').textContent = 'Connecting to JP AI Newsroom · Fetching headlines from worldwide media…';
                     document.getElementById('aiNewsDetails').textContent = 'Global feeds loading in parallel. The first story will air as soon as it arrives.';
                     document.getElementById('aiNewsCounter').textContent = 'Instant-start mode · First batch arriving';
-                    // Self-heal: if first fetch totally failed, refire roughly every 5s
-                    if (aiNewsEmptyPollsEN % 4 === 0) {
-                        try { fetchWorldNews(); } catch(e) {}
-                    }
+                    if (aiNewsEmptyPollsEN % 4 === 0) fetchWorldNews();
                     aiNewsLoopTimeoutId = setTimeout(startAINewsTVLoop, STARTUP_POLL_INTERVAL_MS);
                     return;
                 }
@@ -1725,16 +1699,15 @@
                 break;
             }
 
+            // ── END-OF-CYCLE: bridge seamlessly, no closing speech ──
             if (aiNewsCycleIdx >= aiNewsCycleQueue.length) {
-                const closingMsg = "That completes this news flash from the JP AI News Room. We are now waiting for fresh headlines. A new flash begins as soon as new stories arrive.";
-                document.getElementById('aiNewsCategory').textContent = 'AWAITING FRESH STORIES';
-                document.getElementById('aiNewsHeadline').textContent = 'Awaiting fresh stories (published within 6 hours)...';
-                document.getElementById('aiNewsDetails').textContent = 'No recent headlines available. Older items are rejected. New stories (published within the last 6 hours) will begin the moment they arrive.';
-                document.getElementById('aiNewsCounter').textContent = `Freshness filter: 6 hours · Monitoring feed (5-min refresh)`;
-                speakSingle(closingMsg, {isFemale: false, pitch: 0.82, rate: 0.93, langCode: 'en', onEndCallback: () => {
-                    if (!aiNewsActive) return;
-                    waitForFreshStories('en');
-                }});
+                if (beginNewCycle('en')) {
+                    console.log(`⚡ EN seamless bridge — continuing immediately`);
+                    startAINewsTVLoop();
+                    return;
+                }
+                // Truly exhausted — go to wait loop
+                waitForFreshStories('en');
                 return;
             }
 
@@ -1747,13 +1720,21 @@
             const script = buildAnchorScript(item);
             speakSingle(script, {isFemale: false, pitch: 0.82, rate: 0.93, langCode: 'en', onEndCallback: () => {
                 if (!aiNewsActive) return;
-                aiNewsLoopTimeoutId = setTimeout(startAINewsTVLoop, 2500);
+                aiNewsLoopTimeoutId = setTimeout(startAINewsTVLoop, STORY_GAP_MS);
             }});
         }
 
         function startAINewsTVLoopFR() {
             if (!aiNewsFrActive) return;
             if (aiNewsFrWaitingMode) return;
+
+            if (aiNewsFrCycleQueue.length > 0 &&
+                aiNewsFrCycleIdx >= aiNewsFrCycleQueue.length - PREFETCH_THRESHOLD &&
+                !aiNewsPrefetchedThisCycleFR) {
+                aiNewsPrefetchedThisCycleFR = true;
+                console.log(`🔮 FR prefetching (${aiNewsFrCycleQueue.length - aiNewsFrCycleIdx} left in queue)`);
+                fetchWorldNewsFR();
+            }
 
             if (aiNewsFrCycleQueue.length === 0) {
                 if (newsPoolFR.length === 0) {
@@ -1762,9 +1743,7 @@
                     document.getElementById('aiNewsFrHeadline').textContent = 'Connexion à la salle de presse JP IA · Chargement des titres mondiaux…';
                     document.getElementById('aiNewsFrDetails').textContent = 'Les flux mondiaux se chargent en parallèle. Le premier titre sera diffusé dès son arrivée.';
                     document.getElementById('aiNewsFrCounter').textContent = 'Mode démarrage instantané · Premier lot en cours';
-                    if (aiNewsEmptyPollsFR % 4 === 0) {
-                        try { fetchWorldNewsFR(); } catch(e) {}
-                    }
+                    if (aiNewsEmptyPollsFR % 4 === 0) fetchWorldNewsFR();
                     aiNewsFrLoopTimeoutId = setTimeout(startAINewsTVLoopFR, STARTUP_POLL_INTERVAL_MS);
                     return;
                 }
@@ -1789,15 +1768,12 @@
             }
 
             if (aiNewsFrCycleIdx >= aiNewsFrCycleQueue.length) {
-                const closingMsgFR = "Ceci conclut ce flash d'information. Nous attendons de nouveaux titres récents. Un nouveau flash commencera dès l'arrivée de nouvelles histoires.";
-                document.getElementById('aiNewsFrCategory').textContent = 'EN ATTENTE DE NOUVELLES FRAÎCHES';
-                document.getElementById('aiNewsFrHeadline').textContent = 'En attente de titres publiés dans les 6 dernières heures...';
-                document.getElementById('aiNewsFrDetails').textContent = `Aucun titre récent disponible. Les titres plus anciens sont rejetés. Nouvelle tentative dans 15 secondes.`;
-                document.getElementById('aiNewsFrCounter').textContent = `Filtre : 6 heures · Surveillance du flux (5 min)`;
-                speakSingle(closingMsgFR, {isFemale: false, pitch: 0.88, rate: 0.94, langCode: 'fr', onEndCallback: () => {
-                    if (!aiNewsFrActive) return;
-                    waitForFreshStories('fr');
-                }});
+                if (beginNewCycle('fr')) {
+                    console.log(`⚡ FR seamless bridge — continuing immediately`);
+                    startAINewsTVLoopFR();
+                    return;
+                }
+                waitForFreshStories('fr');
                 return;
             }
 
@@ -1810,7 +1786,7 @@
             const script = buildAnchorScriptFR(item);
             speakSingle(script, {isFemale: false, pitch: 0.88, rate: 0.94, langCode: 'fr', onEndCallback: () => {
                 if (!aiNewsFrActive) return;
-                aiNewsFrLoopTimeoutId = setTimeout(startAINewsTVLoopFR, 2500);
+                aiNewsFrLoopTimeoutId = setTimeout(startAINewsTVLoopFR, STORY_GAP_MS);
             }});
         }
 
@@ -1822,7 +1798,7 @@
             document.getElementById('audioStatus').textContent = '🤖 AI News Flash TV · Broadcasting Live';
             document.getElementById('trackTitle').textContent = 'JP AI News Flash TV';
             document.getElementById('trackArtist').textContent = '100% AI-Generated Broadcast';
-            document.getElementById('trackGenre').textContent = 'Fresh ≤6h · Instant start · 5-min refresh';
+            document.getElementById('trackGenre').textContent = 'Continuous · Fresh ≤6h · Seamless';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -1830,6 +1806,7 @@
             aiNewsActive = true;
             aiNewsWaitingMode = false;
             aiNewsEmptyPollsEN = 0;
+            aiNewsPrefetchedThisCycleEN = false;
             if (aiNewsCycleQueue.length === 0) beginNewCycle('en');
             startAINewsTVLoop();
         }
@@ -1842,7 +1819,7 @@
             document.getElementById('audioStatus').textContent = '🤖 Info Flash TV · Diffusion en direct';
             document.getElementById('trackTitle').textContent = 'JP IA Info Flash TV';
             document.getElementById('trackArtist').textContent = 'Diffusion 100% générée par IA';
-            document.getElementById('trackGenre').textContent = 'Récent ≤6h · Démarrage instantané · Rafraîchissement 5 min';
+            document.getElementById('trackGenre').textContent = 'Continu · Récent ≤6h · Sans interruption';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -1850,6 +1827,7 @@
             aiNewsFrActive = true;
             aiNewsFrWaitingMode = false;
             aiNewsEmptyPollsFR = 0;
+            aiNewsPrefetchedThisCycleFR = false;
             if (aiNewsFrCycleQueue.length === 0) beginNewCycle('fr');
             startAINewsTVLoopFR();
         }
@@ -2128,24 +2106,17 @@
             if (el) el.textContent = listeners.toLocaleString();
         }
 
-        // ============================================================
-        // ⚡ v35 — INSTANT START: no awaits, dismiss immediately, play on first batch
-        // ============================================================
         function startRadio() {
             const startScreen = document.getElementById('startScreen');
             if (!audioElement) createAudioElement();
             if (speechSynth) { try { speechSynth.resume(); } catch(e) {} }
             setupVoices();
             adjustVolume(70);
-
-            // Fire all fetches in parallel — do NOT await.
-            // The TV loop will begin broadcasting the instant the first feed responds.
             fetchWorldNews();
             fetchWorldNewsFR();
             fetchSportsNews();
             fetchWeather();
             fetchSportsScores();
-
             if (startScreen) startScreen.style.display = 'none';
             switchChannel('mix');
         }
@@ -2160,7 +2131,6 @@
             setInterval(updateListeners, 15000);
             adjustVolume(70);
 
-            // Pre-warm the caches so the first batch is already in flight by the time the user clicks Tune In
             fetchWorldNews();
             fetchWorldNewsFR();
             fetchSportsNews();
