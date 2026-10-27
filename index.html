@@ -434,11 +434,13 @@
                 <div class="contact-marquee">
                     📧 <span class="marquee-em">For suggestions or support:</span> <a href="mailto:jpierre722@yahoo.com">jpierre722@yahoo.com</a>
                     <span class="marquee-divider">◆</span>
-                    🕒 <span class="marquee-em">Strict 6-hour cutoff:</span> only headlines published in the last 6 hours are aired
+                    🕒 <span class="marquee-em">12-hour freshness window:</span> headlines published in the last 12 hours are aired
                     <span class="marquee-divider">◆</span>
-                    ⚡ <span class="marquee-em">Seamless broadcast:</span> prefetch during last 5 stories → 0s gap · 800ms between stories · 8s retry with music
+                    ⏱️ <span class="marquee-em">9-minute wait cap:</span> if no fresh stories arrive, the system auto-expands the window and resumes — never silent
                     <span class="marquee-divider">◆</span>
                     🎵 <span class="marquee-em">"Stay tuned" music:</span> continuous news theme plays while headlines refresh
+                    <span class="marquee-divider">◆</span>
+                    ⚡ <span class="marquee-em">Seamless broadcast:</span> prefetch during last 5 stories → 0s gap between cycles · 800ms between stories
                     <span class="marquee-divider">◆</span>
                     ⏱️ <span class="marquee-em">Auto-refresh:</span> feeds pulled every 5 minutes · stale items pruned every 5 minutes
                     <span class="marquee-divider">◆</span>
@@ -493,22 +495,21 @@
 
     <script>
         // ============================================================
-        // JP AI RADIO — v37 · WAIT MUSIC + STAY-TUNED ANNOUNCEMENT
+        // JP AI RADIO — v38 · 12-HOUR WINDOW + 9-MINUTE WAIT CAP
         // ------------------------------------------------------------
-        // v37 changes from v36:
-        //   • During wait-for-fresh-stories mode, continuous news-theme
-        //     music plays non-stop (chained playNewsTheme calls, ~500ms
-        //     overlap so there is never a silent gap)
-        //   • On first entry into wait mode, the anchor speaks:
-        //       EN: "We're updating our headlines... A new headline
-        //            news story is coming soon — stay tuned."
-        //       FR: "Nous actualisons nos titres... Une nouvelle
-        //            histoire arrive très bientôt — restez à l'écoute."
-        //     The announcement plays OVER the background music.
-        //   • Music + speech keep playing across every 8s retry
-        //   • When fresh content arrives, music stops, brief sting,
-        //     broadcast resumes
-        //   • Channel switches cleanly kill wait music + speech
+        // v38 changes from v37:
+        //   • Freshness window: 6h → 12h (matches user request)
+        //   • WAIT CAP: 9 minutes max — broadcast resumes within 9 min
+        //     no matter what (graduated window expansion + session reset)
+        //   • Graduated expansion during wait:
+        //       0–3 min → 12h window
+        //       3–6 min → 18h window
+        //       6–9 min → 24h window
+        //       9+ min  → 24h / 48h + session reset → force restart
+        //   • UI shows live countdown so user knows exactly how long left
+        //   • Announcement mentions the 9-minute guarantee
+        //   • Prune window extended to 48h so 12–24h items survive for
+        //     emergency use
         // ============================================================
 
         const HAITIAN_VOICE_MASTER_PROMPT = {enabled:true,tone:'dous, cho, natif natal',pronunciation:'kreyòl ayisyen klè',nasalRule:'an, en, on, oun byen make — n pa yon konsòn separe',substitutions:{'ou':'oo','è':'eh','ò':'aw','ay':'eye','im':'eem'},constraints:['pa tradui','pa chanje mo yo','li egzak jan li ekri','ritm natirèl yon Ayisyen'],delivery:{rate:0.72,pitch:0.92,volume:1.0,pauseBetweenSentences:900,pauseBetweenChunks:1400}};
@@ -682,7 +683,7 @@
         }
 
         const SEEN_STORY_REGISTRY = new Map();
-        const SEEN_STORY_TTL_MS = 6 * 60 * 60 * 1000;
+        const SEEN_STORY_TTL_MS = 12 * 60 * 60 * 1000;
         function storyFingerprint(item) { return (item.title || '').toLowerCase().replace(/[^\wà-ÿ\s]/g, '').replace(/\s+/g, ' ').trim().substring(0, 80); }
         function markStoryAsSeen(item) { const fp = storyFingerprint(item); SEEN_STORY_REGISTRY.set(fp, { lastSeen: Date.now(), pubDate: item.pubDate || '' }); }
         function pruneSeenStories() {
@@ -690,7 +691,16 @@
             for (const [key, rec] of SEEN_STORY_REGISTRY.entries()) if (rec.lastSeen < cutoff) SEEN_STORY_REGISTRY.delete(key);
         }
 
-        const MAX_ARTICLE_AGE_MS = 6 * 60 * 60 * 1000;
+        // ============================================================
+        // 🕒 v38 — 12-hour base window + 9-minute wait cap
+        // ============================================================
+        const MAX_ARTICLE_AGE_MS = 12 * 60 * 60 * 1000;         // 12h base
+        const EXTENDED_AGE_MS = 24 * 60 * 60 * 1000;            // 24h emergency
+        const FORCE_AGE_MS = 48 * 60 * 60 * 1000;               // 48h final resort
+        const PRUNE_BEYOND_MS = 48 * 60 * 60 * 1000;            // prune only beyond 48h
+        const WAIT_CAP_MS = 9 * 60 * 1000;                      // 9 min max wait
+
+        let currentFreshnessWindowMs = MAX_ARTICLE_AGE_MS;      // starts at base, expands during wait
 
         function parseArticleDate(pubDate) {
             if (!pubDate) return NaN;
@@ -705,7 +715,15 @@
             const t = parseArticleDate(item.pubDate);
             if (isNaN(t)) return false;
             const age = Date.now() - t;
-            return age >= 0 && age <= MAX_ARTICLE_AGE_MS;
+            return age >= 0 && age <= currentFreshnessWindowMs;
+        }
+
+        function isWithinPruneWindow(item) {
+            if (!item || !item.pubDate) return false;
+            const t = parseArticleDate(item.pubDate);
+            if (isNaN(t)) return false;
+            const age = Date.now() - t;
+            return age >= 0 && age <= PRUNE_BEYOND_MS;
         }
 
         function formatAge(ms) {
@@ -730,24 +748,25 @@
         }
 
         function pruneOldArticles(lang) {
+            // Uses PRUNE_BEYOND_MS (48h) — keeps 12–24h items available for emergency use
             if (!lang || lang === 'en') {
                 const before = newsPool.length;
-                newsPool = newsPool.filter(isWithinFreshnessWindow).sort(sortByNewest);
+                newsPool = newsPool.filter(isWithinPruneWindow).sort(sortByNewest);
                 const dropped = before - newsPool.length;
-                if (dropped > 0) console.log(`🧹 EN pool: deleted ${dropped} stale headlines · ${newsPool.length} fresh remaining`);
+                if (dropped > 0) console.log(`🧹 EN pool: pruned ${dropped} items older than 48h · ${newsPool.length} remaining`);
             }
             if (!lang || lang === 'fr') {
                 const before = newsPoolFR.length;
-                newsPoolFR = newsPoolFR.filter(isWithinFreshnessWindow).sort(sortByNewest);
+                newsPoolFR = newsPoolFR.filter(isWithinPruneWindow).sort(sortByNewest);
                 const dropped = before - newsPoolFR.length;
-                if (dropped > 0) console.log(`🧹 FR pool: deleted ${dropped} stale headlines · ${newsPoolFR.length} fresh remaining`);
+                if (dropped > 0) console.log(`🧹 FR pool: pruned ${dropped} items older than 48h · ${newsPoolFR.length} remaining`);
             }
             if (!lang || lang === 'en') {
                 const before = aiNewsCycleQueue.length;
                 aiNewsCycleQueue = aiNewsCycleQueue.filter(isWithinFreshnessWindow);
                 const dropped = before - aiNewsCycleQueue.length;
                 if (dropped > 0) {
-                    console.log(`🧹 EN live queue: removed ${dropped} items that aged out mid-cycle`);
+                    console.log(`🧹 EN live queue: removed ${dropped} items no longer within current window (${Math.round(currentFreshnessWindowMs/3600000)}h)`);
                     aiNewsCycleIdx = Math.min(aiNewsCycleIdx, aiNewsCycleQueue.length);
                 }
             }
@@ -756,7 +775,7 @@
                 aiNewsFrCycleQueue = aiNewsFrCycleQueue.filter(isWithinFreshnessWindow);
                 const dropped = before - aiNewsFrCycleQueue.length;
                 if (dropped > 0) {
-                    console.log(`🧹 FR live queue: removed ${dropped} items that aged out mid-cycle`);
+                    console.log(`🧹 FR live queue: removed ${dropped} items no longer within current window (${Math.round(currentFreshnessWindowMs/3600000)}h)`);
                     aiNewsFrCycleIdx = Math.min(aiNewsFrCycleIdx, aiNewsFrCycleQueue.length);
                 }
             }
@@ -1018,18 +1037,18 @@
             return new Promise((resolve) => {
                 fastFetchNews(worldFeeds, backupWorldNews,
                     (firstItems) => {
-                        const recentFirst = firstItems.filter(isWithinFreshnessWindow).sort(sortByNewest);
+                        const recentFirst = firstItems.filter(isWithinPruneWindow).sort(sortByNewest);
                         if (recentFirst.length > 0 && newsPool.length === 0) {
                             newsPool = recentFirst.slice();
-                            console.log(`📥 First batch: ${recentFirst.length} fresh headlines loaded`);
+                            console.log(`📥 First batch: ${recentFirst.length} headlines loaded (pool)`);
                         }
                         newsIndex = 0;
                         displayNextNews();
                         updateAINewsTicker();
-                        document.getElementById('dataStatus').textContent = `✅ ${newsPool.length} fresh headline(s) ≤6h old · Refresh every 5 min`;
+                        document.getElementById('dataStatus').textContent = `✅ ${newsPool.filter(isWithinFreshnessWindow).length} in-window · ${newsPool.length} in pool`;
                     },
                     (finalItems) => {
-                        const recentFinal = finalItems.filter(isWithinFreshnessWindow).sort(sortByNewest);
+                        const recentFinal = finalItems.filter(isWithinPruneWindow).sort(sortByNewest);
                         if (newsPool.length === 0) newsPool = recentFinal.slice();
                         else {
                             const seen = new Set(newsPool.map(i => i.title.toLowerCase().substring(0, 80)));
@@ -1038,13 +1057,14 @@
                                 if (!seen.has(k)) { newsPool.push(it); seen.add(k); }
                             }
                         }
-                        newsPool = newsPool.filter(isWithinFreshnessWindow).sort(sortByNewest);
-                        if (newsPool.length > 400) newsPool = newsPool.slice(0, 400);
+                        newsPool = newsPool.filter(isWithinPruneWindow).sort(sortByNewest);
+                        if (newsPool.length > 500) newsPool = newsPool.slice(0, 500);
                         newsIndex = 0;
                         updateAINewsTicker();
                         displayNextNews();
-                        console.log(`🔄 World news refreshed · ${newsPool.length} fresh headline(s) ≤6h`);
-                        document.getElementById('dataStatus').textContent = `✅ World news updated (${newsPool.length} fresh ≤6h) · Next refresh in 5 min`;
+                        const inWindow = newsPool.filter(isWithinFreshnessWindow).length;
+                        console.log(`🔄 World news refreshed · ${inWindow} in-window · ${newsPool.length} in pool`);
+                        document.getElementById('dataStatus').textContent = `✅ ${inWindow} in-window (${Math.round(currentFreshnessWindowMs/3600000)}h) · ${newsPool.length} in pool`;
                         worldNewsFetchInFlightEN = false;
                         resolve();
                     }
@@ -1058,12 +1078,12 @@
             return new Promise((resolve) => {
                 fastFetchNews(worldFeedsFR, backupWorldNewsFR,
                     (firstItems) => {
-                        const recentFirst = firstItems.filter(isWithinFreshnessWindow).sort(sortByNewest);
+                        const recentFirst = firstItems.filter(isWithinPruneWindow).sort(sortByNewest);
                         if (recentFirst.length > 0 && newsPoolFR.length === 0) newsPoolFR = recentFirst.slice();
                         updateAINewsTickerFR();
                     },
                     (finalItems) => {
-                        const recentFinal = finalItems.filter(isWithinFreshnessWindow).sort(sortByNewest);
+                        const recentFinal = finalItems.filter(isWithinPruneWindow).sort(sortByNewest);
                         if (newsPoolFR.length === 0) newsPoolFR = recentFinal.slice();
                         else {
                             const seen = new Set(newsPoolFR.map(i => i.title.toLowerCase().substring(0, 80)));
@@ -1072,10 +1092,11 @@
                                 if (!seen.has(k)) { newsPoolFR.push(it); seen.add(k); }
                             }
                         }
-                        newsPoolFR = newsPoolFR.filter(isWithinFreshnessWindow).sort(sortByNewest);
-                        if (newsPoolFR.length > 400) newsPoolFR = newsPoolFR.slice(0, 400);
+                        newsPoolFR = newsPoolFR.filter(isWithinPruneWindow).sort(sortByNewest);
+                        if (newsPoolFR.length > 500) newsPoolFR = newsPoolFR.slice(0, 500);
                         updateAINewsTickerFR();
-                        console.log(`🔄 FR world news refreshed · ${newsPoolFR.length} fresh headline(s) ≤6h`);
+                        const inWindow = newsPoolFR.filter(isWithinFreshnessWindow).length;
+                        console.log(`🔄 FR news refreshed · ${inWindow} in-window · ${newsPoolFR.length} in pool`);
                         worldNewsFetchInFlightFR = false;
                         resolve();
                     }
@@ -1086,7 +1107,7 @@
         function fetchSportsNews() {
             return new Promise((resolve) => {
                 fastFetchNews(sportsFeeds, backupSportsNews, null, (allItems) => {
-                    const recent = allItems.filter(isWithinFreshnessWindow).sort(sortByNewest);
+                    const recent = allItems.filter(isWithinPruneWindow).sort(sortByNewest);
                     sportNewsPool = recent.slice(0, 50);
                     sportNewsIndex = 0;
                     upcomingGames = upcomingGamesData;
@@ -1096,7 +1117,7 @@
         }
 
         function displayNextNews() {
-            if (newsPool.length === 0) { const el = document.getElementById('newsTicker'); if (el) el.textContent = 'Waiting for fresh headlines (≤6h old)…'; return; }
+            if (newsPool.length === 0) { const el = document.getElementById('newsTicker'); if (el) el.textContent = 'Waiting for fresh headlines…'; return; }
             const item = newsPool[newsIndex % newsPool.length];
             const ageMs = itemAgeMs(item);
             const ageLabel = formatAge(ageMs);
@@ -1392,9 +1413,8 @@
         let aiNewsWaitingMode = false;
         let aiNewsEmptyPollsEN = 0;
         let aiNewsPrefetchedThisCycleEN = false;
-        // v37: track wait-music state so we only announce once per wait session
         let aiNewsWaitMusicActiveEN = false;
-        let aiNewsWaitAnnouncedEN = false;
+        let aiNewsWaitStartTimeEN = 0;
 
         let aiNewsFrActive = false, aiNewsFrLoopTimeoutId = null, aiNewsFrClockInterval = null;
         let aiNewsFrHeadlineIndex = 0, currentFrImageSlot = 'A';
@@ -1402,14 +1422,9 @@
         let aiNewsFrWaitingMode = false;
         let aiNewsEmptyPollsFR = 0;
         let aiNewsPrefetchedThisCycleFR = false;
-        // v37
         let aiNewsFrWaitMusicActiveFR = false;
-        let aiNewsFrWaitAnnouncedFR = false;
+        let aiNewsFrWaitStartTimeFR = 0;
 
-        // ============================================================
-        // 🕒 v37 TIMING
-        // ============================================================
-        const THEME_DURATION_MS = 60000;
         const FRESH_FOUND_STING_MS = 1000;
         const NEWS_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
         const SPORTS_REFRESH_INTERVAL_MS = 900000;
@@ -1418,12 +1433,10 @@
         const NEWS_TICKER_ROTATE_MS = 9000;
         const WATCHDOG_INTERVAL_MS = 20000;
         const STORY_IMAGE_ROTATE_MS = 8000;
-        const STORY_MEDIA_FETCH_TIMEOUT_MS = 6000;
-        const WAIT_RETRY_INTERVAL_MS = 8000;                // poll every 8s when empty
+        const WAIT_RETRY_INTERVAL_MS = 8000;
         const STARTUP_POLL_INTERVAL_MS = 1200;
         const STORY_GAP_MS = 800;
         const PREFETCH_THRESHOLD = 5;
-        // v37: how long each wait-music round plays. 8.5s > 8s poll → continuous.
         const WAIT_MUSIC_ROUND_MS = WAIT_RETRY_INTERVAL_MS + 500;
 
         let streamRetryCount = 0;
@@ -1610,7 +1623,7 @@
             const fresh = pool.filter(item => !sessionPlayed.has(storyFingerprint(item)));
 
             if (fresh.length === 0) {
-                console.log(`⏳ ${lang.toUpperCase()}: no unplayed fresh stories remaining — waiting for new content`);
+                console.log(`⏳ ${lang.toUpperCase()}: no unplayed stories within ${Math.round(currentFreshnessWindowMs/3600000)}h window`);
                 return false;
             }
 
@@ -1619,18 +1632,12 @@
             if (lang === 'fr') { aiNewsFrCycleQueue = balanced; aiNewsFrCycleIdx = 0; aiNewsPrefetchedThisCycleFR = false; }
             else { aiNewsCycleQueue = balanced; aiNewsCycleIdx = 0; aiNewsPrefetchedThisCycleEN = false; }
             const newest = balanced[0];
-            console.log(`🔁 New ${lang.toUpperCase()} cycle: ${balanced.length} fresh headlines · newest is ${formatAge(itemAgeMs(newest))}`);
+            console.log(`🔁 New ${lang.toUpperCase()} cycle: ${balanced.length} headlines · newest ${formatAge(itemAgeMs(newest))} · window ${Math.round(currentFreshnessWindowMs/3600000)}h`);
             return true;
         }
 
         // ============================================================
-        // 🎵 v37 — Continuous wait-music (chained playNewsTheme calls)
-        // ------------------------------------------------------------
-        // Each round plays for WAIT_MUSIC_ROUND_MS (8.5s), and the
-        // onComplete callback immediately starts the next round while
-        // waiting mode is still active. Result: uninterrupted music
-        // while headlines refresh, and instant stop when fresh content
-        // arrives (the fresh-content branch calls stopNewsTheme()).
+        // 🎵 Continuous wait-music
         // ============================================================
         function chainWaitMusic(lang) {
             const waiting = lang === 'fr' ? aiNewsFrWaitingMode : aiNewsWaitingMode;
@@ -1638,17 +1645,14 @@
             playNewsTheme(WAIT_MUSIC_ROUND_MS, () => {
                 const stillWaiting = lang === 'fr' ? aiNewsFrWaitingMode : aiNewsWaitingMode;
                 if (!stillWaiting) return;
-                chainWaitMusic(lang);   // ── loop forever while waiting
+                chainWaitMusic(lang);
             });
         }
 
-        // ============================================================
-        // 🎙️ v37 — Speak the "stay tuned" announcement
-        // ============================================================
         function speakWaitAnnouncement(lang) {
             const msg = lang === 'fr'
-                ? "Nous actualisons nos titres depuis la salle de presse mondiale JP IA. Une nouvelle histoire d'actualité arrive très bientôt — restez à l'écoute sur JP IA Info Flash."
-                : "We're updating our headlines from the worldwide JP AI Newsroom. A new headline news story is coming soon — stay tuned to JP AI News Flash.";
+                ? "Nous actualisons nos titres depuis la salle de presse mondiale JP IA. Une nouvelle histoire d'actualité arrive très bientôt — dans les neuf prochaines minutes au plus tard. Restez à l'écoute sur JP IA Info Flash."
+                : "We're updating our headlines from the worldwide JP AI Newsroom. A new headline news story is coming soon — within the next nine minutes at the latest. Stay tuned to JP AI News Flash.";
             speakSingle(msg, {
                 langCode: lang,
                 isFemale: false,
@@ -1658,47 +1662,112 @@
         }
 
         // ============================================================
-        // ⚡ v37 — waitForFreshStories: music + announcement on entry
+        // ⚡ v38 — waitForFreshStories with 9-minute hard cap
         // ============================================================
         function waitForFreshStories(lang) {
             const isActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
             if (!isActive) return;
 
+            const isFirstEntry = lang === 'fr' ? !aiNewsFrWaitingMode : !aiNewsWaitingMode;
+
             if (lang === 'fr') aiNewsFrWaitingMode = true; else aiNewsWaitingMode = true;
 
-            // Show search state in the UI
+            if (isFirstEntry) {
+                // Reset freshness window to base 12h and record start time
+                currentFreshnessWindowMs = MAX_ARTICLE_AGE_MS;
+                if (lang === 'fr') { aiNewsFrWaitStartTimeFR = Date.now(); aiNewsFrWaitMusicActiveFR = true; }
+                else { aiNewsWaitStartTimeEN = Date.now(); aiNewsWaitMusicActiveEN = true; }
+                console.log(`🎵 ${lang.toUpperCase()} — wait mode entered · base window 12h · 9-min cap`);
+                chainWaitMusic(lang);
+                speakWaitAnnouncement(lang);
+            }
+
+            // Compute wait elapsed + which freshness tier
+            const waitStart = lang === 'fr' ? aiNewsFrWaitStartTimeFR : aiNewsWaitStartTimeEN;
+            const elapsed = waitStart ? Date.now() - waitStart : 0;
+            const waitedSec = Math.floor(elapsed / 1000);
+            const waitedMin = Math.floor(waitedSec / 60);
+            const waitSecPart = waitedSec % 60;
+            const remainingMs = Math.max(0, WAIT_CAP_MS - elapsed);
+            const remainingMin = Math.ceil(remainingMs / 60000);
+            const currentWindowH = Math.round(currentFreshnessWindowMs / 3600000);
+            const poolSize = lang === 'fr' ? newsPoolFR.length : newsPool.length;
+            const inWindow = (lang === 'fr' ? newsPoolFR : newsPool).filter(isWithinFreshnessWindow).length;
+
+            // Update UI with live countdown
             const catEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCategory' : 'aiNewsCategory');
             const headEl = document.getElementById(lang === 'fr' ? 'aiNewsFrHeadline' : 'aiNewsHeadline');
             const detEl = document.getElementById(lang === 'fr' ? 'aiNewsFrDetails' : 'aiNewsDetails');
             const cntEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCounter' : 'aiNewsCounter');
             if (catEl) catEl.textContent = lang === 'fr' ? 'EN DIRECT · ACTUALISATION' : 'LIVE · UPDATING';
             if (headEl) headEl.textContent = lang === 'fr' ? 'Mise à jour des titres — restez à l\'écoute…' : 'Updating headlines — stay tuned…';
-            if (detEl) detEl.textContent = lang === 'fr' ? 'Une nouvelle histoire arrive très bientôt. Musique d\'attente en cours.' : 'A new headline news story is coming soon. Background music playing.';
-            if (cntEl) cntEl.textContent = `${(lang === 'fr' ? aiNewsFrSessionPlayed : aiNewsSessionPlayed).size} headlines aired this session`;
+            if (detEl) detEl.textContent = lang === 'fr'
+                ? `Une nouvelle histoire arrive. Fenêtre : ${currentWindowH}h · ${inWindow} en fenêtre · ${poolSize} au total.`
+                : `A new headline news story is coming soon. Window: ${currentWindowH}h · ${inWindow} in window · ${poolSize} total.`;
+            if (cntEl) cntEl.textContent = `Wait ${waitedMin}m ${waitSecPart}s / 9m max · ~${remainingMin}m remaining`;
 
-            // ── On first entry into wait mode: start music + speak announcement
-            const musicActive = lang === 'fr' ? aiNewsFrWaitMusicActiveFR : aiNewsWaitMusicActiveEN;
-            if (!musicActive) {
-                if (lang === 'fr') aiNewsFrWaitMusicActiveFR = true; else aiNewsWaitMusicActiveEN = true;
-                console.log(`🎵 ${lang.toUpperCase()} — wait music + "stay tuned" announcement`);
-                chainWaitMusic(lang);        // continuous background music
-                speakWaitAnnouncement(lang); // spoken announcement over the music
+            // Graduated freshness expansion during wait
+            if (elapsed >= 6 * 60 * 1000 && currentFreshnessWindowMs < EXTENDED_AGE_MS) {
+                currentFreshnessWindowMs = EXTENDED_AGE_MS;
+                console.log(`📏 Window → 24h at ${waitedMin}m wait`);
+            } else if (elapsed >= 3 * 60 * 1000 && currentFreshnessWindowMs < 18 * 60 * 60 * 1000) {
+                currentFreshnessWindowMs = 18 * 60 * 60 * 1000;
+                console.log(`📏 Window → 18h at ${waitedMin}m wait`);
             }
 
             // Fire-and-forget refresh (in-flight guard prevents duplicate)
             if (lang === 'fr') fetchWorldNewsFR(); else fetchWorldNews();
 
-            // ── Retry check in 8s
+            // ── 9-MINUTE HARD CAP: force broadcast, no exceptions ──
+            if (elapsed >= WAIT_CAP_MS) {
+                console.log(`⏰ ${lang.toUpperCase()} — 9 min cap reached · forcing restart`);
+                stopNewsTheme();
+                if (lang === 'fr') { aiNewsFrWaitingMode = false; aiNewsFrWaitMusicActiveFR = false; aiNewsFrWaitStartTimeFR = 0; }
+                else { aiNewsWaitingMode = false; aiNewsWaitMusicActiveEN = false; aiNewsWaitStartTimeEN = 0; }
+
+                let launched = false;
+
+                // Escalation 1: 24h window
+                currentFreshnessWindowMs = EXTENDED_AGE_MS;
+                if (beginNewCycle(lang)) { launched = true; console.log(`✅ Force-restart: 24h window found items`); }
+
+                // Escalation 2: 48h window
+                if (!launched) {
+                    currentFreshnessWindowMs = FORCE_AGE_MS;
+                    if (beginNewCycle(lang)) { launched = true; console.log(`✅ Force-restart: 48h window found items`); }
+                }
+
+                // Escalation 3: reset session, use 24h
+                if (!launched) {
+                    console.log(`⚠️ Force-restart: 48h still empty, clearing session for replay`);
+                    currentFreshnessWindowMs = EXTENDED_AGE_MS;
+                    if (lang === 'fr') aiNewsFrSessionPlayed.clear(); else aiNewsSessionPlayed.clear();
+                    if (beginNewCycle(lang)) { launched = true; console.log(`✅ Force-restart: session reset + 24h replay`); }
+                }
+
+                if (launched) {
+                    playNewsTheme(FRESH_FOUND_STING_MS, () => {
+                        if (lang === 'fr') startAINewsTVLoopFR(); else startAINewsTVLoop();
+                    });
+                    return;
+                }
+
+                // Truly nothing available — recurse and wait for RSS
+                console.log(`⚠️ Force-restart: pool truly empty — waiting again`);
+                waitForFreshStories(lang);
+                return;
+            }
+
+            // ── Regular 8s retry check ──
             setTimeout(() => {
                 const stillActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
                 if (!stillActive) return;
 
                 if (beginNewCycle(lang)) {
                     console.log(`⚡ Fresh content found for ${lang.toUpperCase()} — resuming broadcast`);
-                    stopNewsTheme();   // kills current wait-music round AND its chain
-                    if (lang === 'fr') { aiNewsFrWaitingMode = false; aiNewsFrWaitMusicActiveFR = false; }
-                    else { aiNewsWaitingMode = false; aiNewsWaitMusicActiveEN = false; }
-                    // Brief sting, then broadcast — speech (announcement) may still be playing; browser TTS queues it naturally
+                    stopNewsTheme();
+                    if (lang === 'fr') { aiNewsFrWaitingMode = false; aiNewsFrWaitMusicActiveFR = false; aiNewsFrWaitStartTimeFR = 0; }
+                    else { aiNewsWaitingMode = false; aiNewsWaitMusicActiveEN = false; aiNewsWaitStartTimeEN = 0; }
                     playNewsTheme(FRESH_FOUND_STING_MS, () => {
                         const stillActive2 = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
                         if (!stillActive2) return;
@@ -1706,13 +1775,12 @@
                     });
                     return;
                 }
-                // Still empty — recurse (music already chained, no need to restart)
                 waitForFreshStories(lang);
             }, WAIT_RETRY_INTERVAL_MS);
         }
 
         // ============================================================
-        // ⚡ v37 — Seamless broadcast loop with prefetch
+        // ⚡ Seamless broadcast loop with prefetch
         // ============================================================
         function startAINewsTVLoop() {
             if (!aiNewsActive) return;
@@ -1722,7 +1790,7 @@
                 aiNewsCycleIdx >= aiNewsCycleQueue.length - PREFETCH_THRESHOLD &&
                 !aiNewsPrefetchedThisCycleEN) {
                 aiNewsPrefetchedThisCycleEN = true;
-                console.log(`🔮 EN prefetching (${aiNewsCycleQueue.length - aiNewsCycleIdx} left in queue)`);
+                console.log(`🔮 EN prefetching (${aiNewsCycleQueue.length - aiNewsCycleIdx} left)`);
                 fetchWorldNews();
             }
 
@@ -1750,7 +1818,7 @@
                 const fp = storyFingerprint(cand);
                 if (aiNewsSessionPlayed.has(fp)) { aiNewsCycleIdx++; continue; }
                 if (!isWithinFreshnessWindow(cand)) {
-                    console.log(`⏱️ Skipping stale headline at playtime: "${(cand.title || '').substring(0, 60)}"`);
+                    console.log(`⏱️ Skipping stale at playtime: "${(cand.title || '').substring(0, 60)}"`);
                     aiNewsCycleIdx++;
                     continue;
                 }
@@ -1759,7 +1827,7 @@
 
             if (aiNewsCycleIdx >= aiNewsCycleQueue.length) {
                 if (beginNewCycle('en')) {
-                    console.log(`⚡ EN seamless bridge — continuing immediately`);
+                    console.log(`⚡ EN seamless bridge`);
                     startAINewsTVLoop();
                     return;
                 }
@@ -1788,7 +1856,7 @@
                 aiNewsFrCycleIdx >= aiNewsFrCycleQueue.length - PREFETCH_THRESHOLD &&
                 !aiNewsPrefetchedThisCycleFR) {
                 aiNewsPrefetchedThisCycleFR = true;
-                console.log(`🔮 FR prefetching (${aiNewsFrCycleQueue.length - aiNewsFrCycleIdx} left in queue)`);
+                console.log(`🔮 FR prefetching (${aiNewsFrCycleQueue.length - aiNewsFrCycleIdx} left)`);
                 fetchWorldNewsFR();
             }
 
@@ -1796,9 +1864,9 @@
                 if (newsPoolFR.length === 0) {
                     aiNewsEmptyPollsFR++;
                     document.getElementById('aiNewsFrCategory').textContent = 'CONNEXION';
-                    document.getElementById('aiNewsFrHeadline').textContent = 'Connexion à la salle de presse JP IA · Chargement des titres mondiaux…';
-                    document.getElementById('aiNewsFrDetails').textContent = 'Les flux mondiaux se chargent en parallèle. Le premier titre sera diffusé dès son arrivée.';
-                    document.getElementById('aiNewsFrCounter').textContent = 'Mode démarrage instantané · Premier lot en cours';
+                    document.getElementById('aiNewsFrHeadline').textContent = 'Connexion à la salle de presse JP IA · Chargement des titres…';
+                    document.getElementById('aiNewsFrDetails').textContent = 'Les flux mondiaux se chargent en parallèle.';
+                    document.getElementById('aiNewsFrCounter').textContent = 'Mode démarrage instantané';
                     if (aiNewsEmptyPollsFR % 4 === 0) fetchWorldNewsFR();
                     aiNewsFrLoopTimeoutId = setTimeout(startAINewsTVLoopFR, STARTUP_POLL_INTERVAL_MS);
                     return;
@@ -1816,7 +1884,7 @@
                 const fp = storyFingerprint(cand);
                 if (aiNewsFrSessionPlayed.has(fp)) { aiNewsFrCycleIdx++; continue; }
                 if (!isWithinFreshnessWindow(cand)) {
-                    console.log(`⏱️ Titre périmé ignoré à la diffusion : "${(cand.title || '').substring(0, 60)}"`);
+                    console.log(`⏱️ Titre périmé ignoré : "${(cand.title || '').substring(0, 60)}"`);
                     aiNewsFrCycleIdx++;
                     continue;
                 }
@@ -1825,7 +1893,7 @@
 
             if (aiNewsFrCycleIdx >= aiNewsFrCycleQueue.length) {
                 if (beginNewCycle('fr')) {
-                    console.log(`⚡ FR seamless bridge — continuing immediately`);
+                    console.log(`⚡ FR seamless bridge`);
                     startAINewsTVLoopFR();
                     return;
                 }
@@ -1854,7 +1922,7 @@
             document.getElementById('audioStatus').textContent = '🤖 AI News Flash TV · Broadcasting Live';
             document.getElementById('trackTitle').textContent = 'JP AI News Flash TV';
             document.getElementById('trackArtist').textContent = '100% AI-Generated Broadcast';
-            document.getElementById('trackGenre').textContent = 'Continuous · Fresh ≤6h · Wait-music when refreshing';
+            document.getElementById('trackGenre').textContent = 'Continuous · Fresh ≤12h · 9-min wait cap';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -1864,7 +1932,8 @@
             aiNewsEmptyPollsEN = 0;
             aiNewsPrefetchedThisCycleEN = false;
             aiNewsWaitMusicActiveEN = false;
-            aiNewsWaitAnnouncedEN = false;
+            aiNewsWaitStartTimeEN = 0;
+            currentFreshnessWindowMs = MAX_ARTICLE_AGE_MS;   // fresh 12h start per channel activation
             if (aiNewsCycleQueue.length === 0) beginNewCycle('en');
             startAINewsTVLoop();
         }
@@ -1877,7 +1946,7 @@
             document.getElementById('audioStatus').textContent = '🤖 Info Flash TV · Diffusion en direct';
             document.getElementById('trackTitle').textContent = 'JP IA Info Flash TV';
             document.getElementById('trackArtist').textContent = 'Diffusion 100% générée par IA';
-            document.getElementById('trackGenre').textContent = 'Continu · Récent ≤6h · Musique d\'attente pendant l\'actualisation';
+            document.getElementById('trackGenre').textContent = 'Continu · Récent ≤12h · Attente max 9 min';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -1887,7 +1956,8 @@
             aiNewsEmptyPollsFR = 0;
             aiNewsPrefetchedThisCycleFR = false;
             aiNewsFrWaitMusicActiveFR = false;
-            aiNewsFrWaitAnnouncedFR = false;
+            aiNewsFrWaitStartTimeFR = 0;
+            currentFreshnessWindowMs = MAX_ARTICLE_AGE_MS;
             if (aiNewsFrCycleQueue.length === 0) beginNewCycle('fr');
             startAINewsTVLoopFR();
         }
@@ -1898,7 +1968,7 @@
             aiNewsActive = false;
             aiNewsWaitingMode = false;
             aiNewsWaitMusicActiveEN = false;
-            aiNewsWaitAnnouncedEN = false;
+            aiNewsWaitStartTimeEN = 0;
             if (aiNewsLoopTimeoutId) { clearTimeout(aiNewsLoopTimeoutId); aiNewsLoopTimeoutId = null; }
             if (aiNewsClockInterval) { clearInterval(aiNewsClockInterval); aiNewsClockInterval = null; }
             stopNewsTheme();
@@ -1912,7 +1982,7 @@
             aiNewsFrActive = false;
             aiNewsFrWaitingMode = false;
             aiNewsFrWaitMusicActiveFR = false;
-            aiNewsFrWaitAnnouncedFR = false;
+            aiNewsFrWaitStartTimeFR = 0;
             if (aiNewsFrLoopTimeoutId) { clearTimeout(aiNewsFrLoopTimeoutId); aiNewsFrLoopTimeoutId = null; }
             if (aiNewsFrClockInterval) { clearInterval(aiNewsFrClockInterval); aiNewsFrClockInterval = null; }
             stopNewsTheme();
@@ -2195,6 +2265,8 @@
             setInterval(updateListeners, 15000);
             adjustVolume(70);
 
+            currentFreshnessWindowMs = MAX_ARTICLE_AGE_MS;
+
             fetchWorldNews();
             fetchWorldNewsFR();
             fetchSportsNews();
@@ -2213,7 +2285,7 @@
             setInterval(fetchSportsScores, SCORES_REFRESH_INTERVAL_MS);
 
             const ds = document.getElementById('dataStatus');
-            if (ds) ds.textContent = '📡 Pre-loading fresh news (≤6h old) from worldwide media...';
+            if (ds) ds.textContent = '📡 Pre-loading fresh news (≤12h old) from worldwide media...';
         }
         document.addEventListener('DOMContentLoaded', init);
     </script>
