@@ -94,6 +94,32 @@
         .ai-news-corner.tr{top:12px;right:12px;border-left:none;border-bottom:none;}
         .ai-news-corner.bl{bottom:100px;left:12px;border-right:none;border-top:none;}
         .ai-news-corner.br{bottom:100px;right:12px;border-left:none;border-top:none;}
+
+        /* ── v40: Sponsor Ad Layer ── */
+        .ai-news-ad-layer{position:absolute;inset:0;z-index:9;display:none;}
+        .ai-news-ad-layer.active{display:block;}
+        .ai-news-ad{position:absolute;inset:0;display:none;flex-direction:column;justify-content:space-between;padding:24px 32px;animation:adFadeIn 0.6s ease-out;}
+        .ai-news-ad.active{display:flex;}
+        .ai-news-ad.liberty{background:linear-gradient(135deg,#003DA5 0%,#0a2a6b 55%,#001a4a 100%);}
+        .ai-news-ad.geico{background:linear-gradient(135deg,#00A94F 0%,#00703a 45%,#00305e 100%);}
+        .ai-news-ad::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 40%,rgba(255,255,255,0.18),transparent 60%);pointer-events:none;z-index:1;}
+        .ad-top-bar{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;color:#fff;}
+        .ad-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,0.55);color:#ffe066;font-family:'Inter',sans-serif;font-size:10px;font-weight:800;letter-spacing:0.25em;text-transform:uppercase;padding:6px 12px;border-radius:3px;border:1px solid rgba(255,224,102,0.4);}
+        .ad-counter{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.9);background:rgba(0,0,0,0.4);padding:6px 12px;border-radius:3px;}
+        .ad-body{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;}
+        .ad-brand-logo{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(44px,7.5vw,88px);font-weight:700;letter-spacing:0.02em;color:#fff;text-shadow:0 6px 40px rgba(0,0,0,0.55),0 2px 8px rgba(0,0,0,0.4);margin-bottom:20px;line-height:1;display:flex;align-items:center;justify-content:center;gap:16px;}
+        .ai-news-ad.liberty .ad-brand-logo::before{content:'🔥';font-size:0.75em;filter:drop-shadow(0 0 24px rgba(255,180,60,0.9));}
+        .ai-news-ad.geico .ad-brand-logo::before{content:'🦎';font-size:0.75em;filter:drop-shadow(0 0 24px rgba(100,255,150,0.7));}
+        .ad-tagline{font-family:'Inter',sans-serif;font-size:clamp(13px,1.8vw,19px);font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.96);line-height:1.5;max-width:740px;text-shadow:0 2px 12px rgba(0,0,0,0.5);}
+        .ad-bottom-bar{position:relative;z-index:2;text-align:center;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:0.32em;text-transform:uppercase;color:rgba(255,255,255,0.7);font-weight:600;}
+        @keyframes adFadeIn{from{opacity:0;transform:scale(1.015);}to{opacity:1;transform:scale(1);}}
+
+        /* ── v40: 60-second Startup Countdown ── */
+        .ai-news-countdown{position:absolute;top:56px;left:50%;transform:translateX(-50%);z-index:10;background:linear-gradient(180deg,rgba(184,50,50,0.98) 0%,rgba(139,32,32,0.98) 100%);color:#fff;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;padding:10px 24px;border-radius:4px;border:1px solid rgba(255,224,102,0.6);box-shadow:0 6px 30px rgba(184,50,50,0.8),0 0 0 1px rgba(0,0,0,0.4);display:none;white-space:nowrap;backdrop-filter:blur(6px);}
+        .ai-news-countdown.active{display:block;animation:countdownGlow 1.5s ease-in-out infinite;}
+        .ai-news-countdown strong{color:#ffe066;margin:0 4px;font-size:15px;font-variant-numeric:tabular-nums;}
+        @keyframes countdownGlow{0%,100%{box-shadow:0 6px 30px rgba(184,50,50,0.8),0 0 0 1px rgba(0,0,0,0.4);}50%{box-shadow:0 6px 44px rgba(255,100,100,0.95),0 0 0 2px rgba(255,224,102,0.6);}}
+
         .production-panel{position:absolute;top:0;right:0;bottom:0;width:56%;max-width:520px;background:linear-gradient(180deg,rgba(10,10,13,0.98),rgba(16,16,21,0.99));border-left:1px solid var(--hairline-strong);z-index:20;transform:translateX(100%);transition:transform 0.45s cubic-bezier(0.2,0.7,0.3,1);overflow-y:auto;font-family:'Inter',sans-serif;color:var(--platinum);backdrop-filter:blur(20px);}
         .production-panel.open{transform:translateX(0);}
         .production-panel::-webkit-scrollbar{width:6px;}
@@ -205,8 +231,8 @@
         .start-info{color:var(--mist);text-align:center;font-size:12px;line-height:2;}
         @media (max-width:980px){.channels{grid-template-columns:repeat(5,1fr);}}
         @media (max-width:900px){.info-section{grid-template-columns:1fr;}.ai-news-headline{font-size:28px;}.ai-news-details{font-size:12.5px;}.ai-news-body{padding:10px 40px 0 40px;}.ai-news-anchor-avatar{width:48px;height:48px;font-size:22px;}.ai-news-source-chip{right:16px;top:52px;}}
-        @media (max-width:700px){body{padding:12px 8px;}.header{padding:20px 22px;flex-direction:column;align-items:flex-start;gap:14px;}.header-meta{display:none;}.brand-title{font-size:24px;}.content-pad{padding:20px 22px;}.status-bar{padding:12px 22px;gap:16px;}.channels{grid-template-columns:repeat(3,1fr);gap:6px;}.channel-btn{padding:10px 3px 8px;font-size:8px;letter-spacing:0.06em;}.channel-btn .channel-icon{font-size:17px;}.track-title{font-size:24px;}.control-btn{width:40px;height:40px;font-size:12px;}.control-btn.play{width:52px;height:52px;font-size:15px;}.now-playing{padding:24px 20px;}.anchor-container{padding:24px 20px;}.anchor-avatar{width:56px;height:56px;font-size:24px;}.anchor-info h2{font-size:18px;}.anchor-news-text{font-size:16px;padding:18px 20px;}.weather-temp{font-size:34px;}.start-title{font-size:32px;}.start-button{padding:16px 32px;font-size:11px;}.volume-slider{width:140px;}}
-        @media (max-width:600px){.ai-news-headline{font-size:20px;max-width:100%;}.ai-news-details{font-size:11.5px;}.ai-news-body{padding:8px 24px 0 24px;top:56px;bottom:80px;}.ai-news-brandbar{padding:12px 16px;}.ai-news-brand-right{display:none;}.ai-news-anchor{bottom:80px;right:12px;}.ai-news-bottomticker{height:80px;}.ai-news-corner.bl,.ai-news-corner.br{bottom:90px;}.ai-news-source-chip{top:44px;right:10px;font-size:8px;padding:3px 7px;}}
+        @media (max-width:700px){body{padding:12px 8px;}.header{padding:20px 22px;flex-direction:column;align-items:flex-start;gap:14px;}.header-meta{display:none;}.brand-title{font-size:24px;}.content-pad{padding:20px 22px;}.status-bar{padding:12px 22px;gap:16px;}.channels{grid-template-columns:repeat(3,1fr);gap:6px;}.channel-btn{padding:10px 3px 8px;font-size:8px;letter-spacing:0.06em;}.channel-btn .channel-icon{font-size:17px;}.track-title{font-size:24px;}.control-btn{width:40px;height:40px;font-size:12px;}.control-btn.play{width:52px;height:52px;font-size:15px;}.now-playing{padding:24px 20px;}.anchor-container{padding:24px 20px;}.anchor-avatar{width:56px;height:56px;font-size:24px;}.anchor-info h2{font-size:18px;}.anchor-news-text{font-size:16px;padding:18px 20px;}.weather-temp{font-size:34px;}.start-title{font-size:32px;}.start-button{padding:16px 32px;font-size:11px;}.volume-slider{width:140px;}.ai-news-countdown{font-size:10px;padding:8px 16px;}.ai-news-countdown strong{font-size:13px;}.ad-brand-logo{font-size:44px;}}
+        @media (max-width:600px){.ai-news-headline{font-size:20px;max-width:100%;}.ai-news-details{font-size:11.5px;}.ai-news-body{padding:8px 24px 0 24px;top:56px;bottom:80px;}.ai-news-brandbar{padding:12px 16px;}.ai-news-brand-right{display:none;}.ai-news-anchor{bottom:80px;right:12px;}.ai-news-bottomticker{height:80px;}.ai-news-corner.bl,.ai-news-corner.br{bottom:90px;}.ai-news-source-chip{top:44px;right:10px;font-size:8px;padding:3px 7px;}.ai-news-countdown{top:44px;font-size:9px;padding:6px 12px;letter-spacing:0.1em;}.ai-news-countdown strong{font-size:12px;}.ai-news-ad{padding:16px 20px;}.ad-tagline{font-size:11px;letter-spacing:0.08em;}}
     </style>
 </head>
 <body>
@@ -263,6 +289,31 @@
                     <video class="ai-news-video" id="aiNewsVideoA" muted playsinline preload="auto" disablepictureinpicture></video>
                     <video class="ai-news-video" id="aiNewsVideoB" muted playsinline preload="auto" disablepictureinpicture></video>
                 </div>
+                <div class="ai-news-ad-layer" id="aiNewsAdLayerEN">
+                    <div class="ai-news-ad liberty" id="aiNewsAdLibertyEN">
+                        <div class="ad-top-bar">
+                            <span class="ad-badge">🎯 Sponsor Message</span>
+                            <span class="ad-counter">Commercial 1 of 2</span>
+                        </div>
+                        <div class="ad-body">
+                            <div class="ad-brand-logo">Liberty Mutual</div>
+                            <div class="ad-tagline">Customize your car insurance — only pay for what you need</div>
+                        </div>
+                        <div class="ad-bottom-bar">JP AI Radio · Broadcasting Live</div>
+                    </div>
+                    <div class="ai-news-ad geico" id="aiNewsAdGeicoEN">
+                        <div class="ad-top-bar">
+                            <span class="ad-badge">🎯 Sponsor Message</span>
+                            <span class="ad-counter">Commercial 2 of 2</span>
+                        </div>
+                        <div class="ad-body">
+                            <div class="ad-brand-logo">GEICO</div>
+                            <div class="ad-tagline">15 minutes could save you 15% or more on car insurance</div>
+                        </div>
+                        <div class="ad-bottom-bar">JP AI Radio · Broadcasting Live</div>
+                    </div>
+                </div>
+                <div class="ai-news-countdown" id="aiNewsCountdownEN">📺 News will start in <strong id="aiNewsCountdownSecEN">60</strong>s · Stay tuned</div>
                 <div class="ai-news-corner tl"></div>
                 <div class="ai-news-corner tr"></div>
                 <div class="ai-news-corner bl"></div>
@@ -321,6 +372,31 @@
                     <video class="ai-news-video" id="aiNewsFrVideoA" muted playsinline preload="auto" disablepictureinpicture></video>
                     <video class="ai-news-video" id="aiNewsFrVideoB" muted playsinline preload="auto" disablepictureinpicture></video>
                 </div>
+                <div class="ai-news-ad-layer" id="aiNewsAdLayerFR">
+                    <div class="ai-news-ad liberty" id="aiNewsAdLibertyFR">
+                        <div class="ad-top-bar">
+                            <span class="ad-badge">🎯 Message du sponsor</span>
+                            <span class="ad-counter">Publicité 1 sur 2</span>
+                        </div>
+                        <div class="ad-body">
+                            <div class="ad-brand-logo">Liberty Mutual</div>
+                            <div class="ad-tagline">Personnalisez votre assurance auto — payez seulement ce dont vous avez besoin</div>
+                        </div>
+                        <div class="ad-bottom-bar">JP IA Radio · Diffusion en direct</div>
+                    </div>
+                    <div class="ai-news-ad geico" id="aiNewsAdGeicoFR">
+                        <div class="ad-top-bar">
+                            <span class="ad-badge">🎯 Message du sponsor</span>
+                            <span class="ad-counter">Publicité 2 sur 2</span>
+                        </div>
+                        <div class="ad-body">
+                            <div class="ad-brand-logo">GEICO</div>
+                            <div class="ad-tagline">15 minutes pourraient vous faire économiser 15 % ou plus</div>
+                        </div>
+                        <div class="ad-bottom-bar">JP IA Radio · Diffusion en direct</div>
+                    </div>
+                </div>
+                <div class="ai-news-countdown" id="aiNewsCountdownFR">📺 Les actualités commencent dans <strong id="aiNewsCountdownSecFR">60</strong>s · Restez à l'écoute</div>
                 <div class="ai-news-corner tl"></div>
                 <div class="ai-news-corner tr"></div>
                 <div class="ai-news-corner bl"></div>
@@ -436,13 +512,13 @@
                     <span class="marquee-divider">◆</span>
                     🕒 <span class="marquee-em">12-hour freshness window:</span> headlines published in the last 12 hours are aired
                     <span class="marquee-divider">◆</span>
-                    ⚡ <span class="marquee-em">1-minute loading cap:</span> news starts within 60 seconds — Liberty Mutual &amp; Geico ads play while we fetch
+                    ⚡ <span class="marquee-em">1-minute startup cap:</span> news begins within 60s — Liberty Mutual &amp; Geico sponsors featured onscreen while we fetch
                     <span class="marquee-divider">◆</span>
-                    🔄 <span class="marquee-em">Feed refresh every 1 minute</span> (was 5) · stale items pruned every 5 minutes
+                    🔄 <span class="marquee-em">Feed refresh every 1 minute</span> · stale items pruned every 5 minutes
                     <span class="marquee-divider">◆</span>
-                    🎵 <span class="marquee-em">"Stay tuned" music:</span> continuous news theme plays if headlines update mid-broadcast
+                    🎵 <span class="marquee-em">"Stay tuned" music:</span> continuous news theme if headlines update mid-broadcast
                     <span class="marquee-divider">◆</span>
-                    ⚡ <span class="marquee-em">Seamless broadcast:</span> prefetch during last 5 stories → 0s gap between cycles · 800ms between stories
+                    ⚡ <span class="marquee-em">Seamless broadcast:</span> prefetch during last 5 stories · 800ms between stories
                     <span class="marquee-divider">◆</span>
                     📡 <span class="marquee-em">Worldwide media:</span> BBC · CNN · NPR · AP · Reuters · Guardian · DW · France24 · Sky · Al Jazeera · CBC · ABC AU · CNA · CNBC · FT · and more
                     <span class="marquee-divider">◆</span>
@@ -495,18 +571,18 @@
 
     <script>
         // ============================================================
-        // JP AI RADIO — v39 · 1-MIN LOADING CAP + STARTUP ADS
+        // JP AI RADIO — v40 · SPONSOR AD VISUALS + 60s STARTUP COUNTDOWN
         // ------------------------------------------------------------
-        // v39 changes from v38:
-        //   • NEWS_REFRESH_INTERVAL_MS: 5 min → 1 min
-        //   • Startup hard cap: 1 minute (was effectively unlimited → 9 min wait)
-        //   • Startup ads: Liberty Mutual + Geico play during the
-        //     "Connecting to JP AI Newsroom..." phase — THEN news starts
-        //   • If ads finish before news is ready, keeps polling every 1.2s
-        //   • If 1-minute cap hits before news arrives, force-restarts with
-        //     24h → 48h → session reset — no more 5-min startups
-        //   • All v38 features preserved (12h window, 9-min wait for mid-broadcast,
-        //     wait-music + "stay tuned" announcement, seamless prefetch)
+        // v40 changes from v39:
+        //   • Liberty Mutual & Geico startup ads now display full branded
+        //     visuals (color scheme, logo text, tagline, "Commercial X of 2")
+        //   • On-screen 60-second countdown badge appears the moment
+        //     Tune In is clicked during startup: "News will start in 60s
+        //     · Stay tuned" (counts down live to 0)
+        //   • Ad visuals + countdown are completely hidden the instant the
+        //     first news story starts — only news-related imagery remains
+        //   • All v39 features preserved (1-min refresh, 1-min startup cap,
+        //     12h window, 9-min mid-broadcast cap, wait-music, seamless)
         // ============================================================
 
         const HAITIAN_VOICE_MASTER_PROMPT = {enabled:true,tone:'dous, cho, natif natal',pronunciation:'kreyòl ayisyen klè',nasalRule:'an, en, on, oun byen make — n pa yon konsòn separe',substitutions:{'ou':'oo','è':'eh','ò':'aw','ay':'eye','im':'eem'},constraints:['pa tradui','pa chanje mo yo','li egzak jan li ekri','ritm natirèl yon Ayisyen'],delivery:{rate:0.72,pitch:0.92,volume:1.0,pauseBetweenSentences:900,pauseBetweenChunks:1400}};
@@ -693,7 +769,7 @@
         const FORCE_AGE_MS = 48 * 60 * 60 * 1000;
         const PRUNE_BEYOND_MS = 48 * 60 * 60 * 1000;
         const WAIT_CAP_MS = 9 * 60 * 1000;
-        const STARTUP_MAX_MS = 60 * 1000;                    // v39: 1-min startup cap
+        const STARTUP_MAX_MS = 60 * 1000;
 
         let currentFreshnessWindowMs = MAX_ARTICLE_AGE_MS;
 
@@ -1288,6 +1364,57 @@
             el.className = 'ai-news-age-badge ' + (ageMs <= 2 * 60 * 60 * 1000 ? 'fresh' : 'stale');
         }
 
+        // ── v40: Ad visual helpers ──
+        function showAdVisual(lang, adType) {
+            const layer = document.getElementById(lang === 'fr' ? 'aiNewsAdLayerFR' : 'aiNewsAdLayerEN');
+            const liberty = document.getElementById(lang === 'fr' ? 'aiNewsAdLibertyFR' : 'aiNewsAdLibertyEN');
+            const geico = document.getElementById(lang === 'fr' ? 'aiNewsAdGeicoFR' : 'aiNewsAdGeicoEN');
+            if (!layer) return;
+            layer.classList.add('active');
+            if (liberty) liberty.classList.toggle('active', adType === 'liberty');
+            if (geico) geico.classList.toggle('active', adType === 'geico');
+        }
+        function hideAdVisual(lang) {
+            const layer = document.getElementById(lang === 'fr' ? 'aiNewsAdLayerFR' : 'aiNewsAdLayerEN');
+            if (!layer) return;
+            layer.classList.remove('active');
+            const liberty = document.getElementById(lang === 'fr' ? 'aiNewsAdLibertyFR' : 'aiNewsAdLibertyEN');
+            const geico = document.getElementById(lang === 'fr' ? 'aiNewsAdGeicoFR' : 'aiNewsAdGeicoEN');
+            if (liberty) liberty.classList.remove('active');
+            if (geico) geico.classList.remove('active');
+        }
+
+        // ── v40: 60-second startup countdown helpers ──
+        let aiNewsCountdownIntervalEN = null;
+        let aiNewsCountdownIntervalFR = null;
+
+        function startStartupCountdown(lang) {
+            const el = document.getElementById(lang === 'fr' ? 'aiNewsCountdownFR' : 'aiNewsCountdownEN');
+            const secEl = document.getElementById(lang === 'fr' ? 'aiNewsCountdownSecFR' : 'aiNewsCountdownSecEN');
+            if (!el || !secEl) return;
+            stopStartupCountdown(lang);
+            el.classList.add('active');
+            const start = lang === 'fr' ? aiNewsStartupStartTimeFR : aiNewsStartupStartTimeEN;
+            const update = () => {
+                const elapsed = Math.floor((Date.now() - start) / 1000);
+                const remaining = Math.max(0, 60 - elapsed);
+                secEl.textContent = remaining;
+            };
+            update();
+            const interval = setInterval(update, 500);
+            if (lang === 'fr') aiNewsCountdownIntervalFR = interval;
+            else aiNewsCountdownIntervalEN = interval;
+        }
+        function stopStartupCountdown(lang) {
+            const el = document.getElementById(lang === 'fr' ? 'aiNewsCountdownFR' : 'aiNewsCountdownEN');
+            if (el) el.classList.remove('active');
+            if (lang === 'fr') {
+                if (aiNewsCountdownIntervalFR) { clearInterval(aiNewsCountdownIntervalFR); aiNewsCountdownIntervalFR = null; }
+            } else {
+                if (aiNewsCountdownIntervalEN) { clearInterval(aiNewsCountdownIntervalEN); aiNewsCountdownIntervalEN = null; }
+            }
+        }
+
         const NEWS_PRODUCTION_RULES = {
             POLITICS: { en: { timeline: [ ['00:00','WIDE ESTABLISHING','3s','Exterior of capitol / parliament / government building — slow push in, golden hour'], ['00:03','MEDIUM · LEADER','4s','World leader at podium mid-speech, tight framing, shallow DOF'], ['00:07','GRAPHIC · MAP','3s','Animated election map with live vote tally and district highlights'], ['00:10','CLOSE-UP · FLAG','2s','National flag rippling in slow motion, backlit — dissolve to anchor'] ], imgPrompt: 'Cinematic wide shot: {title}. Marble government chamber, world leaders at a lectern, national flags, warm golden volumetric light, photoreal, 85mm, 4K', vidPrompt: '4K slow-motion dolly push into a marble parliament hall as world leaders stand at the lectern, {title}', thumb: 'Split-screen: politician left, animated vote tally right, BREAKING band bottom, gold accent', ost: ['BREAKING · POLITICS','{title}','LIVE · JP AI NEWSROOM'], social: '🚨 {title} — full report on JP AI News Flash. #Politics #WorldNews' }, fr: { timeline: [ ['00:00','PLAN LARGE · ÉTABLISSEMENT','3s','Extérieur du parlement — travelling avant lent, heure dorée'], ['00:03','PLAN MOYEN · DIRIGEANT','4s','Dirigeant mondial au pupitre'], ['00:07','GRAPHISME · CARTE','3s','Carte électorale animée'], ['00:10','GROS PLAN · DRAPEAU','2s','Drapeau national flottant'] ], imgPrompt: 'Plan large cinématographique : {title}. Chambre parlementaire en marbre, dirigeants, drapeaux, lumière dorée', vidPrompt: 'Travelling 4K ralenti dans un parlement, {title}', thumb: 'Écran partagé : politicien, décompte, bandeau URGENT', ost: ['URGENT · POLITIQUE','{title}','DIRECT · JP IA INFO'], social: '🚨 {title} — rapport complet sur JP IA Info Flash. #Politique' } },
             BUSINESS: { en: { timeline: [ ['00:00','WIDE · CITY','3s','Financial district skyline at dusk'], ['00:03','MEDIUM · TRADING','4s','Trading floor screens, red/green tickers'], ['00:07','GRAPHIC · CHART','3s','Animated stock chart'], ['00:10','CLOSE-UP · CURRENCY','2s','Currency notes fanning out'] ], imgPrompt: 'Cinematic wide of a financial district at dusk, {title}, glass towers, gold and teal lighting, photoreal', vidPrompt: '4K dolly through a trading floor, {title}, red and green tickers', thumb: 'Big animated percentage arrow over skyline, MARKETS band', ost: ['MARKETS · LIVE','{title}','JP AI NEWSROOM'], social: '📈 {title} — full market report. #Markets #Finance' }, fr: { timeline: [ ['00:00','PLAN LARGE · VILLE','3s','Quartier financier au crépuscule'], ['00:03','PLAN MOYEN · TRADING','4s','Écrans de salle de marché'], ['00:07','GRAPHISME · COURBE','3s','Graphique boursier animé'], ['00:10','GROS PLAN · MONNAIE','2s','Billets de banque'] ], imgPrompt: 'Plan large cinématographique d\'un quartier financier, {title}', vidPrompt: 'Travelling 4K dans une salle de marché, {title}', thumb: 'Flèche animée sur skyline, bandeau MARCHÉS', ost: ['MARCHÉS · DIRECT','{title}','SALLE DE PRESSE JP IA'], social: '📈 {title} — rapport complet. #Marchés' } },
@@ -1435,7 +1562,7 @@
         let aiNewsStartupStartTimeFR = 0;
 
         const FRESH_FOUND_STING_MS = 1000;
-        const NEWS_REFRESH_INTERVAL_MS = 60 * 1000;         // v39: 1 minute (was 5)
+        const NEWS_REFRESH_INTERVAL_MS = 60 * 1000;
         const SPORTS_REFRESH_INTERVAL_MS = 900000;
         const WEATHER_REFRESH_INTERVAL_MS = 300000;
         const SCORES_REFRESH_INTERVAL_MS = 60000;
@@ -1500,6 +1627,13 @@
         })();
 
         function displayAIHeadline(item) {
+            // v40: hide any ad visual + countdown — news images only
+            hideAdVisual('en');
+            stopStartupCountdown('en');
+            aiNewsStartupStartTimeEN = 0;
+            aiNewsStartupAdsPlayingEN = false;
+            aiNewsStartupAdsDoneEN = false;
+
             if (!isWithinFreshnessWindow(item)) {
                 console.warn(`⚠️ Rejected at display time (stale): "${item.title}"`);
                 return;
@@ -1540,6 +1674,12 @@
         }
 
         function displayAIHeadlineFR(item) {
+            hideAdVisual('fr');
+            stopStartupCountdown('fr');
+            aiNewsStartupStartTimeFR = 0;
+            aiNewsFrStartupAdsPlayingFR = false;
+            aiNewsStartupAdsDoneFR = false;
+
             if (!isWithinFreshnessWindow(item)) {
                 console.warn(`⚠️ Rejeté à l'affichage (périmé) : "${item.title}"`);
                 return;
@@ -1667,12 +1807,7 @@
             });
         }
 
-        // ============================================================
-        // 🎙️ v39 — STARTUP AD SEQUENCE (Liberty Mutual → Geico)
-        // ------------------------------------------------------------
-        // Plays before news starts when the pool is empty at tune-in.
-        // Falls back to timed skipping if TTS is unavailable.
-        // ============================================================
+        // ── v40: Startup ad sequence now shows branded visuals per ad ──
         function playStartupAdSequence(lang, onComplete) {
             const isActive = () => lang === 'fr' ? aiNewsFrActive : aiNewsActive;
             const ads = lang === 'fr' ? STARTUP_AD_SCRIPTS_FR : STARTUP_AD_SCRIPTS_EN;
@@ -1680,19 +1815,14 @@
             let idx = 0;
 
             function playNext() {
-                if (!isActive()) { if (onComplete) onComplete(); return; }
-                if (idx >= total) { if (onComplete) onComplete(); return; }
+                if (!isActive()) { hideAdVisual(lang); if (onComplete) onComplete(); return; }
+                if (idx >= total) { hideAdVisual(lang); if (onComplete) onComplete(); return; }
                 const text = ads[idx];
+                const adType = idx === 0 ? 'liberty' : 'geico';
                 idx++;
 
-                const catEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCategory' : 'aiNewsCategory');
-                const headEl = document.getElementById(lang === 'fr' ? 'aiNewsFrHeadline' : 'aiNewsHeadline');
-                const detEl = document.getElementById(lang === 'fr' ? 'aiNewsFrDetails' : 'aiNewsDetails');
-                const cntEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCounter' : 'aiNewsCounter');
-                if (catEl) catEl.textContent = lang === 'fr' ? 'MESSAGE DU SPONSOR' : 'SPONSOR MESSAGE';
-                if (headEl) headEl.textContent = lang === 'fr' ? `Publicité ${idx} sur ${total}` : `Commercial ${idx} of ${total}`;
-                if (detEl) detEl.textContent = text;
-                if (cntEl) cntEl.textContent = lang === 'fr' ? 'Actualités ensuite' : 'News starts next';
+                // Show branded visual for this ad
+                showAdVisual(lang, adType);
 
                 let completed = false;
                 const finish = () => {
@@ -1704,7 +1834,6 @@
                     }, 700);
                 };
 
-                // Fallback: advance after 15s if TTS hangs
                 const fallbackTimer = setTimeout(() => {
                     if (!isActive()) return;
                     finish();
@@ -1829,9 +1958,7 @@
             }, WAIT_RETRY_INTERVAL_MS);
         }
 
-        // ============================================================
-        // ⚡ v39 — Startup: ads first, then news. 1-minute hard cap.
-        // ============================================================
+        // ── v40: Startup loop with ads + 60s countdown ──
         function startAINewsTVLoop() {
             if (!aiNewsActive) return;
             if (aiNewsWaitingMode) return;
@@ -1846,21 +1973,23 @@
 
             if (aiNewsCycleQueue.length === 0) {
                 if (newsPool.length === 0) {
-                    // ─── STARTUP PHASE ───
                     aiNewsEmptyPollsEN++;
-
-                    if (aiNewsStartupStartTimeEN === 0) aiNewsStartupStartTimeEN = Date.now();
+                    if (aiNewsStartupStartTimeEN === 0) {
+                        aiNewsStartupStartTimeEN = Date.now();
+                        startStartupCountdown('en');
+                        console.log('📺 EN startup countdown started (60s)');
+                    }
                     const elapsed = Date.now() - aiNewsStartupStartTimeEN;
 
-                    // Play ads first if not done
                     if (!aiNewsStartupAdsDoneEN) {
                         if (!aiNewsStartupAdsPlayingEN) {
                             aiNewsStartupAdsPlayingEN = true;
-                            console.log('📢 EN startup ads playing (Liberty Mutual → Geico)');
+                            console.log('📢 EN startup ads (Liberty Mutual → Geico) · branded visuals shown');
                             playStartupAdSequence('en', () => {
                                 aiNewsStartupAdsDoneEN = true;
                                 aiNewsStartupAdsPlayingEN = false;
-                                console.log('📢 EN startup ads complete — awaiting news');
+                                hideAdVisual('en');
+                                console.log('📢 EN ads complete — countdown continues, awaiting news');
                             });
                         }
                         if (aiNewsEmptyPollsEN % 4 === 0) fetchWorldNews();
@@ -1868,7 +1997,7 @@
                         return;
                     }
 
-                    // Ads done — pool still empty, show connecting
+                    // Ads done, still loading — countdown keeps running
                     document.getElementById('aiNewsCategory').textContent = 'CONNECTING';
                     document.getElementById('aiNewsHeadline').textContent = 'Connecting to JP AI Newsroom · Fetching headlines…';
                     document.getElementById('aiNewsDetails').textContent = 'Loading global content from worldwide media.';
@@ -1876,9 +2005,10 @@
 
                     if (aiNewsEmptyPollsEN % 4 === 0) fetchWorldNews();
 
-                    // 1-minute hard cap
                     if (elapsed >= STARTUP_MAX_MS) {
                         console.log('⏰ EN startup cap reached — forcing broadcast');
+                        stopStartupCountdown('en');
+                        hideAdVisual('en');
                         currentFreshnessWindowMs = EXTENDED_AGE_MS;
                         let ok = beginNewCycle('en');
                         if (!ok) { currentFreshnessWindowMs = FORCE_AGE_MS; ok = beginNewCycle('en'); }
@@ -1902,10 +2032,20 @@
                     aiNewsLoopTimeoutId = setTimeout(startAINewsTVLoop, STARTUP_POLL_INTERVAL_MS);
                     return;
                 }
+
+                // News pool populated — check ads state
+                if (aiNewsStartupAdsPlayingEN) {
+                    // Ads still playing, wait for them
+                    aiNewsLoopTimeoutId = setTimeout(startAINewsTVLoop, STARTUP_POLL_INTERVAL_MS);
+                    return;
+                }
+
                 aiNewsEmptyPollsEN = 0;
                 aiNewsStartupAdsDoneEN = false;
                 aiNewsStartupAdsPlayingEN = false;
                 aiNewsStartupStartTimeEN = 0;
+                stopStartupCountdown('en');
+                hideAdVisual('en');
                 if (!beginNewCycle('en')) {
                     waitForFreshStories('en');
                     return;
@@ -1963,18 +2103,22 @@
             if (aiNewsFrCycleQueue.length === 0) {
                 if (newsPoolFR.length === 0) {
                     aiNewsEmptyPollsFR++;
-
-                    if (aiNewsStartupStartTimeFR === 0) aiNewsStartupStartTimeFR = Date.now();
+                    if (aiNewsStartupStartTimeFR === 0) {
+                        aiNewsStartupStartTimeFR = Date.now();
+                        startStartupCountdown('fr');
+                        console.log('📺 FR startup countdown started (60s)');
+                    }
                     const elapsed = Date.now() - aiNewsStartupStartTimeFR;
 
                     if (!aiNewsStartupAdsDoneFR) {
                         if (!aiNewsFrStartupAdsPlayingFR) {
                             aiNewsFrStartupAdsPlayingFR = true;
-                            console.log('📢 FR startup ads playing (Liberty Mutual → Geico)');
+                            console.log('📢 FR startup ads (Liberty Mutual → Geico) · branded visuals shown');
                             playStartupAdSequence('fr', () => {
                                 aiNewsStartupAdsDoneFR = true;
                                 aiNewsFrStartupAdsPlayingFR = false;
-                                console.log('📢 FR startup ads complete — awaiting news');
+                                hideAdVisual('fr');
+                                console.log('📢 FR ads complete — countdown continues, awaiting news');
                             });
                         }
                         if (aiNewsEmptyPollsFR % 4 === 0) fetchWorldNewsFR();
@@ -1991,6 +2135,8 @@
 
                     if (elapsed >= STARTUP_MAX_MS) {
                         console.log('⏰ FR startup cap reached — forcing broadcast');
+                        stopStartupCountdown('fr');
+                        hideAdVisual('fr');
                         currentFreshnessWindowMs = EXTENDED_AGE_MS;
                         let ok = beginNewCycle('fr');
                         if (!ok) { currentFreshnessWindowMs = FORCE_AGE_MS; ok = beginNewCycle('fr'); }
@@ -2014,10 +2160,18 @@
                     aiNewsFrLoopTimeoutId = setTimeout(startAINewsTVLoopFR, STARTUP_POLL_INTERVAL_MS);
                     return;
                 }
+
+                if (aiNewsFrStartupAdsPlayingFR) {
+                    aiNewsFrLoopTimeoutId = setTimeout(startAINewsTVLoopFR, STARTUP_POLL_INTERVAL_MS);
+                    return;
+                }
+
                 aiNewsEmptyPollsFR = 0;
                 aiNewsStartupAdsDoneFR = false;
                 aiNewsFrStartupAdsPlayingFR = false;
                 aiNewsStartupStartTimeFR = 0;
+                stopStartupCountdown('fr');
+                hideAdVisual('fr');
                 if (!beginNewCycle('fr')) {
                     waitForFreshStories('fr');
                     return;
@@ -2068,7 +2222,7 @@
             document.getElementById('audioStatus').textContent = '🤖 AI News Flash TV · Broadcasting Live';
             document.getElementById('trackTitle').textContent = 'JP AI News Flash TV';
             document.getElementById('trackArtist').textContent = '100% AI-Generated Broadcast';
-            document.getElementById('trackGenre').textContent = 'Fresh ≤12h · 1-min loading cap · 1-min refresh';
+            document.getElementById('trackGenre').textContent = 'Fresh ≤12h · 60s startup cap · 1-min refresh';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -2082,6 +2236,8 @@
             aiNewsStartupAdsPlayingEN = false;
             aiNewsStartupAdsDoneEN = false;
             aiNewsStartupStartTimeEN = 0;
+            hideAdVisual('en');
+            stopStartupCountdown('en');
             currentFreshnessWindowMs = MAX_ARTICLE_AGE_MS;
             if (aiNewsCycleQueue.length === 0) beginNewCycle('en');
             startAINewsTVLoop();
@@ -2095,7 +2251,7 @@
             document.getElementById('audioStatus').textContent = '🤖 Info Flash TV · Diffusion en direct';
             document.getElementById('trackTitle').textContent = 'JP IA Info Flash TV';
             document.getElementById('trackArtist').textContent = 'Diffusion 100% générée par IA';
-            document.getElementById('trackGenre').textContent = 'Récent ≤12h · Chargement max 1 min · Rafraîchissement 1 min';
+            document.getElementById('trackGenre').textContent = 'Récent ≤12h · Démarrage 60s max · Rafraîchissement 1 min';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -2109,6 +2265,8 @@
             aiNewsFrStartupAdsPlayingFR = false;
             aiNewsStartupAdsDoneFR = false;
             aiNewsStartupStartTimeFR = 0;
+            hideAdVisual('fr');
+            stopStartupCountdown('fr');
             currentFreshnessWindowMs = MAX_ARTICLE_AGE_MS;
             if (aiNewsFrCycleQueue.length === 0) beginNewCycle('fr');
             startAINewsTVLoopFR();
@@ -2124,6 +2282,8 @@
             aiNewsStartupAdsPlayingEN = false;
             aiNewsStartupAdsDoneEN = false;
             aiNewsStartupStartTimeEN = 0;
+            hideAdVisual('en');
+            stopStartupCountdown('en');
             if (aiNewsLoopTimeoutId) { clearTimeout(aiNewsLoopTimeoutId); aiNewsLoopTimeoutId = null; }
             if (aiNewsClockInterval) { clearInterval(aiNewsClockInterval); aiNewsClockInterval = null; }
             stopNewsTheme();
@@ -2141,6 +2301,8 @@
             aiNewsFrStartupAdsPlayingFR = false;
             aiNewsStartupAdsDoneFR = false;
             aiNewsStartupStartTimeFR = 0;
+            hideAdVisual('fr');
+            stopStartupCountdown('fr');
             if (aiNewsFrLoopTimeoutId) { clearTimeout(aiNewsFrLoopTimeoutId); aiNewsFrLoopTimeoutId = null; }
             if (aiNewsFrClockInterval) { clearInterval(aiNewsFrClockInterval); aiNewsFrClockInterval = null; }
             stopNewsTheme();
