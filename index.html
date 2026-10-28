@@ -436,13 +436,13 @@
                     <span class="marquee-divider">◆</span>
                     🕒 <span class="marquee-em">12-hour freshness window:</span> headlines published in the last 12 hours are aired
                     <span class="marquee-divider">◆</span>
-                    ⏱️ <span class="marquee-em">9-minute wait cap:</span> if no fresh stories arrive, the system auto-expands the window and resumes — never silent
+                    ⚡ <span class="marquee-em">1-minute loading cap:</span> news starts within 60 seconds — Liberty Mutual &amp; Geico ads play while we fetch
                     <span class="marquee-divider">◆</span>
-                    🎵 <span class="marquee-em">"Stay tuned" music:</span> continuous news theme plays while headlines refresh
+                    🔄 <span class="marquee-em">Feed refresh every 1 minute</span> (was 5) · stale items pruned every 5 minutes
+                    <span class="marquee-divider">◆</span>
+                    🎵 <span class="marquee-em">"Stay tuned" music:</span> continuous news theme plays if headlines update mid-broadcast
                     <span class="marquee-divider">◆</span>
                     ⚡ <span class="marquee-em">Seamless broadcast:</span> prefetch during last 5 stories → 0s gap between cycles · 800ms between stories
-                    <span class="marquee-divider">◆</span>
-                    ⏱️ <span class="marquee-em">Auto-refresh:</span> feeds pulled every 5 minutes · stale items pruned every 5 minutes
                     <span class="marquee-divider">◆</span>
                     📡 <span class="marquee-em">Worldwide media:</span> BBC · CNN · NPR · AP · Reuters · Guardian · DW · France24 · Sky · Al Jazeera · CBC · ABC AU · CNA · CNBC · FT · and more
                     <span class="marquee-divider">◆</span>
@@ -495,21 +495,18 @@
 
     <script>
         // ============================================================
-        // JP AI RADIO — v38 · 12-HOUR WINDOW + 9-MINUTE WAIT CAP
+        // JP AI RADIO — v39 · 1-MIN LOADING CAP + STARTUP ADS
         // ------------------------------------------------------------
-        // v38 changes from v37:
-        //   • Freshness window: 6h → 12h (matches user request)
-        //   • WAIT CAP: 9 minutes max — broadcast resumes within 9 min
-        //     no matter what (graduated window expansion + session reset)
-        //   • Graduated expansion during wait:
-        //       0–3 min → 12h window
-        //       3–6 min → 18h window
-        //       6–9 min → 24h window
-        //       9+ min  → 24h / 48h + session reset → force restart
-        //   • UI shows live countdown so user knows exactly how long left
-        //   • Announcement mentions the 9-minute guarantee
-        //   • Prune window extended to 48h so 12–24h items survive for
-        //     emergency use
+        // v39 changes from v38:
+        //   • NEWS_REFRESH_INTERVAL_MS: 5 min → 1 min
+        //   • Startup hard cap: 1 minute (was effectively unlimited → 9 min wait)
+        //   • Startup ads: Liberty Mutual + Geico play during the
+        //     "Connecting to JP AI Newsroom..." phase — THEN news starts
+        //   • If ads finish before news is ready, keeps polling every 1.2s
+        //   • If 1-minute cap hits before news arrives, force-restarts with
+        //     24h → 48h → session reset — no more 5-min startups
+        //   • All v38 features preserved (12h window, 9-min wait for mid-broadcast,
+        //     wait-music + "stay tuned" announcement, seamless prefetch)
         // ============================================================
 
         const HAITIAN_VOICE_MASTER_PROMPT = {enabled:true,tone:'dous, cho, natif natal',pronunciation:'kreyòl ayisyen klè',nasalRule:'an, en, on, oun byen make — n pa yon konsòn separe',substitutions:{'ou':'oo','è':'eh','ò':'aw','ay':'eye','im':'eem'},constraints:['pa tradui','pa chanje mo yo','li egzak jan li ekri','ritm natirèl yon Ayisyen'],delivery:{rate:0.72,pitch:0.92,volume:1.0,pauseBetweenSentences:900,pauseBetweenChunks:1400}};
@@ -691,16 +688,23 @@
             for (const [key, rec] of SEEN_STORY_REGISTRY.entries()) if (rec.lastSeen < cutoff) SEEN_STORY_REGISTRY.delete(key);
         }
 
-        // ============================================================
-        // 🕒 v38 — 12-hour base window + 9-minute wait cap
-        // ============================================================
-        const MAX_ARTICLE_AGE_MS = 12 * 60 * 60 * 1000;         // 12h base
-        const EXTENDED_AGE_MS = 24 * 60 * 60 * 1000;            // 24h emergency
-        const FORCE_AGE_MS = 48 * 60 * 60 * 1000;               // 48h final resort
-        const PRUNE_BEYOND_MS = 48 * 60 * 60 * 1000;            // prune only beyond 48h
-        const WAIT_CAP_MS = 9 * 60 * 1000;                      // 9 min max wait
+        const MAX_ARTICLE_AGE_MS = 12 * 60 * 60 * 1000;
+        const EXTENDED_AGE_MS = 24 * 60 * 60 * 1000;
+        const FORCE_AGE_MS = 48 * 60 * 60 * 1000;
+        const PRUNE_BEYOND_MS = 48 * 60 * 60 * 1000;
+        const WAIT_CAP_MS = 9 * 60 * 1000;
+        const STARTUP_MAX_MS = 60 * 1000;                    // v39: 1-min startup cap
 
-        let currentFreshnessWindowMs = MAX_ARTICLE_AGE_MS;      // starts at base, expands during wait
+        let currentFreshnessWindowMs = MAX_ARTICLE_AGE_MS;
+
+        const STARTUP_AD_SCRIPTS_EN = [
+            "This is JP AI Radio. Liberty Mutual customizes your car insurance, so you only pay for what you need. Visit Liberty Mutual dot com today.",
+            "This is JP AI Radio. Geico can save you fifteen percent or more on car insurance. Visit Geico dot com today."
+        ];
+        const STARTUP_AD_SCRIPTS_FR = [
+            "Ceci est JP AI Radio. Liberty Mutual personnalise votre assurance auto, pour que vous ne payiez que ce dont vous avez besoin. Visitez Liberty Mutual point com dès aujourd'hui.",
+            "Ceci est JP AI Radio. Geico peut vous faire économiser quinze pour cent ou plus sur l'assurance auto. Visitez Geico point com aujourd'hui."
+        ];
 
         function parseArticleDate(pubDate) {
             if (!pubDate) return NaN;
@@ -748,7 +752,6 @@
         }
 
         function pruneOldArticles(lang) {
-            // Uses PRUNE_BEYOND_MS (48h) — keeps 12–24h items available for emergency use
             if (!lang || lang === 'en') {
                 const before = newsPool.length;
                 newsPool = newsPool.filter(isWithinPruneWindow).sort(sortByNewest);
@@ -766,7 +769,7 @@
                 aiNewsCycleQueue = aiNewsCycleQueue.filter(isWithinFreshnessWindow);
                 const dropped = before - aiNewsCycleQueue.length;
                 if (dropped > 0) {
-                    console.log(`🧹 EN live queue: removed ${dropped} items no longer within current window (${Math.round(currentFreshnessWindowMs/3600000)}h)`);
+                    console.log(`🧹 EN live queue: removed ${dropped} items no longer within ${Math.round(currentFreshnessWindowMs/3600000)}h window`);
                     aiNewsCycleIdx = Math.min(aiNewsCycleIdx, aiNewsCycleQueue.length);
                 }
             }
@@ -775,7 +778,7 @@
                 aiNewsFrCycleQueue = aiNewsFrCycleQueue.filter(isWithinFreshnessWindow);
                 const dropped = before - aiNewsFrCycleQueue.length;
                 if (dropped > 0) {
-                    console.log(`🧹 FR live queue: removed ${dropped} items no longer within current window (${Math.round(currentFreshnessWindowMs/3600000)}h)`);
+                    console.log(`🧹 FR live queue: removed ${dropped} items no longer within ${Math.round(currentFreshnessWindowMs/3600000)}h window`);
                     aiNewsFrCycleIdx = Math.min(aiNewsFrCycleIdx, aiNewsFrCycleQueue.length);
                 }
             }
@@ -1040,7 +1043,7 @@
                         const recentFirst = firstItems.filter(isWithinPruneWindow).sort(sortByNewest);
                         if (recentFirst.length > 0 && newsPool.length === 0) {
                             newsPool = recentFirst.slice();
-                            console.log(`📥 First batch: ${recentFirst.length} headlines loaded (pool)`);
+                            console.log(`📥 First batch: ${recentFirst.length} headlines loaded`);
                         }
                         newsIndex = 0;
                         displayNextNews();
@@ -1415,6 +1418,9 @@
         let aiNewsPrefetchedThisCycleEN = false;
         let aiNewsWaitMusicActiveEN = false;
         let aiNewsWaitStartTimeEN = 0;
+        let aiNewsStartupAdsPlayingEN = false;
+        let aiNewsStartupAdsDoneEN = false;
+        let aiNewsStartupStartTimeEN = 0;
 
         let aiNewsFrActive = false, aiNewsFrLoopTimeoutId = null, aiNewsFrClockInterval = null;
         let aiNewsFrHeadlineIndex = 0, currentFrImageSlot = 'A';
@@ -1424,9 +1430,12 @@
         let aiNewsPrefetchedThisCycleFR = false;
         let aiNewsFrWaitMusicActiveFR = false;
         let aiNewsFrWaitStartTimeFR = 0;
+        let aiNewsFrStartupAdsPlayingFR = false;
+        let aiNewsStartupAdsDoneFR = false;
+        let aiNewsStartupStartTimeFR = 0;
 
         const FRESH_FOUND_STING_MS = 1000;
-        const NEWS_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+        const NEWS_REFRESH_INTERVAL_MS = 60 * 1000;         // v39: 1 minute (was 5)
         const SPORTS_REFRESH_INTERVAL_MS = 900000;
         const WEATHER_REFRESH_INTERVAL_MS = 300000;
         const SCORES_REFRESH_INTERVAL_MS = 60000;
@@ -1636,9 +1645,6 @@
             return true;
         }
 
-        // ============================================================
-        // 🎵 Continuous wait-music
-        // ============================================================
         function chainWaitMusic(lang) {
             const waiting = lang === 'fr' ? aiNewsFrWaitingMode : aiNewsWaitingMode;
             if (!waiting) return;
@@ -1662,27 +1668,84 @@
         }
 
         // ============================================================
-        // ⚡ v38 — waitForFreshStories with 9-minute hard cap
+        // 🎙️ v39 — STARTUP AD SEQUENCE (Liberty Mutual → Geico)
+        // ------------------------------------------------------------
+        // Plays before news starts when the pool is empty at tune-in.
+        // Falls back to timed skipping if TTS is unavailable.
         // ============================================================
+        function playStartupAdSequence(lang, onComplete) {
+            const isActive = () => lang === 'fr' ? aiNewsFrActive : aiNewsActive;
+            const ads = lang === 'fr' ? STARTUP_AD_SCRIPTS_FR : STARTUP_AD_SCRIPTS_EN;
+            const total = ads.length;
+            let idx = 0;
+
+            function playNext() {
+                if (!isActive()) { if (onComplete) onComplete(); return; }
+                if (idx >= total) { if (onComplete) onComplete(); return; }
+                const text = ads[idx];
+                idx++;
+
+                const catEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCategory' : 'aiNewsCategory');
+                const headEl = document.getElementById(lang === 'fr' ? 'aiNewsFrHeadline' : 'aiNewsHeadline');
+                const detEl = document.getElementById(lang === 'fr' ? 'aiNewsFrDetails' : 'aiNewsDetails');
+                const cntEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCounter' : 'aiNewsCounter');
+                if (catEl) catEl.textContent = lang === 'fr' ? 'MESSAGE DU SPONSOR' : 'SPONSOR MESSAGE';
+                if (headEl) headEl.textContent = lang === 'fr' ? `Publicité ${idx} sur ${total}` : `Commercial ${idx} of ${total}`;
+                if (detEl) detEl.textContent = text;
+                if (cntEl) cntEl.textContent = lang === 'fr' ? 'Actualités ensuite' : 'News starts next';
+
+                let completed = false;
+                const finish = () => {
+                    if (completed) return;
+                    completed = true;
+                    setTimeout(() => {
+                        if (!isActive()) return;
+                        playNext();
+                    }, 700);
+                };
+
+                // Fallback: advance after 15s if TTS hangs
+                const fallbackTimer = setTimeout(() => {
+                    if (!isActive()) return;
+                    finish();
+                }, 15000);
+
+                if (!speechSynth) {
+                    clearTimeout(fallbackTimer);
+                    setTimeout(finish, 4000);
+                    return;
+                }
+
+                speakSingle(text, {
+                    isFemale: false,
+                    pitch: 0.95,
+                    rate: 0.92,
+                    langCode: lang,
+                    onEndCallback: () => {
+                        clearTimeout(fallbackTimer);
+                        finish();
+                    }
+                });
+            }
+            playNext();
+        }
+
         function waitForFreshStories(lang) {
             const isActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
             if (!isActive) return;
 
             const isFirstEntry = lang === 'fr' ? !aiNewsFrWaitingMode : !aiNewsWaitingMode;
-
             if (lang === 'fr') aiNewsFrWaitingMode = true; else aiNewsWaitingMode = true;
 
             if (isFirstEntry) {
-                // Reset freshness window to base 12h and record start time
                 currentFreshnessWindowMs = MAX_ARTICLE_AGE_MS;
                 if (lang === 'fr') { aiNewsFrWaitStartTimeFR = Date.now(); aiNewsFrWaitMusicActiveFR = true; }
                 else { aiNewsWaitStartTimeEN = Date.now(); aiNewsWaitMusicActiveEN = true; }
-                console.log(`🎵 ${lang.toUpperCase()} — wait mode entered · base window 12h · 9-min cap`);
+                console.log(`🎵 ${lang.toUpperCase()} — wait mode · base window 12h · 9-min cap`);
                 chainWaitMusic(lang);
                 speakWaitAnnouncement(lang);
             }
 
-            // Compute wait elapsed + which freshness tier
             const waitStart = lang === 'fr' ? aiNewsFrWaitStartTimeFR : aiNewsWaitStartTimeEN;
             const elapsed = waitStart ? Date.now() - waitStart : 0;
             const waitedSec = Math.floor(elapsed / 1000);
@@ -1694,7 +1757,6 @@
             const poolSize = lang === 'fr' ? newsPoolFR.length : newsPool.length;
             const inWindow = (lang === 'fr' ? newsPoolFR : newsPool).filter(isWithinFreshnessWindow).length;
 
-            // Update UI with live countdown
             const catEl = document.getElementById(lang === 'fr' ? 'aiNewsFrCategory' : 'aiNewsCategory');
             const headEl = document.getElementById(lang === 'fr' ? 'aiNewsFrHeadline' : 'aiNewsHeadline');
             const detEl = document.getElementById(lang === 'fr' ? 'aiNewsFrDetails' : 'aiNewsDetails');
@@ -1706,7 +1768,6 @@
                 : `A new headline news story is coming soon. Window: ${currentWindowH}h · ${inWindow} in window · ${poolSize} total.`;
             if (cntEl) cntEl.textContent = `Wait ${waitedMin}m ${waitSecPart}s / 9m max · ~${remainingMin}m remaining`;
 
-            // Graduated freshness expansion during wait
             if (elapsed >= 6 * 60 * 1000 && currentFreshnessWindowMs < EXTENDED_AGE_MS) {
                 currentFreshnessWindowMs = EXTENDED_AGE_MS;
                 console.log(`📏 Window → 24h at ${waitedMin}m wait`);
@@ -1715,10 +1776,8 @@
                 console.log(`📏 Window → 18h at ${waitedMin}m wait`);
             }
 
-            // Fire-and-forget refresh (in-flight guard prevents duplicate)
             if (lang === 'fr') fetchWorldNewsFR(); else fetchWorldNews();
 
-            // ── 9-MINUTE HARD CAP: force broadcast, no exceptions ──
             if (elapsed >= WAIT_CAP_MS) {
                 console.log(`⏰ ${lang.toUpperCase()} — 9 min cap reached · forcing restart`);
                 stopNewsTheme();
@@ -1726,18 +1785,12 @@
                 else { aiNewsWaitingMode = false; aiNewsWaitMusicActiveEN = false; aiNewsWaitStartTimeEN = 0; }
 
                 let launched = false;
-
-                // Escalation 1: 24h window
                 currentFreshnessWindowMs = EXTENDED_AGE_MS;
                 if (beginNewCycle(lang)) { launched = true; console.log(`✅ Force-restart: 24h window found items`); }
-
-                // Escalation 2: 48h window
                 if (!launched) {
                     currentFreshnessWindowMs = FORCE_AGE_MS;
                     if (beginNewCycle(lang)) { launched = true; console.log(`✅ Force-restart: 48h window found items`); }
                 }
-
-                // Escalation 3: reset session, use 24h
                 if (!launched) {
                     console.log(`⚠️ Force-restart: 48h still empty, clearing session for replay`);
                     currentFreshnessWindowMs = EXTENDED_AGE_MS;
@@ -1751,14 +1804,11 @@
                     });
                     return;
                 }
-
-                // Truly nothing available — recurse and wait for RSS
                 console.log(`⚠️ Force-restart: pool truly empty — waiting again`);
                 waitForFreshStories(lang);
                 return;
             }
 
-            // ── Regular 8s retry check ──
             setTimeout(() => {
                 const stillActive = lang === 'fr' ? aiNewsFrActive : aiNewsActive;
                 if (!stillActive) return;
@@ -1780,7 +1830,7 @@
         }
 
         // ============================================================
-        // ⚡ Seamless broadcast loop with prefetch
+        // ⚡ v39 — Startup: ads first, then news. 1-minute hard cap.
         // ============================================================
         function startAINewsTVLoop() {
             if (!aiNewsActive) return;
@@ -1796,16 +1846,66 @@
 
             if (aiNewsCycleQueue.length === 0) {
                 if (newsPool.length === 0) {
+                    // ─── STARTUP PHASE ───
                     aiNewsEmptyPollsEN++;
+
+                    if (aiNewsStartupStartTimeEN === 0) aiNewsStartupStartTimeEN = Date.now();
+                    const elapsed = Date.now() - aiNewsStartupStartTimeEN;
+
+                    // Play ads first if not done
+                    if (!aiNewsStartupAdsDoneEN) {
+                        if (!aiNewsStartupAdsPlayingEN) {
+                            aiNewsStartupAdsPlayingEN = true;
+                            console.log('📢 EN startup ads playing (Liberty Mutual → Geico)');
+                            playStartupAdSequence('en', () => {
+                                aiNewsStartupAdsDoneEN = true;
+                                aiNewsStartupAdsPlayingEN = false;
+                                console.log('📢 EN startup ads complete — awaiting news');
+                            });
+                        }
+                        if (aiNewsEmptyPollsEN % 4 === 0) fetchWorldNews();
+                        aiNewsLoopTimeoutId = setTimeout(startAINewsTVLoop, STARTUP_POLL_INTERVAL_MS);
+                        return;
+                    }
+
+                    // Ads done — pool still empty, show connecting
                     document.getElementById('aiNewsCategory').textContent = 'CONNECTING';
-                    document.getElementById('aiNewsHeadline').textContent = 'Connecting to JP AI Newsroom · Fetching headlines from worldwide media…';
-                    document.getElementById('aiNewsDetails').textContent = 'Global feeds loading in parallel. The first story will air as soon as it arrives.';
-                    document.getElementById('aiNewsCounter').textContent = 'Instant-start mode · First batch arriving';
+                    document.getElementById('aiNewsHeadline').textContent = 'Connecting to JP AI Newsroom · Fetching headlines…';
+                    document.getElementById('aiNewsDetails').textContent = 'Loading global content from worldwide media.';
+                    document.getElementById('aiNewsCounter').textContent = `Loading · ${Math.floor(elapsed/1000)}s / 60s`;
+
                     if (aiNewsEmptyPollsEN % 4 === 0) fetchWorldNews();
+
+                    // 1-minute hard cap
+                    if (elapsed >= STARTUP_MAX_MS) {
+                        console.log('⏰ EN startup cap reached — forcing broadcast');
+                        currentFreshnessWindowMs = EXTENDED_AGE_MS;
+                        let ok = beginNewCycle('en');
+                        if (!ok) { currentFreshnessWindowMs = FORCE_AGE_MS; ok = beginNewCycle('en'); }
+                        if (!ok) { currentFreshnessWindowMs = EXTENDED_AGE_MS; aiNewsSessionPlayed.clear(); ok = beginNewCycle('en'); }
+
+                        aiNewsStartupAdsDoneEN = false;
+                        aiNewsStartupAdsPlayingEN = false;
+                        aiNewsStartupStartTimeEN = 0;
+                        aiNewsEmptyPollsEN = 0;
+
+                        if (ok) {
+                            playNewsTheme(FRESH_FOUND_STING_MS, () => {
+                                if (aiNewsActive) startAINewsTVLoop();
+                            });
+                        } else {
+                            waitForFreshStories('en');
+                        }
+                        return;
+                    }
+
                     aiNewsLoopTimeoutId = setTimeout(startAINewsTVLoop, STARTUP_POLL_INTERVAL_MS);
                     return;
                 }
                 aiNewsEmptyPollsEN = 0;
+                aiNewsStartupAdsDoneEN = false;
+                aiNewsStartupAdsPlayingEN = false;
+                aiNewsStartupStartTimeEN = 0;
                 if (!beginNewCycle('en')) {
                     waitForFreshStories('en');
                     return;
@@ -1863,15 +1963,61 @@
             if (aiNewsFrCycleQueue.length === 0) {
                 if (newsPoolFR.length === 0) {
                     aiNewsEmptyPollsFR++;
+
+                    if (aiNewsStartupStartTimeFR === 0) aiNewsStartupStartTimeFR = Date.now();
+                    const elapsed = Date.now() - aiNewsStartupStartTimeFR;
+
+                    if (!aiNewsStartupAdsDoneFR) {
+                        if (!aiNewsFrStartupAdsPlayingFR) {
+                            aiNewsFrStartupAdsPlayingFR = true;
+                            console.log('📢 FR startup ads playing (Liberty Mutual → Geico)');
+                            playStartupAdSequence('fr', () => {
+                                aiNewsStartupAdsDoneFR = true;
+                                aiNewsFrStartupAdsPlayingFR = false;
+                                console.log('📢 FR startup ads complete — awaiting news');
+                            });
+                        }
+                        if (aiNewsEmptyPollsFR % 4 === 0) fetchWorldNewsFR();
+                        aiNewsFrLoopTimeoutId = setTimeout(startAINewsTVLoopFR, STARTUP_POLL_INTERVAL_MS);
+                        return;
+                    }
+
                     document.getElementById('aiNewsFrCategory').textContent = 'CONNEXION';
                     document.getElementById('aiNewsFrHeadline').textContent = 'Connexion à la salle de presse JP IA · Chargement des titres…';
-                    document.getElementById('aiNewsFrDetails').textContent = 'Les flux mondiaux se chargent en parallèle.';
-                    document.getElementById('aiNewsFrCounter').textContent = 'Mode démarrage instantané';
+                    document.getElementById('aiNewsFrDetails').textContent = 'Chargement du contenu mondial depuis les médias internationaux.';
+                    document.getElementById('aiNewsFrCounter').textContent = `Chargement · ${Math.floor(elapsed/1000)}s / 60s`;
+
                     if (aiNewsEmptyPollsFR % 4 === 0) fetchWorldNewsFR();
+
+                    if (elapsed >= STARTUP_MAX_MS) {
+                        console.log('⏰ FR startup cap reached — forcing broadcast');
+                        currentFreshnessWindowMs = EXTENDED_AGE_MS;
+                        let ok = beginNewCycle('fr');
+                        if (!ok) { currentFreshnessWindowMs = FORCE_AGE_MS; ok = beginNewCycle('fr'); }
+                        if (!ok) { currentFreshnessWindowMs = EXTENDED_AGE_MS; aiNewsFrSessionPlayed.clear(); ok = beginNewCycle('fr'); }
+
+                        aiNewsStartupAdsDoneFR = false;
+                        aiNewsFrStartupAdsPlayingFR = false;
+                        aiNewsStartupStartTimeFR = 0;
+                        aiNewsEmptyPollsFR = 0;
+
+                        if (ok) {
+                            playNewsTheme(FRESH_FOUND_STING_MS, () => {
+                                if (aiNewsFrActive) startAINewsTVLoopFR();
+                            });
+                        } else {
+                            waitForFreshStories('fr');
+                        }
+                        return;
+                    }
+
                     aiNewsFrLoopTimeoutId = setTimeout(startAINewsTVLoopFR, STARTUP_POLL_INTERVAL_MS);
                     return;
                 }
                 aiNewsEmptyPollsFR = 0;
+                aiNewsStartupAdsDoneFR = false;
+                aiNewsFrStartupAdsPlayingFR = false;
+                aiNewsStartupStartTimeFR = 0;
                 if (!beginNewCycle('fr')) {
                     waitForFreshStories('fr');
                     return;
@@ -1922,7 +2068,7 @@
             document.getElementById('audioStatus').textContent = '🤖 AI News Flash TV · Broadcasting Live';
             document.getElementById('trackTitle').textContent = 'JP AI News Flash TV';
             document.getElementById('trackArtist').textContent = '100% AI-Generated Broadcast';
-            document.getElementById('trackGenre').textContent = 'Continuous · Fresh ≤12h · 9-min wait cap';
+            document.getElementById('trackGenre').textContent = 'Fresh ≤12h · 1-min loading cap · 1-min refresh';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -1933,7 +2079,10 @@
             aiNewsPrefetchedThisCycleEN = false;
             aiNewsWaitMusicActiveEN = false;
             aiNewsWaitStartTimeEN = 0;
-            currentFreshnessWindowMs = MAX_ARTICLE_AGE_MS;   // fresh 12h start per channel activation
+            aiNewsStartupAdsPlayingEN = false;
+            aiNewsStartupAdsDoneEN = false;
+            aiNewsStartupStartTimeEN = 0;
+            currentFreshnessWindowMs = MAX_ARTICLE_AGE_MS;
             if (aiNewsCycleQueue.length === 0) beginNewCycle('en');
             startAINewsTVLoop();
         }
@@ -1946,7 +2095,7 @@
             document.getElementById('audioStatus').textContent = '🤖 Info Flash TV · Diffusion en direct';
             document.getElementById('trackTitle').textContent = 'JP IA Info Flash TV';
             document.getElementById('trackArtist').textContent = 'Diffusion 100% générée par IA';
-            document.getElementById('trackGenre').textContent = 'Continu · Récent ≤12h · Attente max 9 min';
+            document.getElementById('trackGenre').textContent = 'Récent ≤12h · Chargement max 1 min · Rafraîchissement 1 min';
             if (audioElement) audioElement.pause();
             stopSpeech();
             if (debateLoopActive) stopDebateLoop();
@@ -1957,6 +2106,9 @@
             aiNewsPrefetchedThisCycleFR = false;
             aiNewsFrWaitMusicActiveFR = false;
             aiNewsFrWaitStartTimeFR = 0;
+            aiNewsFrStartupAdsPlayingFR = false;
+            aiNewsStartupAdsDoneFR = false;
+            aiNewsStartupStartTimeFR = 0;
             currentFreshnessWindowMs = MAX_ARTICLE_AGE_MS;
             if (aiNewsFrCycleQueue.length === 0) beginNewCycle('fr');
             startAINewsTVLoopFR();
@@ -1969,6 +2121,9 @@
             aiNewsWaitingMode = false;
             aiNewsWaitMusicActiveEN = false;
             aiNewsWaitStartTimeEN = 0;
+            aiNewsStartupAdsPlayingEN = false;
+            aiNewsStartupAdsDoneEN = false;
+            aiNewsStartupStartTimeEN = 0;
             if (aiNewsLoopTimeoutId) { clearTimeout(aiNewsLoopTimeoutId); aiNewsLoopTimeoutId = null; }
             if (aiNewsClockInterval) { clearInterval(aiNewsClockInterval); aiNewsClockInterval = null; }
             stopNewsTheme();
@@ -1983,6 +2138,9 @@
             aiNewsFrWaitingMode = false;
             aiNewsFrWaitMusicActiveFR = false;
             aiNewsFrWaitStartTimeFR = 0;
+            aiNewsFrStartupAdsPlayingFR = false;
+            aiNewsStartupAdsDoneFR = false;
+            aiNewsStartupStartTimeFR = 0;
             if (aiNewsFrLoopTimeoutId) { clearTimeout(aiNewsFrLoopTimeoutId); aiNewsFrLoopTimeoutId = null; }
             if (aiNewsFrClockInterval) { clearInterval(aiNewsFrClockInterval); aiNewsFrClockInterval = null; }
             stopNewsTheme();
